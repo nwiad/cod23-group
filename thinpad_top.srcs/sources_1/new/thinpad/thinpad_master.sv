@@ -1,6 +1,6 @@
 `default_nettype none
 
-module lab6_pipeline_master #(
+module thinpad_master #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32
 ) (
