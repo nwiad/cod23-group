@@ -26,6 +26,7 @@ module exe_controller #(
     // WB control
     input wire mem_to_reg_i,
     input wire reg_write_i,
+    input wire imm_to_reg_i,
 
     // ID -> EXE
     input wire [31:0] rf_rdata_a_i,
@@ -51,6 +52,8 @@ module exe_controller #(
     output reg [31:0] rf_rdata_b_o,
     output reg [4:0]  rd_o,
     output reg [31:0] pc_result_o, // for IF
+    output reg [31:0] imm_o, // for lui
+    output reg [31:0] pc_now_o, 
 
     // MEM control
     output reg branch_o, // for IF
@@ -60,18 +63,22 @@ module exe_controller #(
 
     // WB control
     output reg mem_to_reg_o,
-    output reg reg_write_o
+    output reg reg_write_o,
+    output reg imm_to_reg_o
 );
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
   reg [31:0] rf_rdata_b_reg;
   reg [4:0] rd_reg;
   reg [31:0] pc_result_reg;
+  reg [31:0] imm_reg;
 
   reg branch_reg, mem_read_reg, mem_write_reg;
   reg [3:0] mem_sel_reg;
 
-  reg mem_to_reg_reg, reg_write_reg;
+  reg mem_to_reg_reg, reg_write_reg, imm_to_reg_reg;
+
+  reg [31:0] pc_now_reg;
 
   // ALU
   logic [31:0] alu_operand1, alu_operand2;
@@ -122,6 +129,8 @@ module exe_controller #(
     rf_rdata_b_o = rf_rdata_b_reg;
     rd_o = rd_reg;
     pc_result_o = pc_result_reg;
+    imm_o = imm_reg;
+    pc_now_o = pc_now_reg;
 
     branch_o = branch_reg;
     mem_read_o = mem_read_reg;
@@ -130,6 +139,7 @@ module exe_controller #(
 
     mem_to_reg_o = mem_to_reg_reg;
     reg_write_o = reg_write_reg;
+    imm_to_reg_o = imm_to_reg_reg;
   end
 
   always_ff @(posedge clk_i) begin
@@ -138,6 +148,7 @@ module exe_controller #(
       rf_rdata_b_reg <= 32'h0000_0000;
       rd_reg <= 5'b00000;
       pc_result_reg <= 32'h8000_0000;
+      imm_reg <= 32'h0000_0000;
 
       branch_reg <= 1'b0;
       mem_read_reg <= 1'b0;
@@ -145,6 +156,8 @@ module exe_controller #(
 
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b0;
+      imm_to_reg_reg <= 1'b0;
+      pc_now_reg <= 32'h8000_0000;
     end else if (stall_i) begin
       // do nothing
     end else if (bubble_i) begin
@@ -161,6 +174,7 @@ module exe_controller #(
       // rf_rdata_b_reg <= rf_rdata_b_i;
       rd_reg <= rd_i;
       pc_result_reg <= pc_now_i + imm_i;
+      imm_reg <= imm_i;
 
       branch_reg <= branch_eq;
       mem_read_reg <= mem_read_i;
@@ -169,6 +183,8 @@ module exe_controller #(
 
       mem_to_reg_reg <= mem_to_reg_i;
       reg_write_reg <= reg_write_i;
+      imm_to_reg_reg <= imm_to_reg_i;
+      pc_now_reg <= pc_now_i;
     end
   end
 

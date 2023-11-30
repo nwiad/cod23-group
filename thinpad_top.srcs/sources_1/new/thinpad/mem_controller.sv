@@ -31,21 +31,27 @@ module mem_controller #(
     // WB control
     input wire mem_to_reg_i,
     input wire reg_write_i,
+    input wire imm_to_reg_i,
 
     // EXE -> MEM
+    input wire [31:0] pc_now_i,
     input wire [31:0] alu_result_i,
     input wire [31:0] rf_rdata_b_i,
     input wire [4:0]  rd_i,
-    input wire [31:0] pc_result_i,
+    input wire [31:0] pc_result_i, // useless
+    input wire [31:0] imm_i, // for lui
 
     // MEM -> WB
     output reg [31:0] sram_rdata_o,
     output reg [31:0] alu_result_o,
     output reg [4:0]  rd_o,
+    output reg [31:0] imm_o,
+    output reg [31:0] pc_now_o,
 
     // WB control
     output reg mem_to_reg_o,
     output reg reg_write_o,
+    output reg imm_to_reg_o,
 
     // forwarding
     output reg [31:0] rdata_from_mem_o
@@ -55,7 +61,12 @@ module mem_controller #(
 
   reg [31:0] alu_result_reg;
   reg [4:0] rd_reg;
-  reg mem_to_reg_reg, reg_write_reg;
+  reg [31:0] imm_reg;
+  reg mem_to_reg_reg, reg_write_reg, imm_to_reg_reg;
+
+  reg mem_read_reg;
+
+  reg [31:0] pc_now_reg;
 
   typedef enum logic [2:0] { 
     STATE_READY = 0,
@@ -115,11 +126,14 @@ module mem_controller #(
     sram_rdata_o = sram_rdata_reg;
     alu_result_o = alu_result_reg;
     rd_o = rd_reg;
+    imm_o = imm_reg;
+    pc_now_o = pc_now_reg;
 
     mem_to_reg_o = mem_to_reg_reg;
     reg_write_o = reg_write_reg;
+    imm_to_reg_o = imm_to_reg_reg;
 
-    rdata_from_mem_o = (mem_read_i) ? sram_rdata_reg : alu_result_reg;
+    rdata_from_mem_o = (mem_read_reg) ? sram_rdata_reg : alu_result_reg;
   end
 
   always_ff @(posedge clk_i) begin
@@ -127,9 +141,12 @@ module mem_controller #(
       sram_rdata_reg <= 32'h0000_0000;
       alu_result_reg <= 32'h0000_0000;
       rd_reg <= 5'b00000;
+      imm_reg <= 32'h0000_0000;
+      pc_now_reg <= 32'h8000_0000;
 
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b0;
+      imm_to_reg_reg <= 1'b0;
       state <= STATE_READY;
     end else if (stall_i) begin
       // do nothing
@@ -137,9 +154,11 @@ module mem_controller #(
       sram_rdata_reg <= 32'h0000_0000;
       alu_result_reg <= 32'h0000_0000;
       rd_reg <= 5'b00000;
+      imm_reg <= 32'h0000_0000;
 
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b1;
+      imm_to_reg_reg <= 1'b0;
     end else begin
       case (state)
         STATE_READY: begin
@@ -156,8 +175,14 @@ module mem_controller #(
           end
           alu_result_reg <= alu_result_i;
           rd_reg <= rd_i;
+          imm_reg <= imm_i;
           mem_to_reg_reg <= mem_to_reg_i;
           reg_write_reg <= reg_write_i;
+          imm_to_reg_reg <= imm_to_reg_i;
+
+          mem_read_reg <= mem_read_i;
+
+          pc_now_reg <= pc_now_i;
         end
 
         default: ;

@@ -16,11 +16,14 @@ module wb_controller #(
     // WB control
     input wire mem_to_reg_i,
     input wire reg_write_i,
+    input wire imm_to_reg_i,
 
     // MEM -> WB
     input wire [31:0] sram_rdata_i,
     input wire [31:0] alu_result_i,
     input wire [4:0]  rd_i,
+    input wire [31:0] imm_i, // for lui
+    input wire [31:0] pc_now_i,
 
     // WB -> ID
     output reg [31:0] rf_wdata_o,
@@ -34,7 +37,7 @@ module wb_controller #(
 
   logic [31:0] writeback_data_comb;
   always_comb begin
-    writeback_data_comb = mem_to_reg_i ? sram_rdata_i : alu_result_i;
+    writeback_data_comb = mem_to_reg_i ? sram_rdata_i : (imm_to_reg_i ? imm_i : alu_result_i);
   end
 
   always_comb begin

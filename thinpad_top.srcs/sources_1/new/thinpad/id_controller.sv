@@ -54,7 +54,8 @@ module id_controller #(
 
     // WB control
     output reg mem_to_reg_o,
-    output reg reg_write_o
+    output reg reg_write_o,
+    output reg imm_to_reg_o
 );
   // outputs are bounded to these regs
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg;
@@ -68,7 +69,7 @@ module id_controller #(
   reg branch_reg, mem_read_reg, mem_write_reg;
   reg [3:0] mem_sel_reg;
 
-  reg mem_to_reg_reg, reg_write_reg;
+  reg mem_to_reg_reg, reg_write_reg, imm_to_reg_reg;
 
   // regfile
   logic [4:0] rf_raddr_a, rf_raddr_b;
@@ -150,7 +151,7 @@ module id_controller #(
     rf_we = rf_we_i;
 
     inst = inst_i;
-    if (is_itype_comb) begin
+    if (is_itype_comb || is_load_comb) begin
       inst_type = 3'b001;
     end else if (is_stype_comb) begin
       inst_type = 3'b010;
@@ -185,6 +186,7 @@ module id_controller #(
 
     mem_to_reg_o = mem_to_reg_reg;
     reg_write_o = reg_write_reg;
+    imm_to_reg_o = imm_to_reg_reg;
   end
 
   always_ff @(posedge clk_i) begin
@@ -207,6 +209,7 @@ module id_controller #(
 
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b0;
+      imm_to_reg_reg <= 1'b0;
     end else if (stall_i) begin
       // do nothing
     end else if (bubble_i) begin
@@ -228,6 +231,7 @@ module id_controller #(
 
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b1;
+      imm_to_reg_reg <= 1'b0;
     end else begin
       rf_rdata_a_reg <= rf_rdata_a;
       rf_rdata_b_reg <= rf_rdata_b;
@@ -247,6 +251,7 @@ module id_controller #(
 
       mem_to_reg_reg <= is_lb_comb;
       reg_write_reg <= (is_add_comb || is_addi_comb || is_andi_comb || is_lb_comb || is_lui_comb);
+      imm_to_reg_reg <= is_lui_comb;
 
       // forwarding
       exe_rdata_a_hazard_o <= exe_rdata_a_hazard_i;

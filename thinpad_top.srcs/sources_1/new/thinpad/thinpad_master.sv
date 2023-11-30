@@ -1,6 +1,6 @@
 `default_nettype none
 
-module thinpad_master #(
+module lab6_pipeline_master #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32
 ) (
@@ -72,7 +72,7 @@ module thinpad_master #(
   logic ID_EXE_alu_src;
   logic ID_EXE_branch, ID_EXE_mem_read, ID_EXE_mem_write;
   logic [3:0] ID_EXE_mem_sel;
-  logic ID_EXE_mem_to_reg, ID_EXE_reg_write;
+  logic ID_EXE_mem_to_reg, ID_EXE_reg_write, ID_EXE_imm_to_reg;
   // forwarding
   logic EXE_rdata_a_hazard_in, EXE_rdata_b_hazard_in, MEM_rdata_a_hazard_in, MEM_rdata_b_hazard_in;
   logic EXE_rdata_a_hazard_out, EXE_rdata_b_hazard_out, MEM_rdata_a_hazard_out, MEM_rdata_b_hazard_out;
@@ -113,7 +113,8 @@ module thinpad_master #(
     .mem_write_o(ID_EXE_mem_write),
     .mem_sel_o(ID_EXE_mem_sel),
     .mem_to_reg_o(ID_EXE_mem_to_reg),
-    .reg_write_o(ID_EXE_reg_write)
+    .reg_write_o(ID_EXE_reg_write),
+    .imm_to_reg_o(ID_EXE_imm_to_reg)
   );
 
   // EXE logic & EXE/MEM regs
@@ -122,11 +123,13 @@ module thinpad_master #(
   logic [31:0] EXE_MEM_alu_result;
   logic [31:0] EXE_MEM_rf_rdata_b;
   logic [4:0] EXE_MEM_rd;
+  logic [31:0] EXE_MEM_imm;
   logic EXE_MEM_branch, EXE_MEM_mem_read, EXE_MEM_mem_write;
   logic [3:0] EXE_MEM_mem_sel;
-  logic EXE_MEM_mem_to_reg, EXE_MEM_reg_write;
+  logic EXE_MEM_mem_to_reg, EXE_MEM_reg_write, EXE_MEM_imm_to_reg;
   logic exe_is_load;
   logic [31:0] rdata_from_mem;
+  logic [31:0] EXE_MEM_pc_now;
   exe_controller u_exe_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -142,6 +145,7 @@ module thinpad_master #(
     .mem_sel_i(ID_EXE_mem_sel),
     .mem_to_reg_i(ID_EXE_mem_to_reg),
     .reg_write_i(ID_EXE_reg_write),
+    .imm_to_reg_i(ID_EXE_imm_to_reg),
     .rf_rdata_a_i(ID_EXE_rf_rdata_a),
     .rf_rdata_b_i(ID_EXE_rf_rdata_b),
     .imm_i(ID_EXE_imm),
@@ -162,12 +166,15 @@ module thinpad_master #(
     .rf_rdata_b_o(EXE_MEM_rf_rdata_b),
     .rd_o(EXE_MEM_rd),
     .pc_result_o(EXE_MEM_pc_result),
+    .imm_o(EXE_MEM_imm), // for lui
+    .pc_now_o(EXE_MEM_pc_now),
     .branch_o(EXE_MEM_branch),
     .mem_read_o(EXE_MEM_mem_read),
     .mem_write_o(EXE_MEM_mem_write),
     .mem_sel_o(EXE_MEM_mem_sel),
     .mem_to_reg_o(EXE_MEM_mem_to_reg),
-    .reg_write_o(EXE_MEM_reg_write)
+    .reg_write_o(EXE_MEM_reg_write),
+    .imm_to_reg_o(EXE_MEM_imm_to_reg)
   );
 
   // MEM logic & MEM/WB regs
@@ -176,7 +183,9 @@ module thinpad_master #(
   logic [31:0] MEM_WB_sram_rdata;
   logic [31:0] MEM_WB_alu_result;
   logic [4:0] MEM_WB_rd;
-  logic MEM_WB_mem_to_reg, MEM_WB_reg_write;
+  logic [31:0] MEM_WB_imm;
+  logic MEM_WB_mem_to_reg, MEM_WB_reg_write, MEM_WB_imm_to_reg;
+  logic MEM_WB_pc_now;
   mem_controller u_mem_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -197,15 +206,21 @@ module thinpad_master #(
     .mem_sel_i(EXE_MEM_mem_sel),
     .mem_to_reg_i(EXE_MEM_mem_to_reg),
     .reg_write_i(EXE_MEM_reg_write),
+    .imm_to_reg_i(EXE_MEM_imm_to_reg),
+    .pc_now_i(EXE_MEM_pc_now),
     .alu_result_i(EXE_MEM_alu_result),
     .rf_rdata_b_i(EXE_MEM_rf_rdata_b),
     .rd_i(EXE_MEM_rd),
     .pc_result_i(EXE_MEM_pc_result),
+    .imm_i(EXE_MEM_imm), // for lui
     .sram_rdata_o(MEM_WB_sram_rdata),
     .alu_result_o(MEM_WB_alu_result),
     .rd_o(MEM_WB_rd),
+    .imm_o(MEM_WB_imm), // for lui
+    .pc_now_o(MEM_WB_pc_now),
     .mem_to_reg_o(MEM_WB_mem_to_reg),
     .reg_write_o(MEM_WB_reg_write),
+    .imm_to_reg_o(MEM_WB_imm_to_reg),
     .rdata_from_mem_o(rdata_from_mem)
   );
 
@@ -221,9 +236,12 @@ module thinpad_master #(
 
     .mem_to_reg_i(MEM_WB_mem_to_reg),
     .reg_write_i(MEM_WB_reg_write),
+    .imm_to_reg_i(MEM_WB_imm_to_reg),
     .sram_rdata_i(MEM_WB_sram_rdata),
     .alu_result_i(MEM_WB_alu_result),
     .rd_i(MEM_WB_rd),
+    .imm_i(MEM_WB_imm),
+    .pc_now_i(MEM_WB_pc_now),
 
     .rf_wdata_o(WB_rf_wdata),
     .rf_waddr_o(WB_rf_waddr),

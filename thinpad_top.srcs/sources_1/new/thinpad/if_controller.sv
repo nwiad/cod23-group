@@ -49,10 +49,13 @@ module if_controller #(
   // pc mux
   logic [31:0] pc_plus_4_comb;
   logic [31:0] pc_next_comb;
+  logic [1:0] refetch;
+  logic [31:0] refetch_pc;
   always_comb begin
     // pc_plus_4_comb = pc_reg + 32'h0000_0004;
     pc_plus_4_comb = pc_now_reg + 32'h0000_0004;
-    pc_next_comb = (pc_src_i == 1'b1) ? pc_result_i : pc_plus_4_comb;
+    // pc_next_comb = (pc_src_i == 1'b1) ? pc_result_i : pc_plus_4_comb;
+    pc_next_comb = (refetch == 2'b10) ? refetch_pc : pc_plus_4_comb;
   end
 
   always_comb begin
@@ -92,12 +95,18 @@ module if_controller #(
   end
 
   always_ff @(posedge clk_i) begin
+    if (pc_src_i == 1'b1) begin
+      refetch <= 2'b01;
+      refetch_pc <= pc_result_i;
+    end
     if (rst_i) begin
       state <= STATE_READY;
       // pc_reg <= 32'h8000_0000;
       // pc_now_reg <= 32'h8000_0000;
       pc_now_reg <= 32'h7FFF_FFFC;
       inst_reg <= 32'h0000_0000;
+      refetch <= 2'b0;
+      refetch_pc <= 32'h0000_0000;
     end else if (stall_i) begin
       // do nothing
     end else if (bubble_i) begin // insert bubble while waiting for bus response
@@ -111,8 +120,16 @@ module if_controller #(
           state <= STATE_PENDING;
         end
         STATE_PENDING: begin
-          pc_now_reg <= pc_next_comb;
-          inst_reg <= wb_dat_i;
+          if (refetch == 2'b0) begin
+            pc_now_reg <= pc_next_comb;
+            inst_reg <= wb_dat_i;
+          end else if (refetch == 2'b01) begin
+            refetch <= 2'b10;
+          end else if (refetch == 2'b10) begin
+            pc_now_reg <= refetch_pc;
+            inst_reg <= wb_dat_i;
+            refetch <= 2'b0;
+          end
           state <= STATE_READY;
           // if (wb_ack_i == 1'b1) begin
           //   // pc_now_reg <= pc_reg;
