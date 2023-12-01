@@ -69,7 +69,7 @@ module thinpad_master #(
   logic [4:0] ID_EXE_rs1, ID_EXE_rs2, ID_EXE_rd;
   logic [31:0] ID_EXE_pc_now;
   logic [3:0] ID_EXE_alu_op;
-  logic ID_EXE_alu_src;
+  logic ID_EXE_alu_src_1, ID_EXE_alu_src_2;
   logic ID_EXE_branch, ID_EXE_mem_read, ID_EXE_mem_write;
   logic [3:0] ID_EXE_mem_sel;
   logic ID_EXE_mem_to_reg, ID_EXE_reg_write, ID_EXE_imm_to_reg;
@@ -96,7 +96,8 @@ module thinpad_master #(
     .rd_o(ID_EXE_rd),
     .pc_now_o(ID_EXE_pc_now),
     .alu_op_o(ID_EXE_alu_op),
-    .alu_src_o(ID_EXE_alu_src),
+    .alu_src_o_1(ID_EXE_alu_src_1),
+    .alu_src_o_2(ID_EXE_alu_src_2),
 
     // forwarding
     .exe_rdata_a_hazard_i(EXE_rdata_a_hazard_in),
@@ -138,7 +139,8 @@ module thinpad_master #(
     .stall_o(EXE_MEM_stall_out),
     .flush_o(EXE_MEM_flush_out),
     .alu_op_i(ID_EXE_alu_op),
-    .alu_src_i(ID_EXE_alu_src),
+    .alu_src_i_1(ID_EXE_alu_src_1),
+    .alu_src_i_2(ID_EXE_alu_src_2),
     .branch_i(ID_EXE_branch),
     .mem_read_i(ID_EXE_mem_read),
     .mem_write_i(ID_EXE_mem_write),

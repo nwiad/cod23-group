@@ -33,7 +33,8 @@ module id_controller #(
 
     // EXE control
     output reg [3:0] alu_op_o,
-    output reg alu_src_o, // 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
+    output reg alu_src_o_1, // reg1 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
+    output reg alu_src_o_2, // reg2 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
 
     // forwarding
     input reg exe_rdata_a_hazard_i,
@@ -64,7 +65,8 @@ module id_controller #(
   reg [31:0] pc_now_reg;
 
   reg [3:0] alu_op_reg;
-  reg alu_src_reg;
+  reg alu_src_reg_1;
+  reg alu_src_reg_2;
 
   reg branch_reg, mem_read_reg, mem_write_reg;
   reg [3:0] mem_sel_reg;
@@ -99,29 +101,72 @@ module id_controller #(
     .imm(imm)
   );
 
-  logic is_rtype_comb, is_itype_comb, is_load_comb, is_stype_comb, is_btype_comb, is_lui_comb;
-  logic is_add_comb, is_addi_comb, is_andi_comb, is_lb_comb, is_sb_comb, is_sw_comb, is_beq_comb;
+  //types
+  logic is_rtype_comb, is_itype_comb, is_stype_comb, is_btype_comb, is_jtype_comb, is_utype_comb, is_load_comb;
+  //Rtype
+  logic is_add_comb, is_and_comb, is_or_comb, is_xor_comb;
+  //Itype
+  logic is_addi_comb, is_andi_comb, is_lb_comb, is_lw_comb, is_ori_comb, is_slli_comb, is_srli_comb;
+  //Utype
+  logic is_auipc_comb, is_lui_comb;
+  //Btype
+  logic is_beq_comb, is_bne_comb;
+  //Jtype
+  logic is_jal_comb, is_jalr_comb;
+  //Stype
+  logic is_sb_comb, is_sw_comb;
   logic [4:0] rd_comb, rs1_comb, rs2_comb;
   logic [3:0] alu_op_comb;
-  logic alu_src_comb;
+  logic alu_src_comb_1, alu_src_comb_2;
   logic [3:0] mem_sel_comb;
 
   always_comb begin
     is_rtype_comb = (inst_i[6:0] == 7'b011_0011);
     is_itype_comb = (inst_i[6:0] == 7'b001_0011); // 不包括 load
     is_load_comb  = (inst_i[6:0] == 7'b000_0011);
+    is_jtype_comb  = (inst_i[6:0] == 7'b110_0111) || (inst_i[6:0] == 7'b110_1111);
+    is_utype_comb  = (inst_i[6:0] == 7'b001_0111) || (inst_i[6:0] == 7'b011_0111);
     is_stype_comb = (inst_i[6:0] == 7'b010_0011);
     is_btype_comb = (inst_i[6:0] == 7'b110_0011);
-    is_lui_comb   = (inst_i[6:0] == 7'b011_0111);
 
+    //ADD   0000000SSSSSsssss000ddddd0110011
     is_add_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b000));
+    //ADDI  iiiiiiiiiiiisssss000ddddd0010011
     is_addi_comb = (is_itype_comb && (inst_i[14:12] == 3'b000));
+    //AND   0000000SSSSSsssss111ddddd0110011
+    is_and_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b111));
+    //ANDI  iiiiiiiiiiiisssss111ddddd0010011
     is_andi_comb = (is_itype_comb && (inst_i[14:12] == 3'b111));
-    is_lb_comb   = (is_load_comb  && (inst_i[14:12] == 3'b000));
-    is_sb_comb   = (is_stype_comb && (inst_i[14:12] == 3'b000));
-    is_sw_comb   = (is_stype_comb && (inst_i[14:12] == 3'b010));
+    //AUIPC iiiiiiiiiiiiiiiiiiiiddddd0010111
+    is_auipc_comb = (inst_i[6:0] == 7'b001_0111);
+    //BEQ   iiiiiiiSSSSSsssss000iiiii1100011
     is_beq_comb  = (is_btype_comb && (inst_i[14:12] == 3'b000));
-
+    //BNE   iiiiiiiSSSSSsssss001iiiii1100011
+    is_bne_comb  = (is_btype_comb && (inst_i[14:12] == 3'b001));
+    //JAL   iiiiiiiiiiiiiiiiiiiiddddd1101111
+    is_jal_comb  = (inst_i[6:0] == 7'b110_1111);
+    //JALR  iiiiiiiiiiiisssss000ddddd1100111
+    is_jalr_comb  = (inst_i[6:0] == 7'b110_0111);
+    //LB    iiiiiiiiiiiisssss000ddddd0000011
+    is_lb_comb   = (is_load_comb && (inst_i[14:12] == 3'b000));
+    //LUI   iiiiiiiiiiiiiiiiiiiiddddd0110111
+    is_lui_comb   = (inst_i[6:0] == 7'b011_0111);
+    //LW    iiiiiiiiiiiisssss010ddddd0000011
+    is_lw_comb   = (is_load_comb && (inst_i[14:12] == 3'b010));
+    //OR    0000000SSSSSsssss110ddddd0110011
+    is_or_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b110));
+    //ORI   iiiiiiiiiiiisssss110ddddd0010011
+    is_ori_comb  = (is_itype_comb && (inst_i[14:12] == 3'b110));
+    //SB    iiiiiiiSSSSSsssss000iiiii0100011
+    is_sb_comb   = (is_stype_comb && (inst_i[14:12] == 3'b000));
+    //SLLI  0000000iiiiisssss001ddddd0010011
+    is_slli_comb   = (is_itype_comb && (inst_i[14:12] == 3'b001));
+    //SRLI  0000000iiiiisssss101ddddd0010011
+    is_srli_comb   = (is_itype_comb && (inst_i[14:12] == 3'b101));
+    //SW    iiiiiiiSSSSSsssss010iiiii0100011
+    is_sw_comb   = (is_stype_comb && (inst_i[14:12] == 3'b010));
+    //XOR   0000000SSSSSsssss100ddddd0110011
+    is_xor_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b100));
     rd_comb  = inst_i[11:7];
     rs1_comb = inst_i[19:15];
     rs2_comb = inst_i[24:20];
@@ -134,7 +179,8 @@ module id_controller #(
       alu_op_comb = 4'b0000;
     end
 
-    alu_src_comb = is_add_comb;
+    alu_src_comb_1 = is_lui_comb || is_auipc_comb;
+    alu_src_comb_2 = is_add_comb || is_lui_comb || is_auipc_comb;
 
     if (is_lb_comb || is_sb_comb) begin
       mem_sel_comb = 4'b0001;
@@ -157,8 +203,10 @@ module id_controller #(
       inst_type = 3'b010;
     end else if (is_btype_comb) begin
       inst_type = 3'b011;
-    end else if (is_lui_comb) begin
+    end else if (is_utype_comb) begin
       inst_type = 3'b100;
+    end else if (is_jtype_comb) begin
+      inst_type = 3'b101;
     end else begin
       inst_type = 3'b000;
     end
@@ -168,7 +216,14 @@ module id_controller #(
     stall_o = 1'b0; // won't stall other stages ?
     flush_o = 1'b0; // won't flush other stages ?
 
-    rf_rdata_a_o = rf_rdata_a_reg;
+    // rf_rdata_a_o = rf_rdata_a_reg;
+    if (is_lui_comb) begin
+      rf_rdata_a_o = 32'b0;
+    end else if (is_auipc_comb) begin
+      rf_rdata_a_o = pc_now_i;
+    end else begin
+      rf_rdata_a_o = rf_rdata_a_reg;
+    end
     rf_rdata_b_o = rf_rdata_b_reg;
     imm_o = imm_reg;
     rs1_o = rs1_reg;
@@ -177,7 +232,8 @@ module id_controller #(
     pc_now_o = pc_now_reg;
 
     alu_op_o = alu_op_reg;
-    alu_src_o = alu_src_reg;
+    alu_src_o_1 = alu_src_reg_1;
+    alu_src_o_2 = alu_src_reg_2;
 
     branch_o = branch_reg;
     mem_read_o = mem_read_reg;
@@ -200,7 +256,8 @@ module id_controller #(
       pc_now_reg <= 32'h8000_0000;
 
       alu_op_reg <= 4'b0000;
-      alu_src_reg <= 1'b0;
+      alu_src_reg_1 <= 1'b0;
+      alu_src_reg_2 <= 1'b0;
 
       branch_reg <= 1'b0;
       mem_read_reg <= 1'b0;
@@ -222,7 +279,8 @@ module id_controller #(
 
       // controls of addi zero, zero, 0
       alu_op_reg <= 4'b0001;
-      alu_src_reg <= 1'b0;
+      alu_src_reg_1 <= 1'b0;
+      alu_src_reg_2 <= 1'b0;
 
       branch_reg <= 1'b0;
       mem_read_reg <= 1'b0;
@@ -242,7 +300,8 @@ module id_controller #(
       pc_now_reg <= pc_now_i;
 
       alu_op_reg <= alu_op_comb;
-      alu_src_reg <= alu_src_comb;
+      alu_src_reg_1 <= alu_src_comb_1;
+      alu_src_reg_2 <= alu_src_comb_2;
 
       branch_reg <= is_beq_comb;
       mem_read_reg <= is_lb_comb;
