@@ -256,7 +256,7 @@ module thinpad_master #(
     .id_rs2_i(IF_ID_rs2),
     .exe_rd_i(ID_EXE_rd),
     .mem_rd_i(EXE_MEM_rd),
-    .exe_branch_i(EXE_MEM_branch),
+    .exe_branch_i(EXE_MEM_flush_out),
     .exe_is_load_i(exe_is_load),
     .IF_wb_ack_i(IF_wb_ack_i),
     .MEM_wb_ack_i(MEM_wb_ack_i),
