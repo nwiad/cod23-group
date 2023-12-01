@@ -73,7 +73,7 @@ module tb;
     // uart.pc_send_byte(8'h32); // ASCII '2'
     // #10000;
     // uart.pc_send_byte(8'h33); // ASCII '3'
-    #400000 $finish;
+    #600000 $finish;
   end
 
   // 待测试用户设计
