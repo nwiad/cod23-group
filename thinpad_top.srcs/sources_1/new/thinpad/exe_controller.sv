@@ -19,7 +19,7 @@ module exe_controller #(
     input wire alu_src_i_2, // 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
 
     // MEM control
-    input wire [1:0] branch_i,
+    input wire [2:0] branch_i,
     input wire mem_read_i,
     input wire mem_write_i,
     input wire [3:0] mem_sel_i,
@@ -32,6 +32,7 @@ module exe_controller #(
     // ID -> EXE
     input wire [31:0] rf_rdata_a_i,
     input wire [31:0] rf_rdata_b_i,
+    input wire [31:0] rf_rdata_c_i,
     input wire [31:0] imm_i,
     input wire [4:0]  rs1_i,
     input wire [4:0]  rs2_i,
@@ -108,7 +109,7 @@ module exe_controller #(
         alu_operand1 = rf_rdata_a_i;
       end
     end else begin  // operand_1 is imm
-      alu_operand1 = rf_rdata_a_i;
+      alu_operand1 = rf_rdata_c_i;
     end
 
     // alu_operand2
@@ -121,7 +122,7 @@ module exe_controller #(
         alu_operand2 = rf_rdata_b_i;
       end
     end else begin  // operand_2 is imm
-      if (branch_i == 2'b11) begin
+      if ((branch_i == 3'b100) || (branch_i == 3'b011)) begin
         alu_operand2 = 32'b100;
       end else begin
         alu_operand2 = imm_i;
@@ -129,7 +130,7 @@ module exe_controller #(
     end
     alu_op = alu_op_i;
 
-    branch_eq = (branch_i == 2'b11) || ((branch_i == 2'b01) && (rf_rdata_a_i == rf_rdata_b_i)) || ((branch_i == 2'b10) && (rf_rdata_a_i != rf_rdata_b_i));
+    branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_i == rf_rdata_b_i)) || ((branch_i == 3'b010) && (rf_rdata_a_i != rf_rdata_b_i));
   end
 
   always_comb begin
@@ -184,7 +185,11 @@ module exe_controller #(
       end
       // rf_rdata_b_reg <= rf_rdata_b_i;
       rd_reg <= rd_i;
-      pc_result_reg <= pc_now_i + imm_i;
+      if(branch_i == 3'b100) begin
+        pc_result_reg <= rf_rdata_a_i + imm_i;
+      end else begin
+        pc_result_reg <= pc_now_i + imm_i;
+      end
       imm_reg <= imm_i;
 
       branch_reg <= branch_eq;

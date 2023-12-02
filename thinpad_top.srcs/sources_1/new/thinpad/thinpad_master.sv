@@ -64,14 +64,14 @@ module thinpad_master #(
   logic WB_rf_we;
   logic [4:0] WB_rf_waddr;
   logic [31:0] WB_rf_wdata;
-  logic [31:0] ID_EXE_rf_rdata_a, ID_EXE_rf_rdata_b;
+  logic [31:0] ID_EXE_rf_rdata_a, ID_EXE_rf_rdata_b, ID_EXE_rf_rdata_c;
   logic [31:0] ID_EXE_imm;
   logic [4:0] ID_EXE_rs1, ID_EXE_rs2, ID_EXE_rd;
   logic [31:0] ID_EXE_pc_now;
   logic [3:0] ID_EXE_alu_op;
   logic ID_EXE_alu_src_1, ID_EXE_alu_src_2;
   logic ID_EXE_mem_read, ID_EXE_mem_write;
-  logic [1:0] ID_EXE_branch;
+  logic [2:0] ID_EXE_branch;
   logic [3:0] ID_EXE_mem_sel;
   logic ID_EXE_mem_to_reg, ID_EXE_reg_write, ID_EXE_imm_to_reg;
   // forwarding
@@ -91,6 +91,7 @@ module thinpad_master #(
     .inst_i(IF_ID_inst),
     .rf_rdata_a_o(ID_EXE_rf_rdata_a),
     .rf_rdata_b_o(ID_EXE_rf_rdata_b),
+    .rf_rdata_c_o(ID_EXE_rf_rdata_c),
     .imm_o(ID_EXE_imm),
     .rs1_o(ID_EXE_rs1),
     .rs2_o(ID_EXE_rs2),
@@ -152,6 +153,7 @@ module thinpad_master #(
     .imm_to_reg_i(ID_EXE_imm_to_reg),
     .rf_rdata_a_i(ID_EXE_rf_rdata_a),
     .rf_rdata_b_i(ID_EXE_rf_rdata_b),
+    .rf_rdata_c_i(ID_EXE_rf_rdata_c),
     .imm_i(ID_EXE_imm),
     .rs1_i(ID_EXE_rs1),
     .rs2_i(ID_EXE_rs2),
