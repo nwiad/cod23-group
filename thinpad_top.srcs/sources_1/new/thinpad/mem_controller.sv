@@ -136,6 +136,18 @@ module mem_controller #(
     rdata_from_mem_o = (mem_read_reg) ? sram_rdata_reg : alu_result_reg;
   end
 
+  logic [31:0] shifted_data;
+  logic [31:0] sext_data;
+  always_comb begin
+    shifted_data = wb_dat_i >> ({30'b0, alu_result_i[1:0]} << 3);
+    case (mem_sel_i)
+      4'b0001: sext_data = $signed(shifted_data[7:0]);
+      4'b0011: sext_data = $signed(shifted_data[15:0]);
+      4'b1111: sext_data = $signed(shifted_data[31:0]);
+      default: sext_data = 32'h0000_0000;
+    endcase
+  end
+
   always_ff @(posedge clk_i) begin
     if (rst_i) begin
       sram_rdata_reg <= 32'h0000_0000;
@@ -167,7 +179,8 @@ module mem_controller #(
         STATE_PENDING: begin
           if (wb_ack_i) begin
             if (mem_read_i) begin
-              sram_rdata_reg <= wb_dat_i >> ({30'b0, alu_result_i[1:0]} << 3);
+              // sram_rdata_reg <= wb_dat_i >> ({30'b0, alu_result_i[1:0]} << 3);
+              sram_rdata_reg <= sext_data;
             end else begin
               sram_rdata_reg <= 32'h0000_0000;
             end
