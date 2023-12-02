@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="296231640fs"></ZoomStartTime>
+      <ZoomEndTime time="302001641fs"></ZoomEndTime>
+      <Cursor1Time time="304110000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="438"></NameColumnWidth>
+      <ValueColumnWidth column_width="156"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="98" />
+   <wvobject fp_name="/tb/dut/u_thinpad_master/clk_i" type="logic">
+      <obj_property name="ElementShortName">clk_i</obj_property>
+      <obj_property name="ObjectShortName">clk_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/rst_i" type="logic">
+      <obj_property name="ElementShortName">rst_i</obj_property>
+      <obj_property name="ObjectShortName">rst_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_wb_cyc_o" type="logic">
+      <obj_property name="ElementShortName">IF_wb_cyc_o</obj_property>
+      <obj_property name="ObjectShortName">IF_wb_cyc_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_wb_stb_o" type="logic">
+      <obj_property name="ElementShortName">IF_wb_stb_o</obj_property>
+      <obj_property name="ObjectShortName">IF_wb_stb_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_wb_ack_i" type="logic">
+      <obj_property name="ElementShortName">IF_wb_ack_i</obj_property>
+      <obj_property name="ObjectShortName">IF_wb_ack_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_wb_adr_o" type="array">
+      <obj_property name="ElementShortName">IF_wb_adr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_wb_adr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_wb_dat_o" type="array">
+      <obj_property name="ElementShortName">IF_wb_dat_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_wb_dat_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_wb_dat_i" type="array">
+      <obj_property name="ElementShortName">IF_wb_dat_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_wb_dat_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_wb_sel_o" type="array">
+      <obj_property name="ElementShortName">IF_wb_sel_o[3:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_wb_sel_o[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_wb_we_o" type="logic">
+      <obj_property name="ElementShortName">IF_wb_we_o</obj_property>
+      <obj_property name="ObjectShortName">IF_wb_we_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_wb_cyc_o" type="logic">
+      <obj_property name="ElementShortName">MEM_wb_cyc_o</obj_property>
+      <obj_property name="ObjectShortName">MEM_wb_cyc_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_wb_stb_o" type="logic">
+      <obj_property name="ElementShortName">MEM_wb_stb_o</obj_property>
+      <obj_property name="ObjectShortName">MEM_wb_stb_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_wb_ack_i" type="logic">
+      <obj_property name="ElementShortName">MEM_wb_ack_i</obj_property>
+      <obj_property name="ObjectShortName">MEM_wb_ack_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_wb_adr_o" type="array">
+      <obj_property name="ElementShortName">MEM_wb_adr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_wb_adr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_wb_dat_o" type="array">
+      <obj_property name="ElementShortName">MEM_wb_dat_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_wb_dat_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_wb_dat_i" type="array">
+      <obj_property name="ElementShortName">MEM_wb_dat_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_wb_dat_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_wb_sel_o" type="array">
+      <obj_property name="ElementShortName">MEM_wb_sel_o[3:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_wb_sel_o[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_wb_we_o" type="logic">
+      <obj_property name="ElementShortName">MEM_wb_we_o</obj_property>
+      <obj_property name="ObjectShortName">MEM_wb_we_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_ID_stall_in" type="logic">
+      <obj_property name="ElementShortName">IF_ID_stall_in</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_stall_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_ID_bubble_in" type="logic">
+      <obj_property name="ElementShortName">IF_ID_bubble_in</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_bubble_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_ID_stall_out" type="logic">
+      <obj_property name="ElementShortName">IF_ID_stall_out</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_stall_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_ID_flush_out" type="logic">
+      <obj_property name="ElementShortName">IF_ID_flush_out</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_flush_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_pc_result" type="array">
+      <obj_property name="ElementShortName">EXE_MEM_pc_result[31:0]</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_pc_result[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_ID_inst" type="array">
+      <obj_property name="ElementShortName">IF_ID_inst[31:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_inst[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_ID_pc_now" type="array">
+      <obj_property name="ElementShortName">IF_ID_pc_now[31:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_pc_now[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_ID_rs1" type="array">
+      <obj_property name="ElementShortName">IF_ID_rs1[4:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_rs1[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/IF_ID_rs2" type="array">
+      <obj_property name="ElementShortName">IF_ID_rs2[4:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_rs2[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_stall_in" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_stall_in</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_stall_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_bubble_in" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_bubble_in</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_bubble_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_stall_out" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_stall_out</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_stall_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_flush_out" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_flush_out</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_flush_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/WB_rf_we" type="logic">
+      <obj_property name="ElementShortName">WB_rf_we</obj_property>
+      <obj_property name="ObjectShortName">WB_rf_we</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/WB_rf_waddr" type="array">
+      <obj_property name="ElementShortName">WB_rf_waddr[4:0]</obj_property>
+      <obj_property name="ObjectShortName">WB_rf_waddr[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/WB_rf_wdata" type="array">
+      <obj_property name="ElementShortName">WB_rf_wdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">WB_rf_wdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_rf_rdata_a" type="array">
+      <obj_property name="ElementShortName">ID_EXE_rf_rdata_a[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_rf_rdata_a[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_rf_rdata_b" type="array">
+      <obj_property name="ElementShortName">ID_EXE_rf_rdata_b[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_rf_rdata_b[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_imm" type="array">
+      <obj_property name="ElementShortName">ID_EXE_imm[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_imm[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_rs1" type="array">
+      <obj_property name="ElementShortName">ID_EXE_rs1[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_rs1[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_rs2" type="array">
+      <obj_property name="ElementShortName">ID_EXE_rs2[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_rs2[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_rd" type="array">
+      <obj_property name="ElementShortName">ID_EXE_rd[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_rd[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_pc_now" type="array">
+      <obj_property name="ElementShortName">ID_EXE_pc_now[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_pc_now[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_alu_op" type="array">
+      <obj_property name="ElementShortName">ID_EXE_alu_op[3:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_alu_op[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_alu_src" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_alu_src</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_alu_src</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_branch" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_branch</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_branch</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_mem_read" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_mem_read</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_mem_read</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_mem_write" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_mem_write</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_mem_write</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_mem_sel" type="array">
+      <obj_property name="ElementShortName">ID_EXE_mem_sel[3:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_mem_sel[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_mem_to_reg" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_mem_to_reg</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_mem_to_reg</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_reg_write" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_reg_write</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_reg_write</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ID_EXE_imm_to_reg" type="logic">
+      <obj_property name="ElementShortName">ID_EXE_imm_to_reg</obj_property>
+      <obj_property name="ObjectShortName">ID_EXE_imm_to_reg</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_rdata_a_hazard_in" type="logic">
+      <obj_property name="ElementShortName">EXE_rdata_a_hazard_in</obj_property>
+      <obj_property name="ObjectShortName">EXE_rdata_a_hazard_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_rdata_b_hazard_in" type="logic">
+      <obj_property name="ElementShortName">EXE_rdata_b_hazard_in</obj_property>
+      <obj_property name="ObjectShortName">EXE_rdata_b_hazard_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_rdata_a_hazard_in" type="logic">
+      <obj_property name="ElementShortName">MEM_rdata_a_hazard_in</obj_property>
+      <obj_property name="ObjectShortName">MEM_rdata_a_hazard_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_rdata_b_hazard_in" type="logic">
+      <obj_property name="ElementShortName">MEM_rdata_b_hazard_in</obj_property>
+      <obj_property name="ObjectShortName">MEM_rdata_b_hazard_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_rdata_a_hazard_out" type="logic">
+      <obj_property name="ElementShortName">EXE_rdata_a_hazard_out</obj_property>
+      <obj_property name="ObjectShortName">EXE_rdata_a_hazard_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_rdata_b_hazard_out" type="logic">
+      <obj_property name="ElementShortName">EXE_rdata_b_hazard_out</obj_property>
+      <obj_property name="ObjectShortName">EXE_rdata_b_hazard_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_rdata_a_hazard_out" type="logic">
+      <obj_property name="ElementShortName">MEM_rdata_a_hazard_out</obj_property>
+      <obj_property name="ObjectShortName">MEM_rdata_a_hazard_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_rdata_b_hazard_out" type="logic">
+      <obj_property name="ElementShortName">MEM_rdata_b_hazard_out</obj_property>
+      <obj_property name="ObjectShortName">MEM_rdata_b_hazard_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_stall_in" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_stall_in</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_stall_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_bubble_in" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_bubble_in</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_bubble_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_stall_out" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_stall_out</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_stall_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_flush_out" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_flush_out</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_flush_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_alu_result" type="array">
+      <obj_property name="ElementShortName">EXE_MEM_alu_result[31:0]</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_alu_result[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_rf_rdata_b" type="array">
+      <obj_property name="ElementShortName">EXE_MEM_rf_rdata_b[31:0]</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_rf_rdata_b[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_rd" type="array">
+      <obj_property name="ElementShortName">EXE_MEM_rd[4:0]</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_rd[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_imm" type="array">
+      <obj_property name="ElementShortName">EXE_MEM_imm[31:0]</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_imm[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_branch" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_branch</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_branch</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_mem_read" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_mem_read</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_mem_read</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_mem_write" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_mem_write</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_mem_write</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_mem_sel" type="array">
+      <obj_property name="ElementShortName">EXE_MEM_mem_sel[3:0]</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_mem_sel[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_mem_to_reg" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_mem_to_reg</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_mem_to_reg</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_reg_write" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_reg_write</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_reg_write</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_imm_to_reg" type="logic">
+      <obj_property name="ElementShortName">EXE_MEM_imm_to_reg</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_imm_to_reg</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/exe_is_load" type="logic">
+      <obj_property name="ElementShortName">exe_is_load</obj_property>
+      <obj_property name="ObjectShortName">exe_is_load</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/rdata_from_mem" type="array">
+      <obj_property name="ElementShortName">rdata_from_mem[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rdata_from_mem[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/EXE_MEM_pc_now" type="array">
+      <obj_property name="ElementShortName">EXE_MEM_pc_now[31:0]</obj_property>
+      <obj_property name="ObjectShortName">EXE_MEM_pc_now[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_stall_in" type="logic">
+      <obj_property name="ElementShortName">MEM_WB_stall_in</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_stall_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_bubble_in" type="logic">
+      <obj_property name="ElementShortName">MEM_WB_bubble_in</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_bubble_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_stall_out" type="logic">
+      <obj_property name="ElementShortName">MEM_WB_stall_out</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_stall_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_flush_out" type="logic">
+      <obj_property name="ElementShortName">MEM_WB_flush_out</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_flush_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_sram_rdata" type="array">
+      <obj_property name="ElementShortName">MEM_WB_sram_rdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_sram_rdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_alu_result" type="array">
+      <obj_property name="ElementShortName">MEM_WB_alu_result[31:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_alu_result[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_rd" type="array">
+      <obj_property name="ElementShortName">MEM_WB_rd[4:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_rd[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_imm" type="array">
+      <obj_property name="ElementShortName">MEM_WB_imm[31:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_imm[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_mem_to_reg" type="logic">
+      <obj_property name="ElementShortName">MEM_WB_mem_to_reg</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_mem_to_reg</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_reg_write" type="logic">
+      <obj_property name="ElementShortName">MEM_WB_reg_write</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_reg_write</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_imm_to_reg" type="logic">
+      <obj_property name="ElementShortName">MEM_WB_imm_to_reg</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_imm_to_reg</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/MEM_WB_pc_now" type="logic">
+      <obj_property name="ElementShortName">MEM_WB_pc_now</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_pc_now</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/WB_stall_out" type="logic">
+      <obj_property name="ElementShortName">WB_stall_out</obj_property>
+      <obj_property name="ObjectShortName">WB_stall_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/WB_flush_out" type="logic">
+      <obj_property name="ElementShortName">WB_flush_out</obj_property>
+      <obj_property name="ObjectShortName">WB_flush_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/ADDR_WIDTH" type="array">
+      <obj_property name="ElementShortName">ADDR_WIDTH[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ADDR_WIDTH[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/DATA_WIDTH" type="array">
+      <obj_property name="ElementShortName">DATA_WIDTH[31:0]</obj_property>
+      <obj_property name="ObjectShortName">DATA_WIDTH[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/rf_rdata_a_o" type="array">
+      <obj_property name="ElementShortName">rf_rdata_a_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_rdata_a_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/rf_rdata_b_o" type="array">
+      <obj_property name="ElementShortName">rf_rdata_b_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_rdata_b_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/if_alu32/alu_a" type="array">
+      <obj_property name="ElementShortName">alu_a[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_a[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/if_alu32/alu_b" type="array">
+      <obj_property name="ElementShortName">alu_b[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_b[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/if_alu32/alu_op" type="array">
+      <obj_property name="ElementShortName">alu_op[3:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_op[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/if_alu32/alu_y" type="array">
+      <obj_property name="ElementShortName">alu_y[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_y[31:0]</obj_property>
+   </wvobject>
+</wave_config>

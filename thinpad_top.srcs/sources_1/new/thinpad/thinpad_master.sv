@@ -70,7 +70,8 @@ module thinpad_master #(
   logic [31:0] ID_EXE_pc_now;
   logic [3:0] ID_EXE_alu_op;
   logic ID_EXE_alu_src_1, ID_EXE_alu_src_2;
-  logic ID_EXE_branch, ID_EXE_mem_read, ID_EXE_mem_write;
+  logic ID_EXE_mem_read, ID_EXE_mem_write;
+  logic [1:0] ID_EXE_branch;
   logic [3:0] ID_EXE_mem_sel;
   logic ID_EXE_mem_to_reg, ID_EXE_reg_write, ID_EXE_imm_to_reg;
   // forwarding
@@ -125,7 +126,8 @@ module thinpad_master #(
   logic [31:0] EXE_MEM_rf_rdata_b;
   logic [4:0] EXE_MEM_rd;
   logic [31:0] EXE_MEM_imm;
-  logic EXE_MEM_branch, EXE_MEM_mem_read, EXE_MEM_mem_write;
+  logic EXE_MEM_mem_read, EXE_MEM_mem_write;
+  logic EXE_MEM_branch;
   logic [3:0] EXE_MEM_mem_sel;
   logic EXE_MEM_mem_to_reg, EXE_MEM_reg_write, EXE_MEM_imm_to_reg;
   logic exe_is_load;

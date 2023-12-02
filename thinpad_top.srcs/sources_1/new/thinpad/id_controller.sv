@@ -48,7 +48,7 @@ module id_controller #(
     output reg mem_rdata_b_hazard_o,
 
     // MEM control
-    output reg branch_o, // for IF
+    output reg [1:0] branch_o, // for IF
     output reg mem_read_o,
     output reg mem_write_o,
     output reg [3:0] mem_sel_o,
@@ -68,7 +68,8 @@ module id_controller #(
   reg alu_src_reg_1;
   reg alu_src_reg_2;
 
-  reg branch_reg, mem_read_reg, mem_write_reg;
+  reg [1:0] branch_reg;
+  reg mem_read_reg, mem_write_reg;
   reg [3:0] mem_sel_reg;
 
   reg mem_to_reg_reg, reg_write_reg, imm_to_reg_reg;
@@ -171,20 +172,28 @@ module id_controller #(
     rs1_comb = inst_i[19:15];
     rs2_comb = inst_i[24:20];
 
-    if (is_add_comb || is_addi_comb || is_lb_comb || is_sb_comb || is_sw_comb) begin
+    if (is_add_comb || is_addi_comb || is_lb_comb || is_lw_comb || is_sb_comb || is_sw_comb || is_utype_comb) begin
       alu_op_comb = 4'b0001;
-    end else if (is_andi_comb) begin
+    end else if (is_andi_comb || is_and_comb) begin
       alu_op_comb = 4'b0011;
+    end else if (is_or_comb || is_ori_comb) begin
+      alu_op_comb = 4'b0100;
+    end else if (is_xor_comb) begin
+      alu_op_comb = 4'b0101;
+    end else if (is_slli_comb) begin
+      alu_op_comb = 4'b0111;
+    end else if (is_srli_comb) begin
+      alu_op_comb = 4'b1000;
     end else begin
       alu_op_comb = 4'b0000;
     end
 
-    alu_src_comb_1 = is_lui_comb || is_auipc_comb;
-    alu_src_comb_2 = is_add_comb || is_lui_comb || is_auipc_comb;
+    alu_src_comb_1 = !(is_lui_comb || is_auipc_comb || is_jtype_comb);
+    alu_src_comb_2 = is_rtype_comb;
 
     if (is_lb_comb || is_sb_comb) begin
       mem_sel_comb = 4'b0001;
-    end else if (is_sw_comb) begin
+    end else if (is_sw_comb || is_lw_comb) begin
       mem_sel_comb = 4'b0011;
     end else begin
       mem_sel_comb = 4'b0000;
@@ -219,17 +228,26 @@ module id_controller #(
     // rf_rdata_a_o = rf_rdata_a_reg;
     if (is_lui_comb) begin
       rf_rdata_a_o = 32'b0;
-    end else if (is_auipc_comb) begin
+    end else if (is_auipc_comb || is_jtype_comb) begin
       rf_rdata_a_o = pc_now_i;
     end else begin
       rf_rdata_a_o = rf_rdata_a_reg;
     end
-    rf_rdata_b_o = rf_rdata_b_reg;
+    if (is_jtype_comb) begin
+      rf_rdata_b_o = 32'b100;
+    end else begin
+      rf_rdata_b_o = rf_rdata_b_reg;
+    end
     imm_o = imm_reg;
     rs1_o = rs1_reg;
     rs2_o = rs2_reg;
     rd_o = rd_reg;
-    pc_now_o = pc_now_reg;
+    // pc_now_o = pc_now_reg;
+    if (is_jalr_comb) begin
+      pc_now_o = rf_rdata_a;
+    end else begin
+      pc_now_o = pc_now_reg;
+    end
 
     alu_op_o = alu_op_reg;
     alu_src_o_1 = alu_src_reg_1;
@@ -259,7 +277,7 @@ module id_controller #(
       alu_src_reg_1 <= 1'b0;
       alu_src_reg_2 <= 1'b0;
 
-      branch_reg <= 1'b0;
+      branch_reg <= 2'b0;
       mem_read_reg <= 1'b0;
       mem_write_reg <= 1'b0;
       mem_sel_reg <= 4'b0000;
@@ -282,7 +300,7 @@ module id_controller #(
       alu_src_reg_1 <= 1'b0;
       alu_src_reg_2 <= 1'b0;
 
-      branch_reg <= 1'b0;
+      branch_reg <= 2'b0;
       mem_read_reg <= 1'b0;
       mem_write_reg <= 1'b0;
       mem_sel_reg <= 4'b0000;
@@ -303,14 +321,22 @@ module id_controller #(
       alu_src_reg_1 <= alu_src_comb_1;
       alu_src_reg_2 <= alu_src_comb_2;
 
-      branch_reg <= is_beq_comb;
-      mem_read_reg <= is_lb_comb;
+      if (is_beq_comb) begin
+        branch_reg <= 2'b01;
+      end else if (is_bne_comb) begin
+        branch_reg <= 2'b10;
+      end else if (is_jtype_comb) begin
+        branch_reg <= 2'b11;
+      end else begin
+        branch_reg <= 2'b00;
+      end
+      mem_read_reg <= is_lb_comb || is_lw_comb;
       mem_write_reg <= (is_sb_comb || is_sw_comb);
       mem_sel_reg <= mem_sel_comb;
 
-      mem_to_reg_reg <= is_lb_comb;
-      reg_write_reg <= (is_add_comb || is_addi_comb || is_andi_comb || is_lb_comb || is_lui_comb);
-      imm_to_reg_reg <= is_lui_comb;
+      mem_to_reg_reg <= is_lb_comb || is_lw_comb;
+      reg_write_reg <= (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb);
+      imm_to_reg_reg <= 1'b0;
 
       // forwarding
       exe_rdata_a_hazard_o <= exe_rdata_a_hazard_i;

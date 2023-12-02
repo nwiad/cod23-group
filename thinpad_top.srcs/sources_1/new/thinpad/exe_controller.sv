@@ -15,10 +15,11 @@ module exe_controller #(
 
     // EXE control
     input wire [3:0] alu_op_i,
-    input wire alu_src_i, // 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
+    input wire alu_src_i_1, // 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
+    input wire alu_src_i_2, // 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
 
     // MEM control
-    input wire branch_i,
+    input wire [1:0] branch_i,
     input wire mem_read_i,
     input wire mem_write_i,
     input wire [3:0] mem_sel_i,
@@ -98,16 +99,20 @@ module exe_controller #(
     // forwarding
 
     // alu_operand1
-    if (exe_rdata_a_hazard_i) begin
-      alu_operand1 = alu_result_reg;
-    end else if (mem_rdata_a_hazard_i) begin
-      alu_operand1 = rdata_from_mem_i;
-    end else begin
+    if (alu_src_i_1) begin
+      if (exe_rdata_a_hazard_i) begin
+        alu_operand1 = alu_result_reg;
+      end else if (mem_rdata_a_hazard_i) begin
+        alu_operand1 = rdata_from_mem_i;
+      end else begin
+        alu_operand1 = rf_rdata_a_i;
+      end
+    end else begin  // operand_1 is imm
       alu_operand1 = rf_rdata_a_i;
     end
 
     // alu_operand2
-    if (alu_src_i) begin
+    if (alu_src_i_2) begin
       if (exe_rdata_b_hazard_i) begin
         alu_operand2 = alu_result_reg;
       end else if (mem_rdata_b_hazard_i) begin
@@ -116,11 +121,15 @@ module exe_controller #(
         alu_operand2 = rf_rdata_b_i;
       end
     end else begin  // operand_2 is imm
-      alu_operand2 = imm_i;
+      if (branch_i == 2'b11) begin
+        alu_operand2 = 32'b100;
+      end else begin
+        alu_operand2 = imm_i;
+      end
     end
     alu_op = alu_op_i;
 
-    branch_eq = branch_i && (rf_rdata_a_i == rf_rdata_b_i);
+    branch_eq = (branch_i == 2'b11) || ((branch_i == 2'b01) && (rf_rdata_a_i == rf_rdata_b_i)) || ((branch_i == 2'b10) && (rf_rdata_a_i != rf_rdata_b_i));
   end
 
   always_comb begin
