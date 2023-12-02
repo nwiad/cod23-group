@@ -30,7 +30,7 @@ module wb_arbiter_2 #
     parameter ADDR_WIDTH = 32,                    // width of address bus in bits
     parameter SELECT_WIDTH = (DATA_WIDTH/8),      // width of word select bus (1, 2, 4, or 8)
     parameter ARB_TYPE_ROUND_ROBIN = 0,           // select round robin arbitration
-    parameter ARB_LSB_HIGH_PRIORITY = 1           // LSB priority selection
+    parameter ARB_LSB_HIGH_PRIORITY = 0           // LSB priority selection
 )
 (
     input  wire                    clk,

@@ -108,12 +108,14 @@ module exe_controller #(
 
     // alu_operand2
     if (alu_src_i) begin
-      alu_operand2 = rf_rdata_b_i;
-    end else if (exe_rdata_b_hazard_i) begin
-      alu_operand2 = alu_result_reg;
-    end else if (mem_rdata_b_hazard_i) begin
-      alu_operand2 = rdata_from_mem_i;
-    end else begin
+      if (exe_rdata_b_hazard_i) begin
+        alu_operand2 = alu_result_reg;
+      end else if (mem_rdata_b_hazard_i) begin
+        alu_operand2 = rdata_from_mem_i;
+      end else begin
+        alu_operand2 = rf_rdata_b_i;
+      end
+    end else begin  // operand_2 is imm
       alu_operand2 = imm_i;
     end
     alu_op = alu_op_i;
