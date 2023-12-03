@@ -28,7 +28,10 @@ module wb_controller #(
     // WB -> ID
     output reg [31:0] rf_wdata_o,
     output reg [4:0]  rf_waddr_o,
-    output reg rf_we_o
+    output reg rf_we_o,
+
+    // forwarding
+    output reg rdata_from_wb_o
 );
   // outputs are bounded to these regs
   reg [31:0] rf_wdata_reg;
@@ -38,6 +41,7 @@ module wb_controller #(
   logic [31:0] writeback_data_comb;
   always_comb begin
     writeback_data_comb = mem_to_reg_i ? sram_rdata_i : (imm_to_reg_i ? imm_i : alu_result_i);
+    rdata_from_wb_o = mem_to_reg_i ? sram_rdata_i : (imm_to_reg_i ? imm_i : alu_result_i);
   end
 
   always_comb begin

@@ -75,8 +75,8 @@ module thinpad_master #(
   logic [3:0] ID_EXE_mem_sel;
   logic ID_EXE_mem_to_reg, ID_EXE_reg_write, ID_EXE_imm_to_reg;
   // forwarding
-  logic EXE_rdata_a_hazard_in, EXE_rdata_b_hazard_in, MEM_rdata_a_hazard_in, MEM_rdata_b_hazard_in;
-  logic EXE_rdata_a_hazard_out, EXE_rdata_b_hazard_out, MEM_rdata_a_hazard_out, MEM_rdata_b_hazard_out;
+  logic EXE_rdata_a_hazard_in, EXE_rdata_b_hazard_in, MEM_rdata_a_hazard_in, MEM_rdata_b_hazard_in, WB_rdata_a_hazard_in, WB_rdata_b_hazard_in;
+  logic EXE_rdata_a_hazard_out, EXE_rdata_b_hazard_out, MEM_rdata_a_hazard_out, MEM_rdata_b_hazard_out, WB_rdata_a_hazard_out, WB_rdata_b_hazard_out;
   id_controller u_id_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -106,10 +106,15 @@ module thinpad_master #(
     .exe_rdata_b_hazard_i(EXE_rdata_b_hazard_in),
     .mem_rdata_a_hazard_i(MEM_rdata_a_hazard_in),
     .mem_rdata_b_hazard_i(MEM_rdata_b_hazard_in),
+    .wb_rdata_a_hazard_i(WB_rdata_a_hazard_in),
+    .wb_rdata_b_hazard_i(WB_rdata_b_hazard_in),
+
     .exe_rdata_a_hazard_o(EXE_rdata_a_hazard_out),
     .exe_rdata_b_hazard_o(EXE_rdata_b_hazard_out),
     .mem_rdata_a_hazard_o(MEM_rdata_a_hazard_out),
     .mem_rdata_b_hazard_o(MEM_rdata_b_hazard_out),
+    .wb_rdata_a_hazard_o(WB_rdata_a_hazard_out),
+    .wb_rdata_b_hazard_o(WB_rdata_b_hazard_out),
 
     .branch_o(ID_EXE_branch),
     .mem_read_o(ID_EXE_mem_read),
@@ -133,6 +138,7 @@ module thinpad_master #(
   logic EXE_MEM_mem_to_reg, EXE_MEM_reg_write, EXE_MEM_imm_to_reg;
   logic exe_is_load;
   logic [31:0] rdata_from_mem;
+  logic [31:0] rdata_from_wb;
   logic [31:0] EXE_MEM_pc_now;
   exe_controller u_exe_controller (
     .clk_i(clk_i),
@@ -165,8 +171,11 @@ module thinpad_master #(
     .exe_rdata_b_hazard_i(EXE_rdata_b_hazard_out),
     .mem_rdata_a_hazard_i(MEM_rdata_a_hazard_out),
     .mem_rdata_b_hazard_i(MEM_rdata_b_hazard_out),
+    .wb_rdata_a_hazard_i(WB_rdata_a_hazard_out),
+    .wb_rdata_b_hazard_i(WB_rdata_b_hazard_out),
     .exe_is_load_o(exe_is_load),
     .rdata_from_mem_i(rdata_from_mem),
+    .rdata_from_wb_i(rdata_from_wb),
     
     .alu_result_o(EXE_MEM_alu_result),
     .rf_rdata_b_o(EXE_MEM_rf_rdata_b),
@@ -245,6 +254,7 @@ module thinpad_master #(
     .imm_to_reg_i(MEM_WB_imm_to_reg),
     .sram_rdata_i(MEM_WB_sram_rdata),
     .alu_result_i(MEM_WB_alu_result),
+    .rdata_from_wb_o(rdata_from_wb),
     .rd_i(MEM_WB_rd),
     .imm_i(MEM_WB_imm),
     .pc_now_i(MEM_WB_pc_now),
@@ -262,6 +272,7 @@ module thinpad_master #(
     .id_rs2_i(IF_ID_rs2),
     .exe_rd_i(ID_EXE_rd),
     .mem_rd_i(EXE_MEM_rd),
+    .wb_rd_i(MEM_WB_rd),
     .exe_branch_i(EXE_MEM_flush_out),
     .exe_is_load_i(exe_is_load),
     .IF_wb_ack_i(IF_wb_ack_i),
@@ -279,7 +290,9 @@ module thinpad_master #(
     .exe_rdata_a_hazard_o(EXE_rdata_a_hazard_in),
     .exe_rdata_b_hazard_o(EXE_rdata_b_hazard_in),
     .mem_rdata_a_hazard_o(MEM_rdata_a_hazard_in),
-    .mem_rdata_b_hazard_o(MEM_rdata_b_hazard_in)
+    .mem_rdata_b_hazard_o(MEM_rdata_b_hazard_in),
+    .wb_rdata_a_hazard_o(WB_rdata_a_hazard_in),
+    .wb_rdata_b_hazard_o(WB_rdata_b_hazard_in)
   );
 
   // always_comb begin    

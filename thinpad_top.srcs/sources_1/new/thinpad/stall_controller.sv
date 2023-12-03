@@ -11,6 +11,7 @@ module stall_controller (
   input wire [4:0] id_rs2_i,
   input wire [4:0] exe_rd_i,    // ID段需要写的寄存器
   input wire [4:0] mem_rd_i,    // MEM段需要写的寄存器
+  input wire [4:0] wb_rd_i,     // WB段需要写的寄存器
 
   input wire exe_branch_i,       // EXE段检测出是否需要跳转
   input wire exe_is_load_i,      // 当前EXE段是否是load指令
@@ -40,7 +41,10 @@ module stall_controller (
   output reg exe_rdata_b_hazard_o,
 
   output reg mem_rdata_a_hazard_o,
-  output reg mem_rdata_b_hazard_o
+  output reg mem_rdata_b_hazard_o,
+
+  output reg wb_rdata_a_hazard_o,
+  output reg wb_rdata_b_hazard_o
 
 );
 
@@ -58,6 +62,8 @@ always_comb begin
   exe_rdata_b_hazard_o = ((exe_rd_i != 5'b00000) && (id_rs2_i == exe_rd_i));
   mem_rdata_a_hazard_o = ((mem_rd_i != 5'b00000) && (id_rs1_i == mem_rd_i));
   mem_rdata_b_hazard_o = ((mem_rd_i != 5'b00000) && (id_rs2_i == mem_rd_i));
+  wb_rdata_a_hazard_o = ((wb_rd_i != 5'b00000) && (id_rs1_i == wb_rd_i));
+  wb_rdata_b_hazard_o = ((wb_rd_i != 5'b00000) && (id_rs2_i == wb_rd_i));
 end
 
 

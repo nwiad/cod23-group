@@ -42,11 +42,15 @@ module id_controller #(
     input reg exe_rdata_b_hazard_i,
     input reg mem_rdata_a_hazard_i,
     input reg mem_rdata_b_hazard_i,
+    input reg wb_rdata_a_hazard_i,
+    input reg wb_rdata_b_hazard_i,
 
     output reg exe_rdata_a_hazard_o,
     output reg exe_rdata_b_hazard_o,
     output reg mem_rdata_a_hazard_o,
     output reg mem_rdata_b_hazard_o,
+    output reg wb_rdata_a_hazard_o,
+    output reg wb_rdata_b_hazard_o,
 
     // MEM control
     output reg [2:0] branch_o, // for IF
@@ -351,6 +355,8 @@ module id_controller #(
       exe_rdata_b_hazard_o <= exe_rdata_b_hazard_i;
       mem_rdata_a_hazard_o <= mem_rdata_a_hazard_i;
       mem_rdata_b_hazard_o <= mem_rdata_b_hazard_i;
+      wb_rdata_a_hazard_o <= wb_rdata_a_hazard_i;
+      wb_rdata_b_hazard_o <= wb_rdata_b_hazard_i;
     end
   end
 

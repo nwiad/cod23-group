@@ -44,10 +44,13 @@ module exe_controller #(
     input wire exe_rdata_b_hazard_i, 
     input wire mem_rdata_a_hazard_i,
     input wire mem_rdata_b_hazard_i,
+    input wire wb_rdata_a_hazard_i,
+    input wire wb_rdata_b_hazard_i,
 
     output reg exe_is_load_o,
 
     input wire [31:0] rdata_from_mem_i,
+    input wire [31:0] rdata_from_wb_i,
 
     // EXE -> MEM
     output reg [31:0] alu_result_o,
@@ -86,6 +89,8 @@ module exe_controller #(
   logic [31:0] alu_operand1, alu_operand2;
   logic [3:0] alu_op;
   logic [31:0] alu_result;
+
+  logic [31:0] rf_rdata_a_real, rf_rdata_b_real;
   alu32 if_alu32 (
     .alu_a(alu_operand1),
     .alu_b(alu_operand2),
@@ -105,6 +110,8 @@ module exe_controller #(
         alu_operand1 = alu_result_reg;
       end else if (mem_rdata_a_hazard_i) begin
         alu_operand1 = rdata_from_mem_i;
+      end else if (wb_rdata_a_hazard_i) begin
+        alu_operand1 = rdata_from_wb_i;
       end else begin
         alu_operand1 = rf_rdata_a_i;
       end
@@ -118,6 +125,8 @@ module exe_controller #(
         alu_operand2 = alu_result_reg;
       end else if (mem_rdata_b_hazard_i) begin
         alu_operand2 = rdata_from_mem_i;
+      end else if (wb_rdata_b_hazard_i) begin
+        alu_operand2 = rdata_from_wb_i;
       end else begin
         alu_operand2 = rf_rdata_b_i;
       end
@@ -130,7 +139,27 @@ module exe_controller #(
     end
     alu_op = alu_op_i;
 
-    branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_i == rf_rdata_b_i)) || ((branch_i == 3'b010) && (rf_rdata_a_i != rf_rdata_b_i));
+    if (exe_rdata_a_hazard_i) begin
+      rf_rdata_a_real = alu_result_reg;
+    end else if (mem_rdata_a_hazard_i) begin
+      rf_rdata_a_real = rdata_from_mem_i;
+    end else if (wb_rdata_a_hazard_i) begin
+      rf_rdata_a_real = rdata_from_wb_i;
+    end else begin
+      rf_rdata_a_real = rf_rdata_a_i;
+    end
+
+    if (exe_rdata_b_hazard_i) begin
+      rf_rdata_b_real = alu_result_reg;
+    end else if (mem_rdata_b_hazard_i) begin
+      rf_rdata_b_real = rdata_from_mem_i;
+    end else if (wb_rdata_b_hazard_i) begin
+      rf_rdata_b_real = rdata_from_wb_i;
+    end else begin
+      rf_rdata_b_real = rf_rdata_b_i;
+    end
+
+    branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
   end
 
   always_comb begin
@@ -180,12 +209,14 @@ module exe_controller #(
         rf_rdata_b_reg <= alu_result_reg;
       end else if (mem_rdata_b_hazard_i) begin
         rf_rdata_b_reg <= rdata_from_mem_i;
-      end else begin
+      end else if (wb_rdata_b_hazard_i) begin
+        rf_rdata_b_reg <= rdata_from_wb_i;
+      end begin
         rf_rdata_b_reg <= rf_rdata_b_i;
       end
       // rf_rdata_b_reg <= rf_rdata_b_i;
       rd_reg <= rd_i;
-      if(branch_i == 3'b100) begin
+      if (branch_i == 3'b100) begin
         pc_result_reg <= rf_rdata_a_i + imm_i;
       end else begin
         pc_result_reg <= pc_now_i + imm_i;
