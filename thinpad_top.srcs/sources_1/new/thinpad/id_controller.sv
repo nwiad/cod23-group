@@ -195,7 +195,7 @@ module id_controller #(
     if (is_lb_comb || is_sb_comb) begin
       mem_sel_comb = 4'b0001;
     end else if (is_sw_comb || is_lw_comb) begin
-      mem_sel_comb = 4'b0011;
+      mem_sel_comb = 4'b1111;
     end else begin
       mem_sel_comb = 4'b0000;
     end
@@ -316,7 +316,11 @@ module id_controller #(
       imm_reg <= imm;
       rs1_reg <= rs1_comb;
       rs2_reg <= rs2_comb;
-      rd_reg <= rd_comb;
+      if (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb) begin
+        rd_reg <= rd_comb;
+      end else begin
+        rd_reg <= 5'b0;
+      end
       pc_now_reg <= pc_now_i;
 
       alu_op_reg <= alu_op_comb;
@@ -339,7 +343,7 @@ module id_controller #(
       mem_sel_reg <= mem_sel_comb;
 
       mem_to_reg_reg <= is_lb_comb || is_lw_comb;
-      reg_write_reg <= (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb);
+      reg_write_reg <= (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb);
       imm_to_reg_reg <= 1'b0;
 
       // forwarding
