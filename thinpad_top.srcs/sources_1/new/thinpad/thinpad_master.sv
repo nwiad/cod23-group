@@ -31,6 +31,7 @@ module thinpad_master #(
   // IF logic & IF/ID regs
   logic IF_ID_stall_in, IF_ID_bubble_in;
   logic IF_ID_stall_out, IF_ID_flush_out;
+  logic IF_cache_hit;
   logic [31:0] EXE_MEM_pc_result;
   logic [31:0] IF_ID_inst;
   logic [31:0] IF_ID_pc_now;
@@ -42,6 +43,7 @@ module thinpad_master #(
     .bubble_i(IF_ID_bubble_in),
     .stall_o(IF_ID_stall_out), // 1 while wishbone request is pending
     .flush_o(IF_ID_flush_out), // 0
+    .cache_hit_o(IF_cache_hit),
     .wb_cyc_o(IF_wb_cyc_o),
     .wb_stb_o(IF_wb_stb_o),
     .wb_ack_i(IF_wb_ack_i),
@@ -200,7 +202,7 @@ module thinpad_master #(
   logic [4:0] MEM_WB_rd;
   logic [31:0] MEM_WB_imm;
   logic MEM_WB_mem_to_reg, MEM_WB_reg_write, MEM_WB_imm_to_reg;
-  logic MEM_WB_pc_now;
+  logic [31:0] MEM_WB_pc_now;
   mem_controller u_mem_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -276,6 +278,7 @@ module thinpad_master #(
     .exe_branch_i(EXE_MEM_flush_out),
     .exe_is_load_i(exe_is_load),
     .IF_wb_ack_i(IF_wb_ack_i),
+    .IF_cache_hit_i(IF_cache_hit),
     .MEM_wb_ack_i(MEM_wb_ack_i),
 
     .stall_if_o(IF_ID_stall_in),

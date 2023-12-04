@@ -19,6 +19,7 @@ module stall_controller (
   // 还有IF和MEM的ack
 
   input wire IF_wb_ack_i,
+  input wire IF_cache_hit_i,
   input wire MEM_wb_ack_i,
 
   // 模块输出：
@@ -112,7 +113,7 @@ always_comb begin
   if (flush_exe_i) begin  // 需要首先检查是否flush
     stall_if_o = 0;
     bubble_if_o = 1;
-  end else if (IF_wb_ack_i) begin
+  end else if (IF_wb_ack_i || IF_cache_hit_i) begin
     stall_if_o = 0;
     bubble_if_o = 0;
   end else if (stall_id_i || stall_mem_i) begin  // ID段检测到数据冲突，或者MEM段还没有完成
