@@ -42,11 +42,15 @@ module id_controller #(
     input reg exe_rdata_b_hazard_i,
     input reg mem_rdata_a_hazard_i,
     input reg mem_rdata_b_hazard_i,
+    input reg wb_rdata_a_hazard_i,
+    input reg wb_rdata_b_hazard_i,
 
     output reg exe_rdata_a_hazard_o,
     output reg exe_rdata_b_hazard_o,
     output reg mem_rdata_a_hazard_o,
     output reg mem_rdata_b_hazard_o,
+    output reg wb_rdata_a_hazard_o,
+    output reg wb_rdata_b_hazard_o,
 
     // MEM control
     output reg [2:0] branch_o, // for IF
@@ -202,6 +206,12 @@ module id_controller #(
       alu_op_comb = 4'b0111;
     end else if (is_srli_comb) begin
       alu_op_comb = 4'b1000;
+    end else if (is_pcnt_comb) begin
+      alu_op_comb = 4'b1011;
+    end else if (is_minu_comb) begin
+      alu_op_comb = 4'b1100;
+    end else if (is_sbclr_comb) begin
+      alu_op_comb = 4'b1101;
     end else begin
       alu_op_comb = 4'b0000;
     end
@@ -317,7 +327,7 @@ module id_controller #(
     end else begin
       rf_rdata_a_reg <= rf_rdata_a;
       // rf_rdata_b_reg <= rf_rdata_b;
-      if (is_lui_comb || is_pcnt_comb) begin
+      if (is_lui_comb) begin
         rf_rdata_c_reg <= 32'b0;
       end else if (is_auipc_comb || is_jtype_comb || is_jalr_comb) begin
         rf_rdata_c_reg <= pc_now_i;
@@ -374,6 +384,8 @@ module id_controller #(
       exe_rdata_b_hazard_o <= exe_rdata_b_hazard_i;
       mem_rdata_a_hazard_o <= mem_rdata_a_hazard_i;
       mem_rdata_b_hazard_o <= mem_rdata_b_hazard_i;
+      wb_rdata_a_hazard_o <= wb_rdata_a_hazard_i;
+      wb_rdata_b_hazard_o <= wb_rdata_b_hazard_i;
     end
   end
 
