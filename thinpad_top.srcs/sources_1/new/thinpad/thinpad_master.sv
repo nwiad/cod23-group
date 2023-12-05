@@ -242,12 +242,13 @@ module thinpad_master #(
   );
 
   // WB logic
+  logic WB_stall_in, WB_bubble_in;
   logic WB_stall_out, WB_flush_out;
   wb_controller u_wb_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
-    .stall_i(1'b0),
-    .bubble_i(1'b0),
+    .stall_i(WB_stall_in),
+    .bubble_i(WB_bubble_in),
     .stall_o(WB_stall_out),
     .flush_o(WB_flush_out),
 
@@ -289,6 +290,8 @@ module thinpad_master #(
     .bubble_exe_o(EXE_MEM_bubble_in),
     .stall_mem_o(MEM_WB_stall_in),
     .bubble_mem_o(MEM_WB_bubble_in),
+    .stall_wb_o(WB_stall_in),
+    .bubble_wb_o(WB_bubble_in),
 
     .exe_rdata_a_hazard_o(EXE_rdata_a_hazard_in),
     .exe_rdata_b_hazard_o(EXE_rdata_b_hazard_in),

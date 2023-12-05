@@ -91,6 +91,9 @@ module exe_controller #(
   logic [31:0] alu_result;
 
   logic [31:0] rf_rdata_a_real, rf_rdata_b_real;
+
+  logic [31:0] alu_operand1_reg, alu_operand2_reg;
+  logic last_stall;
   alu32 if_alu32 (
     .alu_a(alu_operand1),
     .alu_b(alu_operand2),
@@ -100,44 +103,15 @@ module exe_controller #(
 
   logic branch_eq;
 
+  always_ff @(posedge clk_i) begin
+    last_stall <= stall_i;
+    alu_operand1_reg <= alu_operand1;
+    alu_operand2_reg <= alu_operand2;
+  end
+
   always_comb begin
     exe_is_load_o = mem_read_i;
     // forwarding
-
-    // alu_operand1
-    if (alu_src_i_1) begin
-      if (exe_rdata_a_hazard_i) begin
-        alu_operand1 = alu_result_reg;
-      end else if (mem_rdata_a_hazard_i) begin
-        alu_operand1 = rdata_from_mem_i;
-      end else if (wb_rdata_a_hazard_i) begin
-        alu_operand1 = rdata_from_wb_i;
-      end else begin
-        alu_operand1 = rf_rdata_a_i;
-      end
-    end else begin  // operand_1 is imm
-      alu_operand1 = rf_rdata_c_i;
-    end
-
-    // alu_operand2
-    if (alu_src_i_2) begin
-      if (exe_rdata_b_hazard_i) begin
-        alu_operand2 = alu_result_reg;
-      end else if (mem_rdata_b_hazard_i) begin
-        alu_operand2 = rdata_from_mem_i;
-      end else if (wb_rdata_b_hazard_i) begin
-        alu_operand2 = rdata_from_wb_i;
-      end else begin
-        alu_operand2 = rf_rdata_b_i;
-      end
-    end else begin  // operand_2 is imm
-      if ((branch_i == 3'b100) || (branch_i == 3'b011)) begin
-        alu_operand2 = 32'b100;
-      end else begin
-        alu_operand2 = imm_i;
-      end
-    end
-    alu_op = alu_op_i;
 
     if (exe_rdata_a_hazard_i) begin
       rf_rdata_a_real = alu_result_reg;
@@ -158,6 +132,29 @@ module exe_controller #(
     end else begin
       rf_rdata_b_real = rf_rdata_b_i;
     end
+
+    // alu_operand1
+    if (last_stall) begin
+      alu_operand1 = alu_operand1_reg;
+    end else if (alu_src_i_1) begin
+      alu_operand1 = rf_rdata_a_real;
+    end else begin  // operand_1 is imm
+      alu_operand1 = rf_rdata_c_i;
+    end
+
+    // alu_operand2
+    if (last_stall) begin
+      alu_operand2 = alu_operand2_reg;
+    end else if (alu_src_i_2) begin
+      alu_operand2 = rf_rdata_b_real;
+    end else begin  // operand_2 is imm
+      if ((branch_i == 3'b100) || (branch_i == 3'b011)) begin
+        alu_operand2 = 32'b100;
+      end else begin
+        alu_operand2 = imm_i;
+      end
+    end
+    alu_op = alu_op_i;
 
     branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
   end
@@ -205,15 +202,16 @@ module exe_controller #(
       // won'b be flushed ?
     end else begin
       alu_result_reg <= alu_result;
-      if (exe_rdata_b_hazard_i) begin
-        rf_rdata_b_reg <= alu_result_reg;
-      end else if (mem_rdata_b_hazard_i) begin
-        rf_rdata_b_reg <= rdata_from_mem_i;
-      end else if (wb_rdata_b_hazard_i) begin
-        rf_rdata_b_reg <= rdata_from_wb_i;
-      end begin
-        rf_rdata_b_reg <= rf_rdata_b_i;
-      end
+      rf_rdata_b_reg <= rf_rdata_b_real;
+      // if (exe_rdata_b_hazard_i) begin
+      //   rf_rdata_b_reg <= alu_result_reg;
+      // end else if (mem_rdata_b_hazard_i) begin
+      //   rf_rdata_b_reg <= rdata_from_mem_i;
+      // end else if (wb_rdata_b_hazard_i) begin
+      //   rf_rdata_b_reg <= rdata_from_wb_i;
+      // end begin
+      //   rf_rdata_b_reg <= rf_rdata_b_i;
+      // end
       // rf_rdata_b_reg <= rf_rdata_b_i;
       rd_reg <= rd_i;
       if (branch_i == 3'b100) begin

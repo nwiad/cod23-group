@@ -92,7 +92,7 @@ module if_controller #(
         wb_stb_o = 1'b0;
       end
       STATE_PENDING: begin
-        if (hit == 1'b1) begin
+        if (hit == 1'b1 || stall_i) begin
           stall_o = 1'b0;
           wb_cyc_o = 1'b0;
           wb_stb_o = 1'b0;
