@@ -136,7 +136,7 @@ module if_controller #(
       hit_reg <= 1'b0;
     end else if (stall_i) begin
       // do nothing
-    end else if (bubble_i) begin // insert bubble while waiting for bus response
+    end else if (bubble_i || (pc_src_i && refetch == 2'b0)) begin // insert bubble while waiting for bus response
       inst_reg <= 32'h0000_0013;
       if (state == STATE_READY) begin
         state <= STATE_PENDING;
