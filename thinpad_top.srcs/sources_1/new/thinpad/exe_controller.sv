@@ -217,7 +217,7 @@ module exe_controller #(
       // rf_rdata_b_reg <= rf_rdata_b_i;
       rd_reg <= rd_i;
       if (branch_i == 3'b100) begin
-        pc_result_reg <= rf_rdata_a_i + imm_i;
+        pc_result_reg <= rf_rdata_a_real + imm_i;
       end else begin
         pc_result_reg <= pc_now_i + imm_i;
       end
