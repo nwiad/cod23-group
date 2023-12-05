@@ -121,6 +121,12 @@ module id_controller #(
   logic is_jal_comb;
   //Stype
   logic is_sb_comb, is_sw_comb;
+
+  //special instructions：PCNT, MINU, SBCLR
+  // integer bit_counter;
+  logic is_pcnt_comb, is_minu_comb, is_sbclr_comb;
+  // logic [5:0] 1bit_num_comb;
+
   logic [4:0] rd_comb, rs1_comb, rs2_comb;
   logic [3:0] alu_op_comb;
   logic alu_src_comb_1, alu_src_comb_2;
@@ -134,6 +140,12 @@ module id_controller #(
     is_utype_comb = (inst_i[6:0] == 7'b001_0111) || (inst_i[6:0] == 7'b011_0111);
     is_stype_comb = (inst_i[6:0] == 7'b010_0011);
     is_btype_comb = (inst_i[6:0] == 7'b110_0011);
+
+    is_pcnt_comb = (is_itype_comb && (inst_i[14:12] == 3'b001)) && (inst_i[31:25] == 7'b011_0000);
+    
+    is_minu_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b110)) && (inst_i[31:25] == 7'b000_0101);
+
+    is_sbclr_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b001)) && (inst_i[31:25] == 7'b010_0100);
 
     //ADD   0000000SSSSSsssss000ddddd0110011
     is_add_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b000));
@@ -160,13 +172,13 @@ module id_controller #(
     //LW    iiiiiiiiiiiisssss010ddddd0000011
     is_lw_comb   = (is_load_comb && (inst_i[14:12] == 3'b010));
     //OR    0000000SSSSSsssss110ddddd0110011
-    is_or_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b110));
+    is_or_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b110)) && (inst_i[31:25] == 7'b000_0000);
     //ORI   iiiiiiiiiiiisssss110ddddd0010011
     is_ori_comb  = (is_itype_comb && (inst_i[14:12] == 3'b110));
     //SB    iiiiiiiSSSSSsssss000iiiii0100011
     is_sb_comb   = (is_stype_comb && (inst_i[14:12] == 3'b000));
     //SLLI  0000000iiiiisssss001ddddd0010011
-    is_slli_comb   = (is_itype_comb && (inst_i[14:12] == 3'b001));
+    is_slli_comb   = (is_itype_comb && (inst_i[14:12] == 3'b001) && (inst_i[31:25] == 7'b000_0000));
     //SRLI  0000000iiiiisssss101ddddd0010011
     is_srli_comb   = (is_itype_comb && (inst_i[14:12] == 3'b101));
     //SW    iiiiiiiSSSSSsssss010iiiii0100011
@@ -176,6 +188,11 @@ module id_controller #(
     rd_comb  = inst_i[11:7];
     rs1_comb = inst_i[19:15];
     rs2_comb = inst_i[24:20];
+
+    // 1bit_num_comb = 0;
+    // for (bit_counter = 0; bit_counter < 32; bit_counter++) begin
+    //   1bit_num_comb = 1bit_num_comb + rf_rdata_a[bit_counter];
+    // end
 
     if (is_add_comb || is_addi_comb || is_lb_comb || is_lw_comb || is_sb_comb || is_sw_comb || is_utype_comb || is_jtype_comb || is_jalr_comb) begin
       alu_op_comb = 4'b0001;
@@ -189,6 +206,12 @@ module id_controller #(
       alu_op_comb = 4'b0111;
     end else if (is_srli_comb) begin
       alu_op_comb = 4'b1000;
+    end else if (is_pcnt_comb) begin
+      alu_op_comb = 4'b1011;
+    end else if (is_minu_comb) begin
+      alu_op_comb = 4'b1100;
+    end else if (is_sbclr_comb) begin
+      alu_op_comb = 4'b1101;
     end else begin
       alu_op_comb = 4'b0000;
     end
@@ -318,6 +341,12 @@ module id_controller #(
       end
 
       imm_reg <= imm;
+      // if (is_pcnt_comb) begin
+      //   imm_reg <= 1bit_num_comb;
+      // end else begin
+      //   imm_reg <= imm;
+      // end
+
       rs1_reg <= rs1_comb;
       rs2_reg <= rs2_comb;
       if (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb) begin
