@@ -247,8 +247,8 @@ module thinpad_master #(
   wb_controller u_wb_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
-    .stall_i(WB_stall_in),
-    .bubble_i(WB_bubble_in),
+    .stall_i(1'b0),
+    .bubble_i(1'b0),
     .stall_o(WB_stall_out),
     .flush_o(WB_flush_out),
 
