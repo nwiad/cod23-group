@@ -14,5 +14,8 @@
 `define ALU_SRL 4'b1000
 `define ALU_SRA 4'b1001
 `define ALU_ROL 4'b1010
+`define ALU_PCNT 4'b1011
+`define ALU_MIN 4'b1100
+`define ALU_SBCLR 4'b1101
 
 `define PC_INIT 32'h8000_0000
