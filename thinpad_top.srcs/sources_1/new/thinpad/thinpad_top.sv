@@ -96,11 +96,12 @@ module thinpad_top (
                        // 后级电路复位信号应当由它生成（见下）
   );
 
-  logic reset_of_clk10M;
+//   logic reset_of_clk10M;
+  logic reset_of_clk20M;
   // 异步复位，同步释放，将 locked 信号转为后级电路的复位 reset_of_clk10M
-  always_ff @(posedge clk_10M or negedge locked) begin
-    if (~locked) reset_of_clk10M <= 1'b1;
-    else reset_of_clk10M <= 1'b0;
+  always_ff @(posedge clk_20M or negedge locked) begin
+    if (~locked) reset_of_clk20M <= 1'b1;
+    else reset_of_clk20M <= 1'b0;
   end
 
   /* =========== Demo code end =========== */
@@ -109,7 +110,7 @@ module thinpad_top (
   logic sys_rst;
 
   assign sys_clk = clk_20M;
-  assign sys_rst = reset_of_clk10M;
+  assign sys_rst = reset_of_clk20M;
 
   // 本实验不使用 CPLD 串口，禁用防止总线冲突
   assign uart_rdn = 1'b1;
