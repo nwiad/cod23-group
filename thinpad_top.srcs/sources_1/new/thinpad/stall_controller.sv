@@ -113,10 +113,13 @@ end
 
 always_comb begin
   // 检查if_id段是否需要stall/bubble
-  if (flush_exe_i) begin  // 需要首先检查是否flush
+  if (stall_mem_i) begin
+    stall_if_o = 1;
+    bubble_if_o = 0;
+  end else if (flush_exe_i) begin  // 需要首先检查是否flush
     stall_if_o = 0;
     bubble_if_o = 1;
-  end else if (stall_id_i || stall_mem_i) begin  // ID段检测到数据冲突，或者MEM段还没有完成
+  end else if (stall_id_i) begin  // ID段检测到数据冲突，或者MEM段还没有完成
     stall_if_o = 1;
     bubble_if_o = 0;
   end else if (IF_wb_ack_i || IF_cache_hit_i) begin
@@ -131,12 +134,12 @@ always_comb begin
   end
 
   // 检查id_exe段是否需要stall/bubble
-  if (stall_id_i || flush_exe_i) begin  // ID段检测到数据冲突，
-    stall_id_o = 0;
-    bubble_id_o = 1;
-  end else if (stall_mem_i) begin  // MEM还没有完成
+  if (stall_mem_i) begin
     stall_id_o = 1;
     bubble_id_o = 0;
+  end else if (stall_id_i || flush_exe_i) begin  // ID段检测到数据冲突，
+    stall_id_o = 0;
+    bubble_id_o = 1;
   end else begin
     stall_id_o = 0;
     bubble_id_o = 0;
