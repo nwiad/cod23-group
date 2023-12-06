@@ -14,7 +14,10 @@ module regfile32 (
 reg [31:0] rf [31:0];
 always_ff @(posedge clk) begin
     if (reset) begin
-        rf[0] <= 32'h0000_0000;
+        // rf[0] <= 32'h0000_0000;
+        for (int i = 0; i < 32; i = i + 1) begin
+            rf[i] <= 32'h0000_0000;
+        end
     end else begin
         if ((rf_we == 1) && (rf_waddr != 5'b0)) begin
             rf[rf_waddr] <= rf_wdata;

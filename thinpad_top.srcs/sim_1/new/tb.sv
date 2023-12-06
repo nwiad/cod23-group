@@ -46,8 +46,8 @@ module tb;
   wire uart_tsre;  // 数据发�?�完毕标�?
 
   // Windows �?要注意路径分隔符的转义，例如 "D:\\foo\\bar.bin"
-  // parameter BASE_RAM_INIT_FILE = "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\test.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�?
-  parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin"; // dwn
+  parameter BASE_RAM_INIT_FILE = "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\test.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�?
+  // parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin"; // dwn 
   parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
 
@@ -74,6 +74,7 @@ module tb;
     // #10000;
     // uart.pc_send_byte(8'h33); // ASCII '3'
     #8000000 $finish;
+    // #400000 $finish; // dwn
   end
 
   // 待测试用户设�?

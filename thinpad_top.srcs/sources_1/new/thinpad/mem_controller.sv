@@ -89,7 +89,6 @@ module mem_controller #(
         wb_cyc_o = 1'b0;
         wb_stb_o = 1'b0;
       end
-
       STATE_PENDING: begin
         if (mem_read_i) begin // lb
           stall_o = 1'b1;
@@ -159,7 +158,7 @@ module mem_controller #(
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b0;
       imm_to_reg_reg <= 1'b0;
-      state <= STATE_READY;
+      state <= STATE_PENDING;
     end else if (stall_i) begin
       // do nothing
     end else if (bubble_i) begin // insert bubble while waiting for bus response
@@ -171,6 +170,7 @@ module mem_controller #(
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b1;
       imm_to_reg_reg <= 1'b0;
+      state <= STATE_PENDING;
     end else begin
       case (state)
         STATE_READY: begin
