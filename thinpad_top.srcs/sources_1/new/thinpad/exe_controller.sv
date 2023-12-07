@@ -175,7 +175,7 @@ module exe_controller #(
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
-    if ((branch_eq && !ID_take_predict_i) || (!branch_eq && ID_take_predict_i)) begin
+    if ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) begin
       flush_o = 1'b1;
     end else begin
       flush_o = 1'b0;
@@ -239,7 +239,7 @@ module exe_controller #(
         pc_result_reg <= pc_now_i + imm_i;
       end
 
-      if (!branch_eq && ID_take_predict_i) begin
+      if (EXE_is_branch_o && !branch_eq && ID_take_predict_i) begin
         pc_result_for_IF_o <= pc_now_i + 4;
       end else if (branch_i == 3'b100) begin
         pc_result_for_IF_o <= rf_rdata_a_real + imm_i;
@@ -248,7 +248,7 @@ module exe_controller #(
       end
       imm_reg <= imm_i;
 
-      branch_reg <= (branch_eq && !ID_take_predict_i) || (!branch_eq && ID_take_predict_i);
+      branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
       mem_read_reg <= mem_read_i;
       mem_write_reg <= mem_write_i;
       mem_sel_reg <= mem_sel_i;

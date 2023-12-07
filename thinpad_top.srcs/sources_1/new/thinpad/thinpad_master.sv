@@ -38,6 +38,7 @@ module thinpad_master #(
   logic [4:0] IF_ID_rs1, IF_ID_rs2;
   logic [31:0] IF_pc_now, IF_pc_predicted;
   logic IF_take_predict_in, IF_take_predict_out;
+  logic IF_is_bubble;
   if_controller u_if_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -64,7 +65,8 @@ module thinpad_master #(
     .IF_pc_now(IF_pc_now),
     .IF_pc_predicted(IF_pc_predicted),
     .IF_take_predict_i(IF_take_predict_in),
-    .IF_take_predict_o(IF_take_predict_out)
+    .IF_take_predict_o(IF_take_predict_out),
+    .IF_is_bubble_o(IF_is_bubble)
   );
   
   // ID logic & ID/EXE regs
@@ -330,6 +332,7 @@ module thinpad_master #(
     .EXE_is_branch_i(ID_is_branch),
     .EXE_need_branch_i(branch_eq),
     .EXE_pc_result_i(EXE_pc_result_comb),
+    .ID_is_bubble_i(IF_is_bubble),
     .IF_pc_o(IF_pc_predicted),
     .IF_take_predict_o(IF_take_predict_in)
   );

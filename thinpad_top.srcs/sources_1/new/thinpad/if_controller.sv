@@ -39,7 +39,8 @@ module if_controller #(
     output reg [31:0] IF_pc_now,        /* 这周期本来应该读的pc */
     input wire [31:0] IF_pc_predicted,  /* 经过predictor预测后的pc */
     input wire IF_take_predict_i,       /* 是否采取预测 */
-    output reg IF_take_predict_o
+    output reg IF_take_predict_o,
+    output reg IF_is_bubble_o
 );
   // reg [31:0] pc_reg;
   // outputs are bounded to these regs
@@ -60,6 +61,7 @@ module if_controller #(
   logic [1:0]  refetch;
   logic [31:0] refetch_pc;
   logic [31:0] cache_pc_comb;
+  
   always_comb begin
     pc_plus_4_comb = pc_now_reg + 32'h0000_0004;
     IF_pc_now = pc_now_reg + 32'h0000_0004;
@@ -153,6 +155,7 @@ module if_controller #(
     end else if (bubble_i || (pc_src_i && refetch == 2'b0)) begin // insert bubble while waiting for bus response
       inst_reg <= 32'h0000_0013;
       IF_take_predict_o <= IF_take_predict_i;
+      IF_is_bubble_o <= 1'b1;
       if (state == STATE_READY) begin
         state <= STATE_PENDING;
       end
@@ -165,6 +168,7 @@ module if_controller #(
           if (refetch == 2'b0) begin
             pc_now_reg <= pc_next_comb;
             IF_take_predict_o <= IF_take_predict_i;
+            IF_is_bubble_o <= 1'b0;
             if (hit_reg == 1'b1) begin
               inst_reg <= cached_inst;
             end else begin
@@ -178,6 +182,7 @@ module if_controller #(
           end else if (refetch == 2'b10) begin
             pc_now_reg <= pc_next_comb;
             IF_take_predict_o <= IF_take_predict_i;
+            IF_is_bubble_o <= 1'b0;
             if (hit_reg == 1'b1) begin
               inst_reg <= cached_inst;
             end else begin
