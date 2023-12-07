@@ -69,7 +69,12 @@ module exe_controller #(
     // WB control
     output reg mem_to_reg_o,
     output reg reg_write_o,
-    output reg imm_to_reg_o
+    output reg imm_to_reg_o,
+
+    // fence.i
+    input wire clear_icache_i,
+    output reg clear_icache_o,
+    output reg [31:0] sync_refetch_pc_o
 );
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
@@ -84,6 +89,9 @@ module exe_controller #(
   reg mem_to_reg_reg, reg_write_reg, imm_to_reg_reg;
 
   reg [31:0] pc_now_reg;
+
+  reg clear_icache_reg;
+  reg [31:0] sync_refetch_pc_reg;
 
   // ALU
   logic [31:0] alu_operand1, alu_operand2;
@@ -161,7 +169,8 @@ module exe_controller #(
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
-    flush_o = branch_eq ? 1'b1 : 1'b0;
+    // flush_o = branch_eq ? 1'b1 : 1'b0;
+    flush_o = (branch_eq || clear_icache_i) ? 1'b1 : 1'b0;
 
     alu_result_o = alu_result_reg;
     rf_rdata_b_o = rf_rdata_b_reg;
@@ -178,6 +187,8 @@ module exe_controller #(
     mem_to_reg_o = mem_to_reg_reg;
     reg_write_o = reg_write_reg;
     imm_to_reg_o = imm_to_reg_reg;
+
+    clear_icache_o = clear_icache_reg;
   end
 
   always_ff @(posedge clk_i) begin
@@ -196,6 +207,9 @@ module exe_controller #(
       reg_write_reg <= 1'b0;
       imm_to_reg_reg <= 1'b0;
       pc_now_reg <= 32'h8000_0000;
+
+      clear_icache_reg <= 1'b0;
+      sync_refetch_pc_reg <= 32'h8000_0000;
     end else if (stall_i) begin
       // do nothing
     end else if (bubble_i) begin
@@ -230,6 +244,9 @@ module exe_controller #(
       reg_write_reg <= reg_write_i;
       imm_to_reg_reg <= imm_to_reg_i;
       pc_now_reg <= pc_now_i;
+
+      clear_icache_reg <= clear_icache_i;
+      sync_refetch_pc_reg <= pc_now_i + 32'h0000_0004;
     end
   end
 

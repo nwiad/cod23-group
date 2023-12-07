@@ -61,7 +61,10 @@ module id_controller #(
     // WB control
     output reg mem_to_reg_o,
     output reg reg_write_o,
-    output reg imm_to_reg_o
+    output reg imm_to_reg_o,
+
+    // fence.i
+    output reg clear_icache_o
 );
   // outputs are bounded to these regs
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg, rf_rdata_c_reg;
@@ -78,6 +81,8 @@ module id_controller #(
   reg [3:0] mem_sel_reg;
 
   reg mem_to_reg_reg, reg_write_reg, imm_to_reg_reg;
+
+  reg clear_icache_reg;
 
   // regfile
   logic [4:0] rf_raddr_a, rf_raddr_b;
@@ -127,6 +132,8 @@ module id_controller #(
   logic is_pcnt_comb, is_minu_comb, is_sbclr_comb;
   // logic [5:0] 1bit_num_comb;
 
+  logic is_fence_i_comb;
+
   logic [4:0] rd_comb, rs1_comb, rs2_comb;
   logic [3:0] alu_op_comb;
   logic alu_src_comb_1, alu_src_comb_2;
@@ -140,6 +147,8 @@ module id_controller #(
     is_utype_comb = (inst_i[6:0] == 7'b001_0111) || (inst_i[6:0] == 7'b011_0111);
     is_stype_comb = (inst_i[6:0] == 7'b010_0011);
     is_btype_comb = (inst_i[6:0] == 7'b110_0011);
+
+    is_fence_i_comb = (inst_i == 32'h0000_100F); // 0000_0000_0000_0000_0001_0000_0000_1111
 
     is_pcnt_comb = (is_itype_comb && (inst_i[14:12] == 3'b001)) && (inst_i[31:25] == 7'b011_0000);
     
@@ -275,6 +284,8 @@ module id_controller #(
     mem_to_reg_o = mem_to_reg_reg;
     reg_write_o = reg_write_reg;
     imm_to_reg_o = imm_to_reg_reg;
+
+    clear_icache_o = clear_icache_reg;
   end
 
   always_ff @(posedge clk_i) begin
@@ -300,6 +311,7 @@ module id_controller #(
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b0;
       imm_to_reg_reg <= 1'b0;
+      clear_icache_reg <= 1'b0;
     end else if (stall_i) begin
       // do nothing
     end else if (bubble_i) begin
@@ -324,6 +336,8 @@ module id_controller #(
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b1;
       imm_to_reg_reg <= 1'b0;
+
+      clear_icache_reg <= 1'b0;
     end else begin
       rf_rdata_a_reg <= rf_rdata_a;
       // rf_rdata_b_reg <= rf_rdata_b;
@@ -378,6 +392,8 @@ module id_controller #(
       mem_to_reg_reg <= is_lb_comb || is_lw_comb;
       reg_write_reg <= (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb);
       imm_to_reg_reg <= 1'b0;
+
+      clear_icache_reg <= is_fence_i_comb;
 
       // forwarding
       exe_rdata_a_hazard_o <= exe_rdata_a_hazard_i;

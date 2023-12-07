@@ -8,7 +8,10 @@ module icache (
     input wire [31:0] write_inst_i,
     input wire [31:0] pc_i,
     output reg [31:0] inst_o,
-    output reg hit_o
+    output reg hit_o,
+
+    // fence.i
+    input wire clear_icache_i
 );
 reg valid [0:63];
 reg [25:0] tag [0:63];
@@ -29,7 +32,7 @@ always_comb begin
 end
 
 always_ff @(posedge clk_i) begin
-    if (rst_i) begin
+    if (rst_i || clear_icache_i) begin
         for (int i = 0; i < 64; i = i + 1) begin
             cache[i] <= 32'h0000_0000;
             valid[i] <= 1'b0;

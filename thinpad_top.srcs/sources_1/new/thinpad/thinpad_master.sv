@@ -57,7 +57,11 @@ module thinpad_master #(
     .inst_o(IF_ID_inst),
     .pc_now_o(IF_ID_pc_now),
     .rs1_o(IF_ID_rs1),
-    .rs2_o(IF_ID_rs2)
+    .rs2_o(IF_ID_rs2),
+
+    // fence.i
+    .clear_icache_i(EXE_MEM_clear_icache),
+    .sync_refetch_pc_i(EXD_MEM_sync_refetch_pc)
   );
   
   // ID logic & ID/EXE regs
@@ -76,6 +80,7 @@ module thinpad_master #(
   logic [2:0] ID_EXE_branch;
   logic [3:0] ID_EXE_mem_sel;
   logic ID_EXE_mem_to_reg, ID_EXE_reg_write, ID_EXE_imm_to_reg;
+  logic ID_EXE_clear_icache;
   // forwarding
   logic EXE_rdata_a_hazard_in, EXE_rdata_b_hazard_in, MEM_rdata_a_hazard_in, MEM_rdata_b_hazard_in, WB_rdata_a_hazard_in, WB_rdata_b_hazard_in;
   logic EXE_rdata_a_hazard_out, EXE_rdata_b_hazard_out, MEM_rdata_a_hazard_out, MEM_rdata_b_hazard_out, WB_rdata_a_hazard_out, WB_rdata_b_hazard_out;
@@ -124,7 +129,10 @@ module thinpad_master #(
     .mem_sel_o(ID_EXE_mem_sel),
     .mem_to_reg_o(ID_EXE_mem_to_reg),
     .reg_write_o(ID_EXE_reg_write),
-    .imm_to_reg_o(ID_EXE_imm_to_reg)
+    .imm_to_reg_o(ID_EXE_imm_to_reg),
+
+    // fence.i
+    .clear_icache_o(ID_EXE_clear_icache)
   );
 
   // EXE logic & EXE/MEM regs
@@ -142,6 +150,8 @@ module thinpad_master #(
   logic [31:0] rdata_from_mem;
   logic [31:0] rdata_from_wb;
   logic [31:0] EXE_MEM_pc_now;
+  logic EXE_MEM_clear_icache;
+  logic [31:0] EXD_MEM_sync_refetch_pc;
   exe_controller u_exe_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -191,7 +201,12 @@ module thinpad_master #(
     .mem_sel_o(EXE_MEM_mem_sel),
     .mem_to_reg_o(EXE_MEM_mem_to_reg),
     .reg_write_o(EXE_MEM_reg_write),
-    .imm_to_reg_o(EXE_MEM_imm_to_reg)
+    .imm_to_reg_o(EXE_MEM_imm_to_reg),
+
+    // fence.i
+    .clear_icache_i(ID_EXE_clear_icache),
+    .clear_icache_o(EXE_MEM_clear_icache),
+    .sync_refetch_pc_o(EXD_MEM_sync_refetch_pc)
   );
 
   // MEM logic & MEM/WB regs
@@ -300,18 +315,5 @@ module thinpad_master #(
     .wb_rdata_a_hazard_o(WB_rdata_a_hazard_in),
     .wb_rdata_b_hazard_o(WB_rdata_b_hazard_in)
   );
-
-  // always_comb begin    
-
-
-  // end
-
-  // always_ff @(posedge clk_i) begin
-  //   if (rst_i) begin
-      
-  //   end else begin
-
-  //   end
-  // end
 
 endmodule
