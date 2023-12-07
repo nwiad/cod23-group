@@ -42,14 +42,14 @@ module branch_predictor (
     ID_tag_comb = ID_pc_i[31:6];
     EXE_index_comb = EXE_pc_i[5:0];
     EXE_tag_comb = EXE_pc_i[31:6];
-    hit = btb_valid[ID_index_comb] && (btb_tag[ID_index_comb] == ID_tag_comb) && ID_is_branch_i;
-    if (hit && btb_state[ID_index_comb] == STATE_TAKEN) begin
+    hit = btb_valid[ID_index_comb] && (btb_tag[ID_index_comb] == ID_tag_comb) && ID_is_branch_i && btb_state[ID_index_comb] == STATE_TAKEN;
+    if (hit) begin
       /* 只有上一状态为接受时，才采取分支预测 */
       IF_pc_o = btb_pc[ID_index_comb];
     end else begin
-      IF_pc_o = IF_pc_i;
+      IF_pc_o = 32'h0000_0000;
     end
-    IF_take_predict_o = hit && btb_state[ID_index_comb] == STATE_TAKEN;
+    IF_take_predict_o = hit;
   end
 
   always_ff@ (posedge clk_i) begin
@@ -71,9 +71,10 @@ module branch_predictor (
         end else begin
           btb_pc[EXE_index_comb] <= EXE_pc_result_i;
           btb_valid[EXE_index_comb] <= 1'b1;
-          btb_tag[EXE_index_comb] <= EXE_tag_comb;
+          // btb_tag[EXE_index_comb] <= EXE_tag_comb;
           btb_state[EXE_index_comb] <= EXE_need_branch_i ? STATE_TAKEN : STATE_NOT_TAKEN;
         end
+        btb_tag[EXE_index_comb] <= EXE_tag_comb;
       end
     end
   end

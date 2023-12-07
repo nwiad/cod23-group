@@ -62,8 +62,13 @@ module if_controller #(
   logic [31:0] cache_pc_comb;
   always_comb begin
     pc_plus_4_comb = pc_now_reg + 32'h0000_0004;
-    IF_pc_now = pc_plus_4_comb;
-    pc_plus_4_comb_pred = bubble_i ? pc_plus_4_comb : IF_pc_predicted;
+    IF_pc_now = pc_now_reg + 32'h0000_0004;
+    if (IF_take_predict_i) begin
+      pc_plus_4_comb_pred = IF_pc_predicted;
+    end else begin
+      pc_plus_4_comb_pred = pc_plus_4_comb;
+    end
+
     pc_next_comb = (refetch == 2'b10) ? refetch_pc : pc_plus_4_comb_pred;
     cache_pc_comb = (refetch != 2'b0) ? refetch_pc : pc_plus_4_comb_pred;
   end
