@@ -69,7 +69,14 @@ module exe_controller #(
     // WB control
     output reg mem_to_reg_o,
     output reg reg_write_o,
-    output reg imm_to_reg_o
+    output reg imm_to_reg_o,
+
+    // branch predition
+    input wire ID_take_predict_i,
+    output reg EXE_is_branch_o,
+    output reg branch_eq_o,
+    output reg [31:0] pc_result_comb_o,
+    output reg [31:0] pc_result_for_IF_o
 );
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
@@ -156,12 +163,24 @@ module exe_controller #(
     end
     alu_op = alu_op_i;
 
+    EXE_is_branch_o = (branch_i == 3'b100) || (branch_i == 3'b011) || (branch_i == 3'b001) || (branch_i == 3'b010);
     branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
+    branch_eq_o = branch_eq;
+    if (branch_i == 3'b100) begin
+      pc_result_comb_o = rf_rdata_a_real + imm_i;
+    end else begin
+      pc_result_comb_o = pc_now_i + imm_i;
+    end
   end
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
-    flush_o = branch_eq ? 1'b1 : 1'b0;
+    if ((branch_eq && !ID_take_predict_i) || (!branch_eq && ID_take_predict_i)) begin
+      flush_o = 1'b1;
+    end else begin
+      flush_o = 1'b0;
+    end
+    // flush_o = branch_eq ? 1'b1 : 1'b0;
 
     alu_result_o = alu_result_reg;
     rf_rdata_b_o = rf_rdata_b_reg;
@@ -219,9 +238,17 @@ module exe_controller #(
       end else begin
         pc_result_reg <= pc_now_i + imm_i;
       end
+
+      if (!branch_eq && ID_take_predict_i) begin
+        pc_result_for_IF_o <= pc_now_i + 4;
+      end else if (branch_i == 3'b100) begin
+        pc_result_for_IF_o <= rf_rdata_a_real + imm_i;
+      end else begin
+        pc_result_for_IF_o <= pc_now_i + imm_i;
+      end
       imm_reg <= imm_i;
 
-      branch_reg <= branch_eq;
+      branch_reg <= (branch_eq && !ID_take_predict_i) || (!branch_eq && ID_take_predict_i);
       mem_read_reg <= mem_read_i;
       mem_write_reg <= mem_write_i;
       mem_sel_reg <= mem_sel_i;

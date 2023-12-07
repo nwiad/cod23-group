@@ -61,7 +61,10 @@ module id_controller #(
     // WB control
     output reg mem_to_reg_o,
     output reg reg_write_o,
-    output reg imm_to_reg_o
+    output reg imm_to_reg_o,
+
+    // branch prediction
+    output reg ID_is_branch_o
 );
   // outputs are bounded to these regs
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg, rf_rdata_c_reg;
@@ -248,6 +251,8 @@ module id_controller #(
       inst_type = 3'b000;
     end
   end
+
+  assign ID_is_branch_o = is_beq_comb || is_bne_comb || is_jal_comb || is_jalr_comb;
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
