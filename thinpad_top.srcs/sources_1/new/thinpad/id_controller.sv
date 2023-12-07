@@ -134,6 +134,9 @@ module id_controller #(
 
   logic is_fence_i_comb;
 
+  logic is_lh_comb;
+  logic is_sh_comb;
+
   logic [4:0] rd_comb, rs1_comb, rs2_comb;
   logic [3:0] alu_op_comb;
   logic alu_src_comb_1, alu_src_comb_2;
@@ -147,6 +150,10 @@ module id_controller #(
     is_utype_comb = (inst_i[6:0] == 7'b001_0111) || (inst_i[6:0] == 7'b011_0111);
     is_stype_comb = (inst_i[6:0] == 7'b010_0011);
     is_btype_comb = (inst_i[6:0] == 7'b110_0011);
+
+    is_lh_comb = (is_load_comb && (inst_i[14:12] == 3'b001));
+
+    is_sh_comb = (is_stype_comb && (inst_i[14:12] == 3'b001));
 
     is_fence_i_comb = (inst_i == 32'h0000_100F); // 0000_0000_0000_0000_0001_0000_0000_1111
 
@@ -203,7 +210,7 @@ module id_controller #(
     //   1bit_num_comb = 1bit_num_comb + rf_rdata_a[bit_counter];
     // end
 
-    if (is_add_comb || is_addi_comb || is_lb_comb || is_lw_comb || is_sb_comb || is_sw_comb || is_utype_comb || is_jtype_comb || is_jalr_comb) begin
+    if (is_add_comb || is_addi_comb || is_lb_comb || is_lh_comb || is_lw_comb || is_sb_comb || is_sh_comb || is_sw_comb || is_utype_comb || is_jtype_comb || is_jalr_comb) begin
       alu_op_comb = 4'b0001;
     end else if (is_andi_comb || is_and_comb) begin
       alu_op_comb = 4'b0011;
@@ -230,6 +237,8 @@ module id_controller #(
 
     if (is_lb_comb || is_sb_comb) begin
       mem_sel_comb = 4'b0001;
+    end else if (is_lh_comb || is_sh_comb) begin
+      mem_sel_comb = 4'b0011;
     end else if (is_sw_comb || is_lw_comb) begin
       mem_sel_comb = 4'b1111;
     end else begin
@@ -385,11 +394,11 @@ module id_controller #(
       end else begin
         branch_reg <= 3'b000;
       end
-      mem_read_reg <= is_lb_comb || is_lw_comb;
-      mem_write_reg <= (is_sb_comb || is_sw_comb);
+      mem_read_reg <= is_lb_comb || is_lh_comb || is_lw_comb;
+      mem_write_reg <= (is_sb_comb || is_sh_comb || is_sw_comb);
       mem_sel_reg <= mem_sel_comb;
 
-      mem_to_reg_reg <= is_lb_comb || is_lw_comb;
+      mem_to_reg_reg <= is_lb_comb || is_lh_comb || is_lw_comb;
       reg_write_reg <= (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb);
       imm_to_reg_reg <= 1'b0;
 
