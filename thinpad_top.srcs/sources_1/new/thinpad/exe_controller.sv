@@ -189,6 +189,7 @@ module exe_controller #(
     imm_to_reg_o = imm_to_reg_reg;
 
     clear_icache_o = clear_icache_reg;
+    sync_refetch_pc_o = sync_refetch_pc_reg;
   end
 
   always_ff @(posedge clk_i) begin
