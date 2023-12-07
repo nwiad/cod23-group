@@ -36,9 +36,9 @@ module if_controller #(
     output reg [4:0] rs2_o,
 
     // branch prediction
-    output reg [31:0] IF_pc_now,       /* 这周期本来应该读的pc */
+    output reg [31:0] IF_pc_now,        /* 这周期本来应该读的pc */
     input wire [31:0] IF_pc_predicted,  /* 经过predictor预测后的pc */
-    input wire IF_take_predict_i,      /* 是否采取预测 */
+    input wire IF_take_predict_i,       /* 是否采取预测 */
     output reg IF_take_predict_o
 );
   // reg [31:0] pc_reg;
@@ -152,7 +152,7 @@ module if_controller #(
       // do nothing
     end else if (bubble_i || (pc_src_i && refetch == 2'b0)) begin // insert bubble while waiting for bus response
       inst_reg <= 32'h0000_0013;
-      IF_take_predict_o <= 1'b0;
+      IF_take_predict_o <= IF_take_predict_i;
       if (state == STATE_READY) begin
         state <= STATE_PENDING;
       end

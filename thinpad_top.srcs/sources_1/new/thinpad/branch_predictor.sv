@@ -49,7 +49,7 @@ module branch_predictor (
     end else begin
       IF_pc_o = 32'h0000_0000;
     end
-    IF_take_predict_o = 1'b0;  // test
+    IF_take_predict_o = hit;  // test
   end
 
   always_ff@ (posedge clk_i) begin
