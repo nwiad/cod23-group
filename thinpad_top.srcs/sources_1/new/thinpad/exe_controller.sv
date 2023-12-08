@@ -238,8 +238,7 @@ module exe_controller #(
       end else begin
         pc_result_reg <= pc_now_i + imm_i;
       end
-
-      if (EXE_is_branch_o && !branch_eq && ID_take_predict_i) begin
+      if (EXE_is_branch_o && !branch_eq) begin
         pc_result_for_IF_o <= pc_now_i + 4;
       end else if (branch_i == 3'b100) begin
         pc_result_for_IF_o <= rf_rdata_a_real + imm_i;
