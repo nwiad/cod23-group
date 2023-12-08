@@ -85,18 +85,11 @@ module branch_predictor (
       end
     end else begin
       if (EXE_is_branch_i) begin
-        if (btb_tag[EXE_index_comb] == EXE_tag_comb) begin
-          /* 当前存的就是现在EXE传递进来的指令 */
-          // TODO: 用拥有四个状态的状态机来实现
-          btb_pc[EXE_index_comb] <= EXE_pc_result_i;
-          btb_valid[EXE_index_comb] <= 1'b1;
-          btb_state[EXE_index_comb] <= EXE_need_branch_i === 1'b1 ? STATE_TAKEN : STATE_NOT_TAKEN;
-        end else begin
-          btb_pc[EXE_index_comb] <= EXE_pc_result_i;
-          btb_valid[EXE_index_comb] <= 1'b1;
-          // btb_tag[EXE_index_comb] <= EXE_tag_comb;
-          btb_state[EXE_index_comb] <= EXE_need_branch_i === 1'b1 ? STATE_TAKEN : STATE_NOT_TAKEN;
-        end
+        /* 当前存的就是现在EXE传递进来的指令 */
+        // TODO: 用拥有四个状态的状态机来实现
+        btb_pc[EXE_index_comb] <= EXE_pc_result_i;
+        btb_valid[EXE_index_comb] <= 1'b1;
+        btb_state[EXE_index_comb] <= EXE_need_branch_i === 1 ? STATE_TAKEN : STATE_NOT_TAKEN;
         btb_tag[EXE_index_comb] <= EXE_tag_comb;
       end
     end

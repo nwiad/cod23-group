@@ -109,6 +109,7 @@ module exe_controller #(
   );
 
   logic branch_eq;
+  logic branch_eq_X;
 
   always_ff @(posedge clk_i) begin
     last_stall <= stall_i;
@@ -166,6 +167,10 @@ module exe_controller #(
     EXE_is_branch_o = (branch_i == 3'b100) || (branch_i == 3'b011) || (branch_i == 3'b001) || (branch_i == 3'b010);
     branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
     branch_eq_o = branch_eq;
+    branch_eq_X = !(branch_eq === 0 || branch_eq === 1);
+    if (branch_eq_X) begin
+      branch_eq = 1'b0;
+    end
     if (branch_i == 3'b100) begin
       pc_result_comb_o = rf_rdata_a_real + imm_i;
     end else begin
@@ -175,7 +180,7 @@ module exe_controller #(
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
-    if ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) begin
+    if ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i) || branch_eq_X) begin
       flush_o = 1'b1;
     end else begin
       flush_o = 1'b0;
@@ -246,7 +251,12 @@ module exe_controller #(
         pc_result_for_IF_o <= pc_now_i + imm_i;
       end
       imm_reg <= imm_i;
-      branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
+      if (((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) === 1'b1 ||| ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) === 1'b0) begin
+        branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
+      end else begin
+        branch_reg <= 1'b1;
+      end
+      // branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
       mem_read_reg <= mem_read_i;
       mem_write_reg <= mem_write_i;
       mem_sel_reg <= mem_sel_i;
