@@ -50,12 +50,14 @@ module id_controller #(
     output reg alu_src_o_2, // reg2 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
 
     // forwarding
-    input reg exe_rdata_a_hazard_i,
-    input reg exe_rdata_b_hazard_i,
-    input reg mem_rdata_a_hazard_i,
-    input reg mem_rdata_b_hazard_i,
-    input reg wb_rdata_a_hazard_i,
-    input reg wb_rdata_b_hazard_i,
+    output reg [11:0] ID_csr_o,
+
+    input wire exe_rdata_a_hazard_i,
+    input wire exe_rdata_b_hazard_i,
+    input wire mem_rdata_a_hazard_i,
+    input wire mem_rdata_b_hazard_i,
+    input wire wb_rdata_a_hazard_i,
+    input wire wb_rdata_b_hazard_i,
 
     output reg exe_rdata_a_hazard_o,
     output reg exe_rdata_b_hazard_o,
@@ -63,6 +65,14 @@ module id_controller #(
     output reg mem_rdata_b_hazard_o,
     output reg wb_rdata_a_hazard_o,
     output reg wb_rdata_b_hazard_o,
+
+    input wire exe_csr_hazard_i,
+    input wire mem_csr_hazard_i,
+    input wire wb_csr_hazard_i,
+
+    output reg exe_csr_hazard_o,
+    output reg mem_csr_hazard_o,
+    output reg wb_csr_hazard_o,
 
     // MEM control
     output reg [2:0] branch_o, // for IF
@@ -373,6 +383,7 @@ module id_controller #(
     csr_write_o = csr_write_o_reg;
 
     clear_icache_o = clear_icache_reg;
+    ID_csr_o = rf_raddr_csr;
   end
 
   always_ff @(posedge clk_i) begin
@@ -520,6 +531,10 @@ module id_controller #(
       mem_rdata_b_hazard_o <= mem_rdata_b_hazard_i;
       wb_rdata_a_hazard_o <= wb_rdata_a_hazard_i;
       wb_rdata_b_hazard_o <= wb_rdata_b_hazard_i;
+
+      exe_csr_hazard_o <= exe_csr_hazard_i;
+      mem_csr_hazard_o <= mem_csr_hazard_i;
+      wb_csr_hazard_o <= wb_csr_hazard_i;
     end
   end
 

@@ -41,11 +41,11 @@ module exe_controller #(
     input wire [31:0] pc_now_i,
 
     // ID -> EXE : csr
-    output reg [31:0] rf_rdata_csr_i,
-    output reg [11:0] rf_raddr_csr_i,
-    output reg [31:0] rf_rdata_rs1_csr_i,
-    output reg [4:0] rf_raddr_rs1_csr_i,
-    output reg [1:0] alu_csr_op_i,
+    input wire [31:0] rf_rdata_csr_i,
+    input wire [11:0] rf_raddr_csr_i,
+    input wire [31:0] rf_rdata_rs1_csr_i,
+    input wire [4:0] rf_raddr_rs1_csr_i,
+    input wire [1:0] alu_csr_op_i,
 
     // forwarding
     input wire exe_rdata_a_hazard_i,  // data hazard
@@ -55,10 +55,19 @@ module exe_controller #(
     input wire wb_rdata_a_hazard_i,
     input wire wb_rdata_b_hazard_i,
 
+    input wire exe_csr_hazard_i, // csr hazard
+    input wire mem_csr_hazard_i,
+    input wire wb_csr_hazard_i,
+
     output reg exe_is_load_o,
+    
+    output reg [11:0] EXE_csr_o,
 
     input wire [31:0] rdata_from_mem_i,
     input wire [31:0] rdata_from_wb_i,
+
+    input wire [31:0] csr_from_mem_i,
+    input wire [31:0] csr_from_wb_i,
 
     // EXE -> MEM
     output reg [31:0] alu_result_o,
@@ -112,6 +121,7 @@ module exe_controller #(
   logic [31:0] alu_result;
 
   logic [31:0] rf_rdata_a_real, rf_rdata_b_real;
+  logic [31:0] csr_real;
 
   logic [31:0] alu_operand1_reg, alu_operand2_reg;
   logic last_stall;
@@ -164,6 +174,18 @@ module exe_controller #(
       rf_rdata_b_real = rf_rdata_b_i;
     end
 
+
+    if (exe_csr_hazard_i) begin
+      csr_real = alu_result_csr_reg;
+    end else if (mem_csr_hazard_i) begin
+      csr_real = csr_from_mem_i;
+    end else if (wb_csr_hazard_i) begin
+      csr_real = csr_from_wb_i;
+    end else begin
+      csr_real = rf_rdata_csr_i;
+    end
+    
+
     // alu_operand1
     if (last_stall) begin
       alu_operand1 = alu_operand1_reg;
@@ -192,14 +214,14 @@ module exe_controller #(
     if (last_stall) begin
       alu_csr_operand1 = alu_operand1_csr_reg;
     end else begin
-      alu_csr_operand1 = rf_raddr_rs1_csr_i;
+      alu_csr_operand1 = rf_rdata_a_real;
     end
 
     // alu_operand2
     if (last_stall) begin
       alu_csr_operand2 = alu_operand2_csr_reg;
     end else begin
-      alu_csr_operand2 = rf_raddr_csr_i;
+      alu_csr_operand2 = csr_real;
     end
     alu_op_csr = alu_csr_op_i;
 
@@ -213,12 +235,12 @@ module exe_controller #(
       alu_result_csr = alu_csr_operand1;
     end else if (alu_op_csr == 2'b01) begin
       alu_result_csr = alu_csr_operand2;
-      for(counter = 0 ; counter < 32 ; counter ++) begin
+      for (counter = 0 ; counter < 32 ; counter ++) begin
         alu_result_csr[counter] = 1;
       end
-    end else if (alu_op_csr == 2'b01) begin
+    end else if (alu_op_csr == 2'b10) begin
       alu_result_csr = alu_csr_operand2;
-      for(counter = 0 ; counter < 32 ; counter ++) begin
+      for (counter = 0 ; counter < 32 ; counter ++) begin
         alu_result_csr[counter] = 0;
       end
     end else begin
@@ -254,6 +276,7 @@ module exe_controller #(
 
     clear_icache_o = clear_icache_reg;
     sync_refetch_pc_o = sync_refetch_pc_reg;
+    EXE_csr_o = rf_raddr_csr_i;
   end
 
   always_ff @(posedge clk_i) begin

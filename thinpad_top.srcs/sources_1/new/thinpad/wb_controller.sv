@@ -40,7 +40,9 @@ module wb_controller #(
     output reg [11:0] rf_waddr_csr_o,
     output reg [31:0] rf_wdata_csr_o,
 
-    output reg [31:0] rdata_from_wb_o
+    output reg [31:0] rdata_from_wb_o,
+    output reg [31:0] csr_from_wb_o,
+    output reg [11:0] WB_csr_o
 );
   // outputs are bounded to these regs
   reg [31:0] rf_wdata_reg;
@@ -70,6 +72,8 @@ module wb_controller #(
     rf_wdata_csr_o = reg_to_csr_i ? alu_result_csr_i : 0;
     rf_waddr_csr_o = rd_csr_i;
     rf_we_csr_o = reg_to_csr_i;
+    WB_csr_o = rd_csr_i;
+    csr_from_wb_o = alu_result_csr_i;
   end
 
   always_ff @(posedge clk_i) begin

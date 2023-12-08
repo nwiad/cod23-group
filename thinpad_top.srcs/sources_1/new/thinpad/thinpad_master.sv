@@ -95,6 +95,11 @@ module thinpad_master #(
   logic EXE_rdata_a_hazard_in, EXE_rdata_b_hazard_in, MEM_rdata_a_hazard_in, MEM_rdata_b_hazard_in, WB_rdata_a_hazard_in, WB_rdata_b_hazard_in;
   logic EXE_rdata_a_hazard_out, EXE_rdata_b_hazard_out, MEM_rdata_a_hazard_out, MEM_rdata_b_hazard_out, WB_rdata_a_hazard_out, WB_rdata_b_hazard_out;
 
+  // csr
+  logic EXE_csr_hazard_in, MEM_csr_hazard_in, WB_csr_hazard_in;
+  logic EXE_csr_hazard_out, MEM_csr_hazard_out, WB_csr_hazard_out;
+  logic ID_csr;
+
   id_controller u_id_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -120,6 +125,7 @@ module thinpad_master #(
     .alu_src_o_2(ID_EXE_alu_src_2),
 
     //csr
+    .ID_csr_o(ID_csr),
     .rf_we_csr_i(WB_rf_csr_we),
     .rf_waddr_csr_i(WB_rf_csr_waddr),
     .rf_wdata_csr_i(WB_rf_csr_wdata),
@@ -143,6 +149,15 @@ module thinpad_master #(
     .mem_rdata_b_hazard_o(MEM_rdata_b_hazard_out),
     .wb_rdata_a_hazard_o(WB_rdata_a_hazard_out),
     .wb_rdata_b_hazard_o(WB_rdata_b_hazard_out),
+
+    .exe_csr_hazard_i(EXE_csr_hazard_in),
+    .mem_csr_hazard_i(MEM_csr_hazard_in),
+    .wb_csr_hazard_i(WB_csr_hazard_in),
+
+    .exe_csr_hazard_o(EXE_csr_hazard_out),
+    .mem_csr_hazard_o(MEM_csr_hazard_out),
+    .wb_csr_hazard_o(WB_csr_hazard_out),
+
 
     .branch_o(ID_EXE_branch),
     .mem_read_o(ID_EXE_mem_read),
@@ -171,11 +186,14 @@ module thinpad_master #(
   logic exe_is_load;
   logic [31:0] rdata_from_mem;
   logic [31:0] rdata_from_wb;
+  logic [31:0] csr_from_mem;
+  logic [31:0] csr_from_wb;
   logic [31:0] EXE_MEM_pc_now;
   logic EXE_MEM_clear_icache;
   logic [31:0] EXD_MEM_sync_refetch_pc;
 
   //csr
+  logic [11:0] EXE_csr;
   logic EXE_MEM_reg_to_csr;
   logic [31:0] EXE_MEM_alu_result_csr;
   logic [11:0] EXE_MEM_rd_csr;
@@ -224,10 +242,15 @@ module thinpad_master #(
     .mem_rdata_b_hazard_i(MEM_rdata_b_hazard_out),
     .wb_rdata_a_hazard_i(WB_rdata_a_hazard_out),
     .wb_rdata_b_hazard_i(WB_rdata_b_hazard_out),
+    .exe_csr_hazard_i(EXE_csr_hazard_out),
+    .mem_csr_hazard_i(MEM_csr_hazard_out),
+    .wb_csr_hazard_i(WB_csr_hazard_out),
     .exe_is_load_o(exe_is_load),
+    .EXE_csr_o(EXE_csr),
     .rdata_from_mem_i(rdata_from_mem),
     .rdata_from_wb_i(rdata_from_wb),
-    
+    .csr_from_mem_i(csr_from_mem),
+    .csr_from_wb_i(csr_from_wb),
     .alu_result_o(EXE_MEM_alu_result),
     .rf_rdata_b_o(EXE_MEM_rf_rdata_b),
     .rd_o(EXE_MEM_rd),
@@ -260,6 +283,7 @@ module thinpad_master #(
   logic [31:0] MEM_WB_pc_now;
 
   //csr
+  logic [11:0] MEM_csr;
   logic MEM_WB_reg_to_csr;
   logic [31:0] MEM_WB_alu_result_csr;
   logic [11:0] MEM_WB_rd_csr;
@@ -308,12 +332,15 @@ module thinpad_master #(
     .reg_write_o(MEM_WB_reg_write),
     .imm_to_reg_o(MEM_WB_imm_to_reg),
     .reg_to_csr_o(MEM_WB_reg_to_csr),
-    .rdata_from_mem_o(rdata_from_mem)
+    .rdata_from_mem_o(rdata_from_mem),
+    .MEM_csr_o(MEM_csr),
+    .csr_from_mem_o(csr_from_mem)
   );
 
   // WB logic
   logic WB_stall_in, WB_bubble_in;
   logic WB_stall_out, WB_flush_out;
+  logic [11:0] WB_csr;
   wb_controller u_wb_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -336,6 +363,8 @@ module thinpad_master #(
     .rf_we_csr_o(WB_rf_csr_we),
     .rf_waddr_csr_o(WB_rf_csr_waddr),
     .rf_wdata_csr_o(WB_rf_csr_wdata),
+    .csr_from_wb_o(csr_from_wb),
+    .WB_csr_o(WB_csr),
 
     .alu_result_csr_i(MEM_WB_alu_result_csr),
     .rd_csr_i(MEM_WB_rd_csr),
@@ -355,6 +384,12 @@ module thinpad_master #(
     .exe_rd_i(ID_EXE_rd),
     .mem_rd_i(EXE_MEM_rd),
     .wb_rd_i(MEM_WB_rd),
+
+    .id_csr_i(ID_csr),
+    .exe_csr_i(EXE_csr),
+    .mem_csr_i(MEM_csr),
+    .wb_csr_i(WB_csr)
+
     .exe_branch_i(EXE_MEM_flush_out),
     .exe_is_load_i(exe_is_load),
     .IF_wb_ack_i(IF_wb_ack_i),
@@ -377,7 +412,11 @@ module thinpad_master #(
     .mem_rdata_a_hazard_o(MEM_rdata_a_hazard_in),
     .mem_rdata_b_hazard_o(MEM_rdata_b_hazard_in),
     .wb_rdata_a_hazard_o(WB_rdata_a_hazard_in),
-    .wb_rdata_b_hazard_o(WB_rdata_b_hazard_in)
+    .wb_rdata_b_hazard_o(WB_rdata_b_hazard_in),
+
+    .exe_csr_hazard_o(EXE_csr_hazard_in),
+    .mem_csr_hazard_o(MEM_csr_hazard_in),
+    .wb_csr_hazard_o(WB_csr_hazard_in)
   );
 
 endmodule
