@@ -71,19 +71,16 @@ module exe_controller #(
     output reg reg_write_o,
     output reg imm_to_reg_o,
 
-<<<<<<< HEAD
     // fence.i
     input wire clear_icache_i,
     output reg clear_icache_o,
-    output reg [31:0] sync_refetch_pc_o
-=======
+    output reg [31:0] sync_refetch_pc_o,
     // branch predition
     input wire ID_take_predict_i,
     output reg EXE_is_branch_o,
     output reg branch_eq_o,
     output reg [31:0] pc_result_comb_o,
     output reg [31:0] pc_result_for_IF_o
->>>>>>> origin/branch-prediction
 );
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
@@ -190,17 +187,12 @@ module exe_controller #(
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
-<<<<<<< HEAD
-    // flush_o = branch_eq ? 1'b1 : 1'b0;
-    flush_o = (branch_eq || clear_icache_i) ? 1'b1 : 1'b0;
-=======
-    if ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i) || branch_eq_X) begin
+    if ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i) || branch_eq_X || clear_icache_i) begin
       flush_o = 1'b1;
     end else begin
       flush_o = 1'b0;
     end
     // flush_o = branch_eq ? 1'b1 : 1'b0;
->>>>>>> origin/branch-prediction
 
     alu_result_o = alu_result_reg;
     rf_rdata_b_o = rf_rdata_b_reg;

@@ -35,18 +35,15 @@ module if_controller #(
     output reg [4:0] rs1_o,
     output reg [4:0] rs2_o,
 
-<<<<<<< HEAD
     // fence.i
     input wire clear_icache_i,
-    input wire [31:0] sync_refetch_pc_i
-=======
+    input wire [31:0] sync_refetch_pc_i,
     // branch prediction
     output reg [31:0] IF_pc_now,        /* 这周期本来应该读的pc */
     input wire [31:0] IF_pc_predicted,  /* 经过predictor预测后的pc */
     input wire IF_take_predict_i,       /* 是否采取预测 */
     output reg IF_take_predict_o,
     output reg IF_is_bubble_o
->>>>>>> origin/branch-prediction
 );
   // reg [31:0] pc_reg;
   // outputs are bounded to these regs

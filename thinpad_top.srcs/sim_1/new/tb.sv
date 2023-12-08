@@ -273,24 +273,4 @@ module tb;
     end
   end
 
-  initial begin
-    // load user program
-    reg [31:0] user_array[0:1048575];
-    integer user_File_ID, n_File_Size;
-    user_File_ID = $fopen(`DWN, "rb");
-    if (!user_File_ID) begin
-      n_File_Size = 0;
-      $display("Failed to open user program init file");
-    end else begin
-      n_File_Size = $fread(user_array, user_File_ID);
-      n_File_Size /= 4;
-      $fclose(user_File_ID);
-    end
-    for (integer i = 0; i < n_File_Size; i++) begin
-      base1.mem_array0[i + `BASE_USER_INDEX] = user_array[i][24+:8];
-      base1.mem_array1[i + `BASE_USER_INDEX] = user_array[i][16+:8];
-      base2.mem_array0[i + `BASE_USER_INDEX] = user_array[i][8+:8];
-      base2.mem_array1[i + `BASE_USER_INDEX] = user_array[i][0+:8];
-    end
-  end
 endmodule

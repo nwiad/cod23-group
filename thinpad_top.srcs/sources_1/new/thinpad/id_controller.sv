@@ -63,16 +63,13 @@ module id_controller #(
     output reg reg_write_o,
     output reg imm_to_reg_o,
 
-<<<<<<< HEAD
     // fence.i
-    output reg clear_icache_o
-=======
+    output reg clear_icache_o,
     // branch prediction
     output reg [31:0] ID_pc_now_o,
     output reg ID_is_branch_o,
     output reg ID_is_jalr_o,
     output reg [31:0] ID_imm_o
->>>>>>> origin/branch-prediction
 );
   // outputs are bounded to these regs
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg, rf_rdata_c_reg;
