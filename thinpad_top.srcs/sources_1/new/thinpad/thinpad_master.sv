@@ -329,7 +329,7 @@ module thinpad_master #(
     .ID_is_branch_i(ID_is_branch),
     .IF_pc_i(IF_pc_now),
     .EXE_pc_i(ID_EXE_pc_now),
-    .EXE_is_branch_i(ID_is_branch),
+    .EXE_is_branch_i(EXE_is_branch),
     .EXE_need_branch_i(branch_eq),
     .EXE_pc_result_i(EXE_pc_result_comb),
     .ID_is_bubble_i(IF_is_bubble),
