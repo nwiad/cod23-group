@@ -46,6 +46,8 @@ module tb;
   wire uart_tsre;  // 数据发�?�完毕标�?
 
   // Windows �?要注意路径分隔符的转义，例如 "D:\\foo\\bar.bin"
+  `define BASE_USER_ADDR 32'h10_0000
+  `define BASE_USER_INDEX (`BASE_USER_ADDR / 4)
   `define DWN "D:\\rv-2023\\asmcode\\lab6.bin"
   `define DWN_FENCE_I "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\rvtests_simple\\rv32ui-p-fence_i.bin"
   `define DWN_LAB6_FENCE_I "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\lab6_fence_i.bin"
@@ -53,7 +55,7 @@ module tb;
   `define WJL "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\kernel-rv32-no16550.bin"
   // parameter BASE_RAM_INIT_FILE = "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\test.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�?
   // parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin";
-  parameter BASE_RAM_INIT_FILE = `DWN_LAB6_FENCE_I; // dwn
+  parameter BASE_RAM_INIT_FILE = `DWN_KERNEL_ONLINE; // dwn
   parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
 
@@ -68,17 +70,40 @@ module tb;
     reset_btn = 1;
     #100;
     reset_btn = 0;
-    // for (integer i = 0; i < 20; i = i + 1) begin
-    //   #100;  // 等待 100ns
-    //   push_btn = 1;  // 按下 push_btn 按钮
-    //   #100;  // 等待 100ns
-    //   push_btn = 0;  // 松开 push_btn 按钮
-    // end
+
+    #3500000;
+
+    $display("test D");
+    // send 'D' to uart
+    uart.pc_send_byte(8'h44); // ASCII 'D'
+    // send 0x80100000 to uart
+    #10000;
+    $display("send 0x00");
+    uart.pc_send_byte(8'h00);
+    #10000;
+    $display("send 0x00");
+    uart.pc_send_byte(8'h00);
+    #10000;
+    $display("send 0x10");
+    uart.pc_send_byte(8'h10);
+    #10000;
+    $display("send 0x80");
+    uart.pc_send_byte(8'h80);
+
+    // send 0x0000_0090 to uart
+    #10000;
+    $display("send 0x90");
+    uart.pc_send_byte(8'h90);
+    #10000;
+    $display("send 0x00");
+    uart.pc_send_byte(8'h00);
+    #10000;
+    $display("send 0x00");
+    uart.pc_send_byte(8'h00);
+    #10000;
+    $display("send 0x00");
+    uart.pc_send_byte(8'h00);
   
-    // // 模拟 PC 通过直连串口，向 FPGA 发�?�字�?
-    // uart.pc_send_byte(8'h32); // ASCII '2'
-    // #10000;
-    // uart.pc_send_byte(8'h33); // ASCII '3'
     #8000000 $finish;
     // #400000 $finish; // dwn
   end
@@ -247,6 +272,27 @@ module tb;
       ext1.mem_array1[i] = tmp_array[i][16+:8];
       ext2.mem_array0[i] = tmp_array[i][8+:8];
       ext2.mem_array1[i] = tmp_array[i][0+:8];
+    end
+  end
+
+  initial begin
+    // load user program
+    reg [31:0] user_array[0:1048575];
+    integer user_File_ID, n_File_Size;
+    user_File_ID = $fopen(`DWN, "rb");
+    if (!user_File_ID) begin
+      n_File_Size = 0;
+      $display("Failed to open user program init file");
+    end else begin
+      n_File_Size = $fread(user_array, user_File_ID);
+      n_File_Size /= 4;
+      $fclose(user_File_ID);
+    end
+    for (integer i = 0; i < n_File_Size; i++) begin
+      base1.mem_array0[i + `BASE_USER_INDEX] = user_array[i][24+:8];
+      base1.mem_array1[i + `BASE_USER_INDEX] = user_array[i][16+:8];
+      base2.mem_array0[i + `BASE_USER_INDEX] = user_array[i][8+:8];
+      base2.mem_array1[i + `BASE_USER_INDEX] = user_array[i][0+:8];
     end
   end
 endmodule
