@@ -388,7 +388,7 @@ module thinpad_master #(
     .id_csr_i(ID_csr),
     .exe_csr_i(EXE_csr),
     .mem_csr_i(MEM_csr),
-    .wb_csr_i(WB_csr)
+    .wb_csr_i(WB_csr),
 
     .exe_branch_i(EXE_MEM_flush_out),
     .exe_is_load_i(exe_is_load),

@@ -64,7 +64,7 @@ module mem_controller #(
     // forwarding
     output reg [31:0] rdata_from_mem_o,
     output reg [11:0] MEM_csr_o,
-    output reg [31:0] csr_from_mem_o,
+    output reg [31:0] csr_from_mem_o
 );
   // outputs are bounded to these regs
   reg [31:0] sram_rdata_reg;
