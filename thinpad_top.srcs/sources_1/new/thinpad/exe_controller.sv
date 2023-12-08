@@ -164,7 +164,7 @@ module exe_controller #(
     alu_op = alu_op_i;
 
     EXE_is_branch_o = (branch_i == 3'b100) || (branch_i == 3'b011) || (branch_i == 3'b001) || (branch_i == 3'b010);
-    branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real === rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real !== rf_rdata_b_real));
+    branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
     branch_eq_o = branch_eq;
     if (branch_i == 3'b100) begin
       pc_result_comb_o = rf_rdata_a_real + imm_i;
@@ -246,7 +246,6 @@ module exe_controller #(
         pc_result_for_IF_o <= pc_now_i + imm_i;
       end
       imm_reg <= imm_i;
-
       branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
       mem_read_reg <= mem_read_i;
       mem_write_reg <= mem_write_i;

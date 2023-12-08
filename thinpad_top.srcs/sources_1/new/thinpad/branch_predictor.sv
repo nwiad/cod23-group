@@ -60,15 +60,15 @@ module branch_predictor (
         IF_pc_o = btb_pc[ID_index_comb];
       end
     end else begin
-      IF_pc_o = 32'h0000_0000;
+      IF_pc_o = 32'h8000_0000;
     end
-    IF_take_predict_o = hit;  // test
+    IF_take_predict_o = hit;
   end
 
   always_ff@ (posedge clk_i) begin
     if (rst_i) begin
       hit_reg <= 1'b0;
-      IF_pc_o_reg <= 32'h0000_0000;
+      IF_pc_o_reg <= 32'h8000_0000;
     end else begin
       hit_reg <= hit;
       IF_pc_o_reg <= IF_pc_o;
@@ -78,7 +78,7 @@ module branch_predictor (
   always_ff@ (posedge clk_i) begin
     if (rst_i) begin
       for (int i = 0; i < 64; i = i + 1) begin
-        btb_pc[i] <= 32'h0000_0000;
+        btb_pc[i] <= 32'h8000_0000;
         btb_valid[i] <= 1'b0;
         btb_tag[i] <= 26'h0000_0000;
         btb_state[i] <= STATE_NOT_TAKEN;
@@ -90,12 +90,12 @@ module branch_predictor (
           // TODO: 用拥有四个状态的状态机来实现
           btb_pc[EXE_index_comb] <= EXE_pc_result_i;
           btb_valid[EXE_index_comb] <= 1'b1;
-          btb_state[EXE_index_comb] <= EXE_need_branch_i ? STATE_TAKEN : STATE_NOT_TAKEN;
+          btb_state[EXE_index_comb] <= EXE_need_branch_i === 1'b1 ? STATE_TAKEN : STATE_NOT_TAKEN;
         end else begin
           btb_pc[EXE_index_comb] <= EXE_pc_result_i;
           btb_valid[EXE_index_comb] <= 1'b1;
           // btb_tag[EXE_index_comb] <= EXE_tag_comb;
-          btb_state[EXE_index_comb] <= EXE_need_branch_i ? STATE_TAKEN : STATE_NOT_TAKEN;
+          btb_state[EXE_index_comb] <= EXE_need_branch_i === 1'b1 ? STATE_TAKEN : STATE_NOT_TAKEN;
         end
         btb_tag[EXE_index_comb] <= EXE_tag_comb;
       end
