@@ -28,6 +28,7 @@ module exe_controller #(
     input wire mem_to_reg_i,
     input wire reg_write_i,
     input wire imm_to_reg_i,
+    input reg reg_to_csr_i,
 
     // ID -> EXE
     input wire [31:0] rf_rdata_a_i,
@@ -38,6 +39,13 @@ module exe_controller #(
     input wire [4:0]  rs2_i,
     input wire [4:0]  rd_i,
     input wire [31:0] pc_now_i,
+
+    // ID -> EXE : csr
+    output reg [31:0] rf_rdata_csr_i,
+    output reg [11:0] rf_raddr_csr_i,
+    output reg [31:0] rf_rdata_rs1_csr_i,
+    output reg [4:0] rf_raddr_rs1_csr_i,
+    output reg [1:0] alu_csr_op_i,
 
     // forwarding
     input wire exe_rdata_a_hazard_i,  // data hazard
@@ -60,6 +68,10 @@ module exe_controller #(
     output reg [31:0] imm_o, // for lui
     output reg [31:0] pc_now_o, 
 
+    // EXE -> MEM : csr
+    output reg [31:0] alu_result_csr_o,
+    output reg [11:0] rd_csr_o,
+
     // MEM control
     output reg branch_o, // for IF
     output reg mem_read_o,
@@ -69,7 +81,13 @@ module exe_controller #(
     // WB control
     output reg mem_to_reg_o,
     output reg reg_write_o,
-    output reg imm_to_reg_o
+    output reg imm_to_reg_o,
+    output reg reg_to_csr_o,
+
+    // fence.i
+    input wire clear_icache_i,
+    output reg clear_icache_o,
+    output reg [31:0] sync_refetch_pc_o
 );
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
@@ -84,6 +102,9 @@ module exe_controller #(
   reg mem_to_reg_reg, reg_write_reg, imm_to_reg_reg;
 
   reg [31:0] pc_now_reg;
+
+  reg clear_icache_reg;
+  reg [31:0] sync_refetch_pc_reg;
 
   // ALU
   logic [31:0] alu_operand1, alu_operand2;
@@ -101,12 +122,22 @@ module exe_controller #(
     .alu_op(alu_op)
   );
 
+  // csr 
+  logic [31:0] alu_csr_operand1, alu_csr_operand2;
+  logic [31:0] alu_operand1_csr_reg, alu_operand2_csr_reg;
+  logic [1:0] alu_op_csr;
+  logic [31:0] alu_result_csr_reg, alu_result_csr;
+  logic [11:0] rd_csr_reg;
+  logic reg_to_csr_reg;
+
   logic branch_eq;
 
   always_ff @(posedge clk_i) begin
     last_stall <= stall_i;
     alu_operand1_reg <= alu_operand1;
     alu_operand2_reg <= alu_operand2;
+    alu_operand1_csr_reg <= alu_csr_operand1;
+    alu_operand2_csr_reg <= alu_csr_operand2;
   end
 
   always_comb begin
@@ -156,12 +187,49 @@ module exe_controller #(
     end
     alu_op = alu_op_i;
 
+    // csr
+    // alu_operand1
+    if (last_stall) begin
+      alu_csr_operand1 = alu_operand1_csr_reg;
+    end else begin
+      alu_csr_operand1 = rf_raddr_rs1_csr_i;
+    end
+
+    // alu_operand2
+    if (last_stall) begin
+      alu_csr_operand2 = alu_operand2_csr_reg;
+    end else begin
+      alu_csr_operand2 = rf_raddr_csr_i;
+    end
+    alu_op_csr = alu_csr_op_i;
+
     branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
+  end
+
+  //csr
+  integer counter;
+  always_comb begin
+    if (alu_op_csr == 2'b01) begin 
+      alu_result_csr = alu_csr_operand1;
+    end else if (alu_op_csr == 2'b01) begin
+      alu_result_csr = alu_csr_operand2;
+      for(counter = 0 ; counter < 32 ; counter ++) begin
+        alu_result_csr[counter] = 1;
+      end
+    end else if (alu_op_csr == 2'b01) begin
+      alu_result_csr = alu_csr_operand2;
+      for(counter = 0 ; counter < 32 ; counter ++) begin
+        alu_result_csr[counter] = 0;
+      end
+    end else begin
+      alu_result_csr = 0;
+    end
   end
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
-    flush_o = branch_eq ? 1'b1 : 1'b0;
+    // flush_o = branch_eq ? 1'b1 : 1'b0;
+    flush_o = (branch_eq || clear_icache_i) ? 1'b1 : 1'b0;
 
     alu_result_o = alu_result_reg;
     rf_rdata_b_o = rf_rdata_b_reg;
@@ -169,6 +237,10 @@ module exe_controller #(
     pc_result_o = pc_result_reg;
     imm_o = imm_reg;
     pc_now_o = pc_now_reg;
+
+    //csr
+    alu_result_csr_o = alu_result_csr_reg;
+    rd_csr_o = rd_csr_reg;
 
     branch_o = branch_reg;
     mem_read_o = mem_read_reg;
@@ -178,6 +250,10 @@ module exe_controller #(
     mem_to_reg_o = mem_to_reg_reg;
     reg_write_o = reg_write_reg;
     imm_to_reg_o = imm_to_reg_reg;
+    reg_to_csr_o = reg_to_csr_reg;
+
+    clear_icache_o = clear_icache_reg;
+    sync_refetch_pc_o = sync_refetch_pc_reg;
   end
 
   always_ff @(posedge clk_i) begin
@@ -188,6 +264,10 @@ module exe_controller #(
       pc_result_reg <= 32'h8000_0000;
       imm_reg <= 32'h0000_0000;
 
+      //csr
+      alu_result_csr_reg <= 32'h0000_0000;
+      rd_csr_reg <= 12'b0000_0000;
+
       branch_reg <= 1'b0;
       mem_read_reg <= 1'b0;
       mem_write_reg <= 1'b0;
@@ -195,7 +275,11 @@ module exe_controller #(
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b0;
       imm_to_reg_reg <= 1'b0;
+      reg_to_csr_reg <= 1'b0;
       pc_now_reg <= 32'h8000_0000;
+
+      clear_icache_reg <= 1'b0;
+      sync_refetch_pc_reg <= 32'h8000_0000;
     end else if (stall_i) begin
       // do nothing
     end else if (bubble_i) begin
@@ -221,6 +305,10 @@ module exe_controller #(
       end
       imm_reg <= imm_i;
 
+      //csr
+      alu_result_csr_reg <= alu_result_csr;
+      rd_csr_reg <= rf_raddr_csr_i;
+
       branch_reg <= branch_eq;
       mem_read_reg <= mem_read_i;
       mem_write_reg <= mem_write_i;
@@ -229,7 +317,11 @@ module exe_controller #(
       mem_to_reg_reg <= mem_to_reg_i;
       reg_write_reg <= reg_write_i;
       imm_to_reg_reg <= imm_to_reg_i;
+      reg_to_csr_reg <= reg_to_csr_i;
       pc_now_reg <= pc_now_i;
+
+      clear_icache_reg <= clear_icache_i;
+      sync_refetch_pc_reg <= pc_now_i + 32'h0000_0004;
     end
   end
 

@@ -33,7 +33,11 @@ module if_controller #(
     output reg [31:0] pc_now_o,
 
     output reg [4:0] rs1_o,
-    output reg [4:0] rs2_o
+    output reg [4:0] rs2_o,
+
+    // fence.i
+    input wire clear_icache_i,
+    input wire [31:0] sync_refetch_pc_i
 );
   // reg [31:0] pc_reg;
   // outputs are bounded to these regs
@@ -73,7 +77,10 @@ module if_controller #(
     .write_inst_i(write_inst),
     .pc_i(cache_pc_comb),
     .inst_o(cached_inst),
-    .hit_o(hit)
+    .hit_o(hit),
+
+    // fence.i
+    .clear_icache_i(clear_icache_i)
   );
 
   always_comb begin
@@ -126,6 +133,10 @@ module if_controller #(
     if (pc_src_i == 1'b1) begin
       refetch <= 2'b01;
       refetch_pc <= pc_result_i;
+    end
+    if (clear_icache_i == 1'b1) begin
+      refetch <= 2'b01;
+      refetch_pc <= sync_refetch_pc_i;
     end
     if (rst_i) begin
       state <= STATE_READY;

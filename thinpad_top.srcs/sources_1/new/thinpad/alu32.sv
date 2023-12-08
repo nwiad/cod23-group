@@ -34,6 +34,7 @@ always_comb begin
         `ALU_PCNT: alu_y = num_bits;
         `ALU_MIN: alu_y = (alu_a < alu_b) ? alu_a : alu_b;
         `ALU_SBCLR: alu_y = alu_a & ~(32'b1 << (32'b11111 & alu_b));
+        `ALU_SLTU: alu_y = (alu_a < alu_b) ? 1 : 0;
         default:  alu_y = 32'b0;
     endcase
 end

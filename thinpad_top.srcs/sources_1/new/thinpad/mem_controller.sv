@@ -32,6 +32,7 @@ module mem_controller #(
     input wire mem_to_reg_i,
     input wire reg_write_i,
     input wire imm_to_reg_i,
+    input wire reg_to_csr_i,
 
     // EXE -> MEM
     input wire [31:0] pc_now_i,
@@ -48,10 +49,17 @@ module mem_controller #(
     output reg [31:0] imm_o,
     output reg [31:0] pc_now_o,
 
+    // csr
+    input wire [31:0] alu_result_csr_i,
+    input wire [11:0] rd_csr_i,
+    output reg [31:0] alu_result_csr_o,
+    output reg [11:0] rd_csr_o,
+
     // WB control
     output reg mem_to_reg_o,
     output reg reg_write_o,
     output reg imm_to_reg_o,
+    output reg reg_to_csr_o,
 
     // forwarding
     output reg [31:0] rdata_from_mem_o
@@ -67,6 +75,11 @@ module mem_controller #(
   reg mem_read_reg;
 
   reg [31:0] pc_now_reg;
+
+  // csr
+  reg [31:0] alu_result_csr_reg;
+  reg [11:0] rd_csr_reg;
+  reg reg_to_csr_reg;
 
   typedef enum logic [2:0] { 
     STATE_READY = 0,
@@ -128,6 +141,11 @@ module mem_controller #(
     imm_o = imm_reg;
     pc_now_o = pc_now_reg;
 
+    //csr
+    alu_result_csr_o = alu_result_csr_reg;
+    rd_csr_o = rd_csr_reg;
+    reg_to_csr_o = reg_to_csr_reg;
+
     mem_to_reg_o = mem_to_reg_reg;
     reg_write_o = reg_write_reg;
     imm_to_reg_o = imm_to_reg_reg;
@@ -155,6 +173,11 @@ module mem_controller #(
       imm_reg <= 32'h0000_0000;
       pc_now_reg <= 32'h8000_0000;
 
+      //csr
+      alu_result_csr_reg <= 32'h0000_0000;
+      rd_csr_reg <= 12'b0000_0000;
+      reg_to_csr_reg <= 0;
+
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b0;
       imm_to_reg_reg <= 1'b0;
@@ -166,6 +189,11 @@ module mem_controller #(
       alu_result_reg <= 32'h0000_0000;
       rd_reg <= 5'b00000;
       imm_reg <= 32'h0000_0000;
+
+      //csr
+      alu_result_csr_reg <= 32'h0000_0000;
+      rd_csr_reg <= 12'b0000_0000;
+      reg_to_csr_reg <= 0;
 
       mem_to_reg_reg <= 1'b0;
       reg_write_reg <= 1'b1;
@@ -192,6 +220,11 @@ module mem_controller #(
           mem_to_reg_reg <= mem_to_reg_i;
           reg_write_reg <= reg_write_i;
           imm_to_reg_reg <= imm_to_reg_i;
+
+          //csr
+          alu_result_csr_reg <= alu_result_csr_i;
+          rd_csr_reg <= rd_csr_i;
+          reg_to_csr_reg <= reg_to_csr_i;
 
           mem_read_reg <= mem_read_i;
 
