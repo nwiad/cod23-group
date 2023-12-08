@@ -26,7 +26,6 @@ always_comb begin
     pc_tag_comb = pc_i[31:6];
     hit_o = valid[index_comb] && (tag[index_comb] == pc_tag_comb) && cache[index_comb] != 32'h0000_0000; // 防止存入失败
     inst_o = hit_o ? cache[index_comb] : 32'h0000_0000;
-
     write_index_comb = write_pc_i[5:0];
     write_pc_tag_comb = write_pc_i[31:6];
 end

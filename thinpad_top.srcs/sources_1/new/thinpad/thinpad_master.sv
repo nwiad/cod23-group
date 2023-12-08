@@ -36,6 +36,9 @@ module thinpad_master #(
   logic [31:0] IF_ID_inst;
   logic [31:0] IF_ID_pc_now;
   logic [4:0] IF_ID_rs1, IF_ID_rs2;
+  logic [31:0] IF_pc_now, IF_pc_predicted;
+  logic IF_take_predict_in, IF_take_predict_out;
+  logic IF_is_bubble;
   if_controller u_if_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -53,15 +56,23 @@ module thinpad_master #(
     .wb_sel_o(IF_wb_sel_o),
     .wb_we_o(IF_wb_we_o),
     .pc_src_i(EXE_MEM_branch),
-    .pc_result_i(EXE_MEM_pc_result),
+    .pc_result_i(pc_result_for_IF),
     .inst_o(IF_ID_inst),
     .pc_now_o(IF_ID_pc_now),
     .rs1_o(IF_ID_rs1),
     .rs2_o(IF_ID_rs2),
 
+<<<<<<< HEAD
     // fence.i
     .clear_icache_i(EXE_MEM_clear_icache),
     .sync_refetch_pc_i(EXD_MEM_sync_refetch_pc)
+=======
+    .IF_pc_now(IF_pc_now),
+    .IF_pc_predicted(IF_pc_predicted),
+    .IF_take_predict_i(IF_take_predict_in),
+    .IF_take_predict_o(IF_take_predict_out),
+    .IF_is_bubble_o(IF_is_bubble)
+>>>>>>> origin/branch-prediction
   );
   
   // ID logic & ID/EXE regs
@@ -84,6 +95,8 @@ module thinpad_master #(
   // forwarding
   logic EXE_rdata_a_hazard_in, EXE_rdata_b_hazard_in, MEM_rdata_a_hazard_in, MEM_rdata_b_hazard_in, WB_rdata_a_hazard_in, WB_rdata_b_hazard_in;
   logic EXE_rdata_a_hazard_out, EXE_rdata_b_hazard_out, MEM_rdata_a_hazard_out, MEM_rdata_b_hazard_out, WB_rdata_a_hazard_out, WB_rdata_b_hazard_out;
+  logic ID_is_branch, ID_is_jalr;
+  logic [31:0] ID_pc_now, ID_imm;
   id_controller u_id_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -131,8 +144,15 @@ module thinpad_master #(
     .reg_write_o(ID_EXE_reg_write),
     .imm_to_reg_o(ID_EXE_imm_to_reg),
 
+<<<<<<< HEAD
     // fence.i
     .clear_icache_o(ID_EXE_clear_icache)
+=======
+    .ID_is_branch_o(ID_is_branch),
+    .ID_is_jalr_o(ID_is_jalr),
+    .ID_pc_now_o(ID_pc_now),
+    .ID_imm_o(ID_imm)
+>>>>>>> origin/branch-prediction
   );
 
   // EXE logic & EXE/MEM regs
@@ -150,8 +170,14 @@ module thinpad_master #(
   logic [31:0] rdata_from_mem;
   logic [31:0] rdata_from_wb;
   logic [31:0] EXE_MEM_pc_now;
+<<<<<<< HEAD
   logic EXE_MEM_clear_icache;
   logic [31:0] EXD_MEM_sync_refetch_pc;
+=======
+  logic EXE_is_branch, branch_eq;
+  logic [31:0] EXE_pc_result_comb;
+  logic [31:0] pc_result_for_IF;
+>>>>>>> origin/branch-prediction
   exe_controller u_exe_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -202,11 +228,19 @@ module thinpad_master #(
     .mem_to_reg_o(EXE_MEM_mem_to_reg),
     .reg_write_o(EXE_MEM_reg_write),
     .imm_to_reg_o(EXE_MEM_imm_to_reg),
+<<<<<<< HEAD
 
     // fence.i
     .clear_icache_i(ID_EXE_clear_icache),
     .clear_icache_o(EXE_MEM_clear_icache),
     .sync_refetch_pc_o(EXD_MEM_sync_refetch_pc)
+=======
+    .ID_take_predict_i(IF_take_predict_out),
+    .EXE_is_branch_o(EXE_is_branch),
+    .branch_eq_o(branch_eq),
+    .pc_result_comb_o(EXE_pc_result_comb),
+    .pc_result_for_IF_o(pc_result_for_IF)
+>>>>>>> origin/branch-prediction
   );
 
   // MEM logic & MEM/WB regs
@@ -316,4 +350,38 @@ module thinpad_master #(
     .wb_rdata_b_hazard_o(WB_rdata_b_hazard_in)
   );
 
+<<<<<<< HEAD
+=======
+
+  branch_predictor u_branch_predictor (
+    .clk_i(clk_i),
+    .rst_i(rst_i),
+    .ID_pc_i(ID_pc_now),
+    .ID_is_branch_i(ID_is_branch),
+    .ID_is_jalr_i(ID_is_jalr),
+    .ID_imm_i(ID_imm),
+    .IF_pc_i(IF_pc_now),
+    .EXE_pc_i(ID_EXE_pc_now),
+    .EXE_is_branch_i(EXE_is_branch),
+    .EXE_need_branch_i(branch_eq),
+    .EXE_pc_result_i(EXE_pc_result_comb),
+    .ID_is_bubble_i(IF_is_bubble),
+    .IF_pc_o(IF_pc_predicted),
+    .IF_take_predict_o(IF_take_predict_in)
+  );
+
+  // always_comb begin    
+
+
+  // end
+
+  // always_ff @(posedge clk_i) begin
+  //   if (rst_i) begin
+      
+  //   end else begin
+
+  //   end
+  // end
+
+>>>>>>> origin/branch-prediction
 endmodule

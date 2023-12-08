@@ -3,61 +3,59 @@ module tb;
 
   wire clk_50M, clk_11M0592;
 
-  reg push_btn;   // BTN5 按钮�?关，带消抖电路，按下时为 1
-  reg reset_btn;  // BTN6 复位按钮，带消抖电路，按下时�? 1
+  reg push_btn;   // BTN5 按钮�??关，带消抖电路，按下时为 1
+  reg reset_btn;  // BTN6 复位按钮，带消抖电路，按下时�?? 1
 
   reg [3:0] touch_btn; // BTN1~BTN4，按钮开关，按下时为 1
-  reg [31:0] dip_sw;   // 32 位拨码开关，拨到“ON”时�? 1
+  reg [31:0] dip_sw;   // 32 位拨码开关，拨到“ON”时�?? 1
 
-  wire [15:0] leds;  // 16 �? LED，输出时 1 点亮
+  wire [15:0] leds;  // 16 �?? LED，输出时 1 点亮
   wire [7:0] dpy0;   // 数码管低位信号，包括小数点，输出 1 点亮
   wire [7:0] dpy1;   // 数码管高位信号，包括小数点，输出 1 点亮
 
   wire txd;  // 直连串口发�?�端
-  wire rxd;  // 直连串口接收�?
+  wire rxd;  // 直连串口接收�??
 
-  wire [31:0] base_ram_data;  // BaseRAM 数据，低 8 位与 CPLD 串口控制器共�?
+  wire [31:0] base_ram_data;  // BaseRAM 数据，低 8 位与 CPLD 串口控制器共�??
   wire [19:0] base_ram_addr;  // BaseRAM 地址
-  wire[3:0] base_ram_be_n;    // BaseRAM 字节使能，低有效。如果不使用字节使能，请保持�? 0
-  wire base_ram_ce_n;  // BaseRAM 片�?�，低有�?
-  wire base_ram_oe_n;  // BaseRAM 读使能，低有�?
-  wire base_ram_we_n;  // BaseRAM 写使能，低有�?
+  wire[3:0] base_ram_be_n;    // BaseRAM 字节使能，低有效。如果不使用字节使能，请保持�?? 0
+  wire base_ram_ce_n;  // BaseRAM 片�?�，低有�??
+  wire base_ram_oe_n;  // BaseRAM 读使能，低有�??
+  wire base_ram_we_n;  // BaseRAM 写使能，低有�??
 
   wire [31:0] ext_ram_data;  // ExtRAM 数据
   wire [19:0] ext_ram_addr;  // ExtRAM 地址
-  wire[3:0] ext_ram_be_n;    // ExtRAM 字节使能，低有效。如果不使用字节使能，请保持�? 0
-  wire ext_ram_ce_n;  // ExtRAM 片�?�，低有�?
-  wire ext_ram_oe_n;  // ExtRAM 读使能，低有�?
-  wire ext_ram_we_n;  // ExtRAM 写使能，低有�?
+  wire[3:0] ext_ram_be_n;    // ExtRAM 字节使能，低有效。如果不使用字节使能，请保持�?? 0
+  wire ext_ram_ce_n;  // ExtRAM 片�?�，低有�??
+  wire ext_ram_oe_n;  // ExtRAM 读使能，低有�??
+  wire ext_ram_we_n;  // ExtRAM 写使能，低有�??
 
-  wire [22:0] flash_a;  // Flash 地址，a0 仅在 8bit 模式有效�?16bit 模式无意�?
+  wire [22:0] flash_a;  // Flash 地址，a0 仅在 8bit 模式有效�??16bit 模式无意�??
   wire [15:0] flash_d;  // Flash 数据
   wire flash_rp_n;   // Flash 复位信号，低有效
-  wire flash_vpen;   // Flash 写保护信号，低电平时不能擦除、烧�?
-  wire flash_ce_n;   // Flash 片�?�信号，低有�?
-  wire flash_oe_n;   // Flash 读使能信号，低有�?
-  wire flash_we_n;   // Flash 写使能信号，低有�?
-  wire flash_byte_n; // Flash 8bit 模式选择，低有效。在使用 flash �? 16 位模式时请设�? 1
+  wire flash_vpen;   // Flash 写保护信号，低电平时不能擦除、烧�??
+  wire flash_ce_n;   // Flash 片�?�信号，低有�??
+  wire flash_oe_n;   // Flash 读使能信号，低有�??
+  wire flash_we_n;   // Flash 写使能信号，低有�??
+  wire flash_byte_n; // Flash 8bit 模式选择，低有效。在使用 flash �?? 16 位模式时请设�?? 1
 
-  wire uart_rdn;  // 读串口信号，低有�?
-  wire uart_wrn;  // 写串口信号，低有�?
-  wire uart_dataready;  // 串口数据准备�?
-  wire uart_tbre;  // 发�?�数据标�?
-  wire uart_tsre;  // 数据发�?�完毕标�?
+  wire uart_rdn;  // 读串口信号，低有�??
+  wire uart_wrn;  // 写串口信号，低有�??
+  wire uart_dataready;  // 串口数据准备�??
+  wire uart_tbre;  // 发�?�数据标�??
+  wire uart_tsre;  // 数据发�?�完毕标�??
 
-  // Windows �?要注意路径分隔符的转义，例如 "D:\\foo\\bar.bin"
-  `define BASE_USER_ADDR 32'h10_0000
-  `define BASE_USER_INDEX (`BASE_USER_ADDR / 4)
+  // Windows �??要注意路径分隔符的转义，例如 "D:\\foo\\bar.bin"
   `define DWN "D:\\rv-2023\\asmcode\\lab6.bin"
   `define DWN_FENCE_I "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\rvtests_simple\\rv32ui-p-fence_i.bin"
   `define DWN_LAB6_FENCE_I "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\lab6_fence_i.bin"
   `define DWN_KERNEL_ONLINE "D:\\rv-2023\\supervisor-rv\\kernel\\kernel-rv32-no16550.bin"
   `define WJL "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\kernel-rv32-no16550.bin"
-  // parameter BASE_RAM_INIT_FILE = "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\test.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�?
+  // parameter BASE_RAM_INIT_FILE = "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\test.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�??
   // parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin";
-  parameter BASE_RAM_INIT_FILE = `DWN_KERNEL_ONLINE; // dwn
-  parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
-  parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
+  parameter BASE_RAM_INIT_FILE = `WJL; // dwn
+  parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�??
+  parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�??
 
   initial begin
     // 在这里可以自定义测试输入序列，例如：
@@ -108,7 +106,7 @@ module tb;
     // #400000 $finish; // dwn
   end
 
-  // 待测试用户设�?
+  // 待测试用户设�??
   thinpad_top dut (
       .clk_50M(clk_50M),
       .clk_11M0592(clk_11M0592),
@@ -147,7 +145,7 @@ module tb;
       .flash_byte_n(flash_byte_n),
       .flash_we_n(flash_we_n)
   );
-  // 时钟�?
+  // 时钟�??
   clock osc (
       .clk_11M0592(clk_11M0592),
       .clk_50M    (clk_50M)
@@ -231,7 +229,7 @@ module tb;
     $stop;
   end
 
-  // 从文件加�? BaseRAM
+  // 从文件加�?? BaseRAM
   initial begin
     reg [31:0] tmp_array[0:1048575];
     integer n_File_ID, n_Init_Size;
@@ -253,7 +251,7 @@ module tb;
     end
   end
 
-  // 从文件加�? ExtRAM
+  // 从文件加�?? ExtRAM
   initial begin
     reg [31:0] tmp_array[0:1048575];
     integer n_File_ID, n_Init_Size;
