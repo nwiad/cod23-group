@@ -88,7 +88,8 @@ module thinpad_master #(
   // forwarding
   logic EXE_rdata_a_hazard_in, EXE_rdata_b_hazard_in, MEM_rdata_a_hazard_in, MEM_rdata_b_hazard_in, WB_rdata_a_hazard_in, WB_rdata_b_hazard_in;
   logic EXE_rdata_a_hazard_out, EXE_rdata_b_hazard_out, MEM_rdata_a_hazard_out, MEM_rdata_b_hazard_out, WB_rdata_a_hazard_out, WB_rdata_b_hazard_out;
-  logic ID_is_branch;
+  logic ID_is_branch, ID_is_jalr;
+  logic [31:0] ID_pc_now, ID_imm;
   id_controller u_id_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -136,7 +137,10 @@ module thinpad_master #(
     .reg_write_o(ID_EXE_reg_write),
     .imm_to_reg_o(ID_EXE_imm_to_reg),
 
-    .ID_is_branch_o(ID_is_branch)
+    .ID_is_branch_o(ID_is_branch),
+    .ID_is_jalr_o(ID_is_jalr),
+    .ID_pc_now_o(ID_pc_now),
+    .ID_imm_o(ID_imm)
   );
 
   // EXE logic & EXE/MEM regs
@@ -325,8 +329,10 @@ module thinpad_master #(
   branch_predictor u_branch_predictor (
     .clk_i(clk_i),
     .rst_i(rst_i),
-    .ID_pc_i(IF_ID_pc_now),
+    .ID_pc_i(ID_pc_now),
     .ID_is_branch_i(ID_is_branch),
+    .ID_is_jalr_i(ID_is_jalr),
+    .ID_imm_i(ID_imm),
     .IF_pc_i(IF_pc_now),
     .EXE_pc_i(ID_EXE_pc_now),
     .EXE_is_branch_i(EXE_is_branch),

@@ -10,6 +10,8 @@ module branch_predictor (
   input wire rst_i,
   input wire [31:0] ID_pc_i,
   input wire ID_is_branch_i,
+  input wire ID_is_jalr_i,
+  input wire [31:0] ID_imm_i,
   input wire [31:0] IF_pc_i,  /* IF段这个周期本来要读的pc */
 
   input wire [31:0] EXE_pc_i, 
@@ -30,7 +32,6 @@ module branch_predictor (
 
   reg btb_valid [0:63];
   reg [25:0] btb_tag [0:63];
-  reg [31:0] btb_pc [0:63];
   reg [1:0] btb_state [0:63];
 
   logic [5:0] ID_index_comb;
@@ -50,14 +51,14 @@ module branch_predictor (
     if (ID_is_bubble_i) begin
       hit = hit_reg;
     end else begin
-      hit = btb_valid[ID_index_comb] && (btb_tag[ID_index_comb] == ID_tag_comb) && ID_is_branch_i && btb_state[ID_index_comb] == STATE_TAKEN;
+      hit = btb_valid[ID_index_comb] && (btb_tag[ID_index_comb] == ID_tag_comb) && ID_is_branch_i && (!ID_is_jalr_i) && btb_state[ID_index_comb] == STATE_TAKEN;
     end
     if (hit) begin
       /* 只有上一状态为接受时，才采取分支预测 */
       if (ID_is_bubble_i) begin
         IF_pc_o = IF_pc_o_reg;
       end else begin
-        IF_pc_o = btb_pc[ID_index_comb];
+        IF_pc_o = ID_pc_i + ID_imm_i;
       end
     end else begin
       IF_pc_o = 32'h8000_0000;
@@ -78,7 +79,6 @@ module branch_predictor (
   always_ff@ (posedge clk_i) begin
     if (rst_i) begin
       for (int i = 0; i < 64; i = i + 1) begin
-        btb_pc[i] <= 32'h8000_0000;
         btb_valid[i] <= 1'b0;
         btb_tag[i] <= 26'h0000_0000;
         btb_state[i] <= STATE_NOT_TAKEN;
@@ -87,7 +87,6 @@ module branch_predictor (
       if (EXE_is_branch_i) begin
         /* 当前存的就是现在EXE传递进来的指令 */
         // TODO: 用拥有四个状态的状态机来实现
-        btb_pc[EXE_index_comb] <= EXE_pc_result_i;
         btb_valid[EXE_index_comb] <= 1'b1;
         btb_state[EXE_index_comb] <= EXE_need_branch_i === 1 ? STATE_TAKEN : STATE_NOT_TAKEN;
         btb_tag[EXE_index_comb] <= EXE_tag_comb;

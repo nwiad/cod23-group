@@ -64,7 +64,10 @@ module id_controller #(
     output reg imm_to_reg_o,
 
     // branch prediction
-    output reg ID_is_branch_o
+    output reg [31:0] ID_pc_now_o,
+    output reg ID_is_branch_o,
+    output reg ID_is_jalr_o,
+    output reg [31:0] ID_imm_o
 );
   // outputs are bounded to these regs
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg, rf_rdata_c_reg;
@@ -253,6 +256,9 @@ module id_controller #(
   end
 
   assign ID_is_branch_o = is_beq_comb || is_bne_comb || is_jal_comb || is_jalr_comb;
+  assign ID_is_jalr_o = is_jalr_comb;
+  assign ID_imm_o = imm;
+  assign ID_pc_now_o = pc_now_i;
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
