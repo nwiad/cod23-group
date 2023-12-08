@@ -164,7 +164,7 @@ module exe_controller #(
     alu_op = alu_op_i;
 
     EXE_is_branch_o = (branch_i == 3'b100) || (branch_i == 3'b011) || (branch_i == 3'b001) || (branch_i == 3'b010);
-    branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
+    branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real === rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real !== rf_rdata_b_real));
     branch_eq_o = branch_eq;
     if (branch_i == 3'b100) begin
       pc_result_comb_o = rf_rdata_a_real + imm_i;
