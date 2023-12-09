@@ -27,6 +27,10 @@ module thinpad_master #(
     output reg [DATA_WIDTH/8-1:0] MEM_wb_sel_o,
     output reg MEM_wb_we_o
 );
+  // exception handler
+  logic [1:0] mode;
+  logic ID_EXE_is_exception;
+  logic [31:0] ID_EXE_exception_cause;
 
   // IF logic & IF/ID regs
   logic IF_ID_stall_in, IF_ID_bubble_in;
@@ -135,6 +139,11 @@ module thinpad_master #(
     .rf_raddr_rs1_csr_o(ID_EXE_rf_raddr_rs1_csr),
     .alu_csr_op(ID_EXE_alu_csr_op),
 
+    //exception
+    .mode_i(mode),
+    .is_exception_o(ID_EXE_is_exception),
+    .exception_cause_o(ID_EXE_exception_cause),
+
     // forwarding
     .exe_rdata_a_hazard_i(EXE_rdata_a_hazard_in),
     .exe_rdata_b_hazard_i(EXE_rdata_b_hazard_in),
@@ -235,6 +244,11 @@ module thinpad_master #(
     .alu_result_csr_o(EXE_MEM_alu_result_csr),
     .rd_csr_o(EXE_MEM_rd_csr),
 
+    //exception
+    .mode_o(mode),
+    .is_exception_i(ID_EXE_is_exception),
+    .exception_cause_i(ID_EXE_exception_cause),
+
     // forwarding
     .exe_rdata_a_hazard_i(EXE_rdata_a_hazard_out),
     .exe_rdata_b_hazard_i(EXE_rdata_b_hazard_out),
@@ -245,7 +259,7 @@ module thinpad_master #(
     .exe_csr_hazard_i(EXE_csr_hazard_out),
     .mem_csr_hazard_i(MEM_csr_hazard_out),
     .wb_csr_hazard_i(WB_csr_hazard_out),
-    
+
     .exe_is_load_o(exe_is_load),
     .EXE_csr_o(EXE_csr),
     .rdata_from_mem_i(rdata_from_mem),

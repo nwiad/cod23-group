@@ -87,7 +87,12 @@ module id_controller #(
     output reg imm_to_reg_o,
 
     // fence.i
-    output reg clear_icache_o
+    output reg clear_icache_o,
+
+    //exception
+    input wire [1:0] mode_i,
+    output reg is_exception_o,
+    output reg [31:0] exception_cause_o
 );
   // outputs are bounded to these regs
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg, rf_rdata_c_reg;
@@ -106,7 +111,9 @@ module id_controller #(
   reg mem_to_reg_reg, reg_write_reg, imm_to_reg_reg;
 
   reg clear_icache_reg;
-  
+
+  reg is_exception_reg;
+  reg [31:0] exception_cause_reg;
 
   // regfile 
   logic [4:0] rf_raddr_a, rf_raddr_b;
@@ -149,7 +156,7 @@ module id_controller #(
     .rdata(rf_rdata_csr),
     .waddr(rf_waddr_csr),
     .wdata(rf_wdata_csr),
-    .we(rf_we)
+    .we(rf_we_csr)
   );
 
   // immediate generator
@@ -199,6 +206,7 @@ module id_controller #(
   logic [3:0] mem_sel_comb;
 
   always_comb begin
+
     is_rtype_comb = (inst_i[6:0] == 7'b011_0011);
     is_itype_comb = (inst_i[6:0] == 7'b001_0011) || (inst_i[6:0] == 7'b110_0111); // 不包括 load
     is_load_comb  = (inst_i[6:0] == 7'b000_0011);
@@ -363,6 +371,10 @@ module id_controller #(
     rf_raddr_rs1_csr_o = rf_raddr_rs1_csr_o_reg;
     alu_csr_op = alu_csr_reg;
 
+    //exception
+    is_exception_o = is_exception_reg;
+    exception_cause_o = exception_cause_reg;
+
     imm_o = imm_reg;
     rs1_o = rs1_reg;
     rs2_o = rs2_reg;
@@ -398,6 +410,10 @@ module id_controller #(
       rd_reg <= 5'b00000;
       pc_now_reg <= 32'h8000_0000;
 
+      //exception
+      is_exception_reg <= 1'b0;
+      exception_cause_reg <= 32'b0000_0000;
+
       //csr
       rf_rdata_csr_o_reg <= 32'h0000_0000;
       rf_raddr_csr_o_reg <= 12'h0000_0000;
@@ -428,6 +444,10 @@ module id_controller #(
       rs1_reg <= 5'b00000;
       rs2_reg <= 5'b00000;
       rd_reg <= 5'b00000;
+
+      //exception
+      is_exception_reg <= 1'b0;
+      exception_cause_reg <= 32'b0000_0000;
 
       //csr
       rf_rdata_csr_o_reg <= 32'h0000_0000;
@@ -480,6 +500,22 @@ module id_controller #(
       // end else begin
       //   imm_reg <= imm;
       // end
+
+      //exception
+      if ( is_ecall_comb ) begin
+        is_exception_reg <= 1'b1;
+        if (mode_i == 2'b00) begin
+          exception_cause_reg <= 8; //environment call from U mode
+        end else begin
+          exception_cause_reg <= 11; //environment call from M mode
+        end
+      end else if ( is_ebreak_comb ) begin
+        is_exception_reg <= 1'b1;
+        exception_cause_reg <= 3; //Ebreak
+      end else begin
+        is_exception_reg <= 1'b0;
+        exception_cause_reg <= 32'b0000_0000;
+      end
 
       //csr
       rf_rdata_csr_o_reg <= rf_rdata_csr;

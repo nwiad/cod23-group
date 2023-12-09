@@ -96,7 +96,14 @@ module exe_controller #(
     // fence.i
     input wire clear_icache_i,
     output reg clear_icache_o,
-    output reg [31:0] sync_refetch_pc_o
+    output reg [31:0] sync_refetch_pc_o,
+
+    // exception
+    output reg [1:0] mode_o,
+    input wire is_exception_i,
+    input wire [31:0] exception_cause_i,
+    output reg is_exception_o,
+    output reg [31:0] exception_cause_o
 );
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
@@ -115,6 +122,10 @@ module exe_controller #(
   reg clear_icache_reg;
   reg [31:0] sync_refetch_pc_reg;
 
+  reg [1:0] mode_reg;
+  reg is_exception_reg;
+  reg [31:0] exception_cause_reg;
+
   // ALU
   logic [31:0] alu_operand1, alu_operand2;
   logic [3:0] alu_op;
@@ -130,6 +141,23 @@ module exe_controller #(
     .alu_b(alu_operand2),
     .alu_y(alu_result),
     .alu_op(alu_op)
+  );
+  
+  //csr_file
+  logic [11:0] rf_raddr_csr;
+  logic [31:0] rf_rdata_csr;
+  logic [11:0] rf_waddr_csr;
+  logic [31:0] rf_wdata_csr;
+  logic rf_we_csr;
+
+  csrfile32 id_csrfile32 (
+    .clk(clk_i),
+    .reset(rst_i),
+    .raddr(rf_raddr_csr),
+    .rdata(rf_rdata_csr),
+    .waddr(rf_waddr_csr),
+    .wdata(rf_wdata_csr),
+    .we(rf_we_csr)
   );
 
   // csr 
@@ -266,6 +294,10 @@ module exe_controller #(
     imm_o = imm_reg;
     pc_now_o = pc_now_reg;
 
+    mode_o = mode_reg;
+    is_exception_o = is_exception_reg;
+    exception_cause_o = exception_cause_reg;
+
     //csr
     alu_result_csr_o = alu_result_csr_reg;
     rd_csr_o = rd_csr_reg;
@@ -292,6 +324,10 @@ module exe_controller #(
       rd_reg <= 5'b00000;
       pc_result_reg <= 32'h8000_0000;
       imm_reg <= 32'h0000_0000;
+
+      // mode_reg <= 2'b11;
+      is_exception_reg <= 1'b0;
+      exception_cause_reg <= 32'b0;
 
       //csr
       alu_result_csr_reg <= 32'h0000_0000;
@@ -334,6 +370,10 @@ module exe_controller #(
       end
       imm_reg <= imm_i;
 
+      //exception
+      is_exception_reg <= is_exception_i;
+      exception_cause_reg <= exception_cause_i;
+      
       //csr
       alu_result_csr_reg <= alu_result_csr;
       rd_csr_reg <= rf_raddr_csr_i;
@@ -352,6 +392,57 @@ module exe_controller #(
       clear_icache_reg <= clear_icache_i;
       sync_refetch_pc_reg <= pc_now_i + 32'h0000_0004;
     end
+  end
+
+  //exception
+  logic [1:0] state_exp;
+  logic exp_done;
+  always_ff @(posedge clk_i) begin
+    if(rst_i) begin
+      state_exp <= `STATE_INIT;
+      //csr init 
+      rf_raddr_csr <= 12'b0;
+      rf_rdata_csr <= 32'b0;
+      rf_waddr_csr <= 12'b0;
+      rf_wdata_csr <= 32'b0;
+      rf_we_csr <= 1'b0;
+      exp_done <= 0;
+      mode_reg <= 2'b11;
+    end else if (is_exception_reg) begin
+      if (!exp_done) begin
+        case(state_exp)
+        `STATE_INIT: begin
+          state_exp <= `STATE_W_mepc;
+          rf_we_csr <= 1;
+          rf_waddr_csr <= 12'h341;
+          rf_wdata_csr <= pc_now_i;
+        end
+        `STATE_W_mepc: begin
+          state_exp <= `STATE_W_mcause;
+          rf_we_csr <= 1;
+          rf_waddr_csr <= 12'h342;
+          rf_wdata_csr <= exception_cause_reg;
+        end
+        `STATE_W_mcause: begin
+          state_exp <= `STATE_W_mstatus;
+          rf_we_csr <= 1;
+          rf_waddr_csr <= 12'h300;
+          rf_wdata_csr <= {19'b0,mode_reg,11'b0};
+        end
+        `STATE_W_mstatus: begin
+          state_exp <= `STATE_INIT;
+          rf_we_csr <= 0;
+          rf_waddr_csr <= 12'b0;
+          rf_wdata_csr <= 32'b0;
+        end
+        endcase
+      end else begin
+        exp_done <= 0;
+      end
+    end
+    // end else if(id_exe_if_branch_reg && id_exe_wb_csr_we_reg)begin//mret
+    //     mode_reg <= temp_mode_reg;
+    // end
   end
 
 endmodule

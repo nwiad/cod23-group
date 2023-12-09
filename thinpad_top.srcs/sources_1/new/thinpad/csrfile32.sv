@@ -7,6 +7,11 @@ module csrfile32(
   input wire[11:0] waddr,
   input wire[31:0] wdata,
   input wire we,
+
+//   //csr寄存器的第二个读写指令
+//   input wire[11:0] waddr_exp,
+//   input wire[31:0] wdata_exp,
+//   input wire we_exp,
   
   input wire[11:0] raddr,
   output reg[31:0] rdata
@@ -45,15 +50,6 @@ always_ff @ (posedge clk or posedge reset) begin
             12'h300: mstatus[12:11] <= wdata[12:11];
             12'h304: mie[7] <= wdata[7];
         endcase
-    // end else if (we_exp) begin
-    //     case(waddr_exp)
-    //         12'h305: mtvec <= wdata_exp;
-    //         12'h340: mscratch <= wdata_exp;
-    //         12'h341: mepc[31:2] <= wdata_exp[31:2];
-    //         12'h342: mcause <= wdata_exp;
-    //         12'h300: mstatus[12:11] <= wdata_exp[12:11];
-    //         12'h304: mie[7] <= wdata_exp[7];
-    //     endcase
     end
 end
 

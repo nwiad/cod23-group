@@ -22,3 +22,8 @@
 `define ALU_SETBIT 4'b1111
 
 `define PC_INIT 32'h8000_0000
+
+`define STATE_INIT 2'b00
+`define STATE_W_mepc 2'b01
+`define STATE_W_mcause 2'b10
+`define STATE_W_mstatus 2'b11
