@@ -79,9 +79,9 @@ always_comb begin
   mem_rdata_b_hazard_o = ((mem_rd_i != 5'b00000) && (id_rs2_i == mem_rd_i));
   wb_rdata_a_hazard_o = ((wb_rd_i != 5'b00000) && (id_rs1_i == wb_rd_i));
   wb_rdata_b_hazard_o = ((wb_rd_i != 5'b00000) && (id_rs2_i == wb_rd_i));
-  exe_csr_hazard_o = (id_csr_i == exe_csr_i);
-  mem_csr_hazard_o = (id_csr_i == mem_csr_i);
-  wb_csr_hazard_o = (id_csr_i == wb_csr_i);
+  exe_csr_hazard_o = (id_csr_i != 12'b0000_0000 && id_csr_i == exe_csr_i);
+  mem_csr_hazard_o = (id_csr_i != 12'b0000_0000 && id_csr_i == mem_csr_i);
+  wb_csr_hazard_o = (id_csr_i != 12'b0000_0000 && id_csr_i == wb_csr_i);
 end
 
 

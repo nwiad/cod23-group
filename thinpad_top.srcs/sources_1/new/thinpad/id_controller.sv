@@ -140,14 +140,15 @@ module id_controller #(
   logic [31:0] rf_rdata_rs1_csr_o_reg;
   logic [4:0] rf_raddr_rs1_csr_o_reg;
   logic [1:0] alu_csr_reg;
+  logic [1:0] alu_csr_comb;
 
   csrfile32 id_csrfile32 (
     .clk(clk_i),
     .reset(rst_i),
     .raddr(rf_raddr_csr),
     .rdata(rf_rdata_csr),
-    .waddr(rf_waddr),
-    .wdata(rf_wdata),
+    .waddr(rf_waddr_csr),
+    .wdata(rf_wdata_csr),
     .we(rf_we)
   );
 
@@ -324,13 +325,13 @@ module id_controller #(
     rf_we_csr = rf_we_csr_i;
 
     if (is_csrrw_comb) begin
-      alu_csr_reg = 2'b01;   //just the rs1
+      alu_csr_comb = 2'b01;   //just the rs1
     end else if (is_csrrs_comb) begin
-      alu_csr_reg = 2'b10;   //use rs1 to make csr 1
+      alu_csr_comb = 2'b10;   //use rs1 to make csr 1
     end else if (is_csrrc_comb) begin
-      alu_csr_reg = 2'b11;   //use rs1 to make csr 0
+      alu_csr_comb = 2'b11;   //use rs1 to make csr 0
     end else begin
-      alu_csr_reg = 2'b00;   //whatever no effect
+      alu_csr_comb = 2'b00;   //whatever no effect
     end
 
     inst = inst_i;
@@ -383,7 +384,7 @@ module id_controller #(
     csr_write_o = csr_write_o_reg;
 
     clear_icache_o = clear_icache_reg;
-    ID_csr_o = rf_raddr_csr;
+    ID_csr_o = is_csr_comb ? rf_raddr_csr : 12'b0000_0000;
   end
 
   always_ff @(posedge clk_i) begin
@@ -402,7 +403,7 @@ module id_controller #(
       rf_raddr_csr_o_reg <= 12'h0000_0000;
       rf_rdata_rs1_csr_o_reg <= 32'h0000_0000;
       rf_raddr_rs1_csr_o_reg <= 5'h0000_0000;
-      alu_csr_op <= 2'h00;
+      alu_csr_reg <= 2'h00;
 
       alu_op_reg <= 4'b0000;
       alu_src_reg_1 <= 1'b0;
@@ -433,7 +434,7 @@ module id_controller #(
       rf_raddr_csr_o_reg <= 12'h0000_0000;
       rf_rdata_rs1_csr_o_reg <= 32'h0000_0000;
       rf_raddr_rs1_csr_o_reg <= 5'h0000_0000;
-      alu_csr_op <= 2'h00;
+      alu_csr_reg <= 2'h00;
 
       // controls of addi zero, zero, 0
       alu_op_reg <= 4'b0001;
@@ -485,7 +486,7 @@ module id_controller #(
       rf_raddr_csr_o_reg <= rf_raddr_csr;
       rf_rdata_rs1_csr_o_reg <= rf_rdata_a;
       rf_raddr_rs1_csr_o_reg <= rs1_comb;
-      alu_csr_op <= alu_csr_reg;
+      alu_csr_reg <= alu_csr_comb;
 
       rs1_reg <= rs1_comb;
       rs2_reg <= rs2_comb;

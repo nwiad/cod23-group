@@ -51,9 +51,11 @@ module tb;
   `define DWN_LAB6_FENCE_I "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\lab6_fence_i.bin"
   `define DWN_KERNEL_ONLINE "D:\\rv-2023\\supervisor-rv\\kernel\\kernel-rv32-no16550.bin"
   `define WJL "D:\\Codefield\\cod23-grp53\\rvtests_simple\\testall.bin"
+  `define YJX_KERNEL "D:\\rv-2023\\supervisor-rv\\kernel\\kernel.bin"
   // parameter BASE_RAM_INIT_FILE = "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\test.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�?
   // parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin";
-  parameter BASE_RAM_INIT_FILE = `WJL; // dwn
+  // parameter BASE_RAM_INIT_FILE = `WJL; // dwn
+  parameter BASE_RAM_INIT_FILE = `YJX_KERNEL; // yjx
   parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
 

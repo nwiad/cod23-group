@@ -233,15 +233,21 @@ module exe_controller #(
   always_comb begin
     if (alu_op_csr == 2'b01) begin 
       alu_result_csr = alu_csr_operand1;
-    end else if (alu_op_csr == 2'b01) begin
-      alu_result_csr = alu_csr_operand2;
-      for (counter = 0 ; counter < 32 ; counter ++) begin
-        alu_result_csr[counter] = 1;
-      end
     end else if (alu_op_csr == 2'b10) begin
-      alu_result_csr = alu_csr_operand2;
       for (counter = 0 ; counter < 32 ; counter ++) begin
-        alu_result_csr[counter] = 0;
+        if( alu_csr_operand1[counter] == 1 ) begin
+          alu_result_csr[counter] = 1;
+        end else begin
+          alu_result_csr[counter] = alu_csr_operand2[counter];
+        end
+      end
+    end else if (alu_op_csr == 2'b11) begin
+      for (counter = 0 ; counter < 32 ; counter ++) begin
+        if( alu_csr_operand1[counter] == 1 ) begin
+          alu_result_csr[counter] = 0;
+        end else begin
+          alu_result_csr[counter] = alu_csr_operand2[counter];
+        end
       end
     end else begin
       alu_result_csr = 0;

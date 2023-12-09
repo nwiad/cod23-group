@@ -71,7 +71,7 @@ module thinpad_master #(
   logic [4:0] WB_rf_waddr;
   logic [31:0] WB_rf_wdata;
   logic WB_rf_csr_we;
-  logic [4:0] WB_rf_csr_waddr;
+  logic [11:0] WB_rf_csr_waddr;
   logic [31:0] WB_rf_csr_wdata;
   logic [31:0] ID_EXE_rf_rdata_a, ID_EXE_rf_rdata_b, ID_EXE_rf_rdata_c;
   logic [31:0] ID_EXE_imm;
@@ -98,7 +98,7 @@ module thinpad_master #(
   // csr
   logic EXE_csr_hazard_in, MEM_csr_hazard_in, WB_csr_hazard_in;
   logic EXE_csr_hazard_out, MEM_csr_hazard_out, WB_csr_hazard_out;
-  logic ID_csr;
+  logic [11:0] ID_csr;
 
   id_controller u_id_controller (
     .clk_i(clk_i),
@@ -245,6 +245,7 @@ module thinpad_master #(
     .exe_csr_hazard_i(EXE_csr_hazard_out),
     .mem_csr_hazard_i(MEM_csr_hazard_out),
     .wb_csr_hazard_i(WB_csr_hazard_out),
+    
     .exe_is_load_o(exe_is_load),
     .EXE_csr_o(EXE_csr),
     .rdata_from_mem_i(rdata_from_mem),
