@@ -167,6 +167,7 @@ module exe_controller #(
   logic [11:0] rd_csr_reg;
   logic reg_to_csr_reg;
 
+  logic branch_eq_csr, branch_eq_no_csr;
   logic branch_eq;
 
   always_ff @(posedge clk_i) begin
@@ -252,9 +253,11 @@ module exe_controller #(
     end
     alu_op_csr = alu_csr_op_i;
 
-    branch_eq = (branch_i == 3'b110) || (branch_i == 3'b101) ||(branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
+    branch_eq_no_csr = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
+    branch_eq_csr = ((branch_i == 3'b110) || (branch_i == 3'b101)) && exp_done;
+    branch_eq = branch_eq_csr || branch_eq_no_csr;
 
-    //exception
+    // exception
     is_exception_comb = is_exception_i;
     exception_cause_reg = exception_cause_i;
   end
@@ -442,7 +445,7 @@ module exe_controller #(
       end else begin
         exp_done <= 0;
       end
-    end else if(branch_i == 3'b101) begin //mret
+    end else if (branch_i == 3'b101) begin //mret
       mode_reg <= rf_rdata_csr_i[12:11];   //mpp
     end
   end
@@ -450,9 +453,9 @@ module exe_controller #(
   always_comb begin
     rf_raddr_csr = 12'b0;
     if (is_exception_comb) begin
-      rf_raddr_csr <= 12'h305;
+      rf_raddr_csr = 12'h305;
     end else if (branch_i == 3'b101) begin
-      rf_raddr_csr <= 12'h341;
+      rf_raddr_csr = 12'h341;
     end
   end
 
