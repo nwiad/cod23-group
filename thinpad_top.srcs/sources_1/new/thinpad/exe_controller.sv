@@ -101,9 +101,7 @@ module exe_controller #(
     // exception
     output reg [1:0] mode_o,
     input wire is_exception_i,
-    input wire [31:0] exception_cause_i,
-    output reg is_exception_o,
-    output reg [31:0] exception_cause_o
+    input wire [31:0] exception_cause_i
 );
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
@@ -254,6 +252,10 @@ module exe_controller #(
     alu_op_csr = alu_csr_op_i;
 
     branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
+
+    //exception
+    is_exception_reg = is_exception_i;
+    exception_cause_reg = exception_cause_i;
   end
 
   //csr
@@ -295,8 +297,6 @@ module exe_controller #(
     pc_now_o = pc_now_reg;
 
     mode_o = mode_reg;
-    is_exception_o = is_exception_reg;
-    exception_cause_o = exception_cause_reg;
 
     //csr
     alu_result_csr_o = alu_result_csr_reg;
@@ -326,8 +326,6 @@ module exe_controller #(
       imm_reg <= 32'h0000_0000;
 
       // mode_reg <= 2'b11;
-      is_exception_reg <= 1'b0;
-      exception_cause_reg <= 32'b0;
 
       //csr
       alu_result_csr_reg <= 32'h0000_0000;
@@ -369,10 +367,6 @@ module exe_controller #(
         pc_result_reg <= pc_now_i + imm_i;
       end
       imm_reg <= imm_i;
-
-      //exception
-      is_exception_reg <= is_exception_i;
-      exception_cause_reg <= exception_cause_i;
       
       //csr
       alu_result_csr_reg <= alu_result_csr;
