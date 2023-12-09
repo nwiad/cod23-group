@@ -327,7 +327,11 @@ module id_controller #(
     rf_we = rf_we_i;
 
     // csr
-    rf_raddr_csr = inst_i[31:20];
+    if (is_mret_comb) begin
+      rf_raddr_csr = 12'h300;
+    end else begin
+      rf_raddr_csr = inst_i[31:20];
+    end
     rf_waddr_csr = rf_waddr_csr_i;
     rf_wdata_csr = rf_wdata_csr_i;
     rf_we_csr = rf_we_csr_i;
@@ -396,7 +400,7 @@ module id_controller #(
     csr_write_o = csr_write_o_reg;
 
     clear_icache_o = clear_icache_reg;
-    ID_csr_o = is_csr_comb ? rf_raddr_csr : 12'b0000_0000;
+    ID_csr_o = (is_csrrc_comb || is_csrrw_comb || is_csrrs_comb || is_mret_comb) ? rf_raddr_csr : 12'b0000_0000;
   end
 
   always_ff @(posedge clk_i) begin
@@ -545,6 +549,10 @@ module id_controller #(
         branch_reg <= 3'b011;
       end else if (is_jalr_comb) begin
         branch_reg <= 3'b100;
+      end else if (is_mret_comb) begin
+        branch_reg <= 3'b101;
+      end else if (is_ecall_comb || is_ebreak_comb) begin
+        branch_reg <= 3'b110;
       end else begin
         branch_reg <= 3'b000;
       end

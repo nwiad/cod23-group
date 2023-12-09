@@ -252,7 +252,7 @@ module exe_controller #(
     end
     alu_op_csr = alu_csr_op_i;
 
-    branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
+    branch_eq = (branch_i == 3'b110) || (branch_i == 3'b101) ||(branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
 
     //exception
     is_exception_comb = is_exception_i;
@@ -371,6 +371,10 @@ module exe_controller #(
       rd_reg <= rd_i;
       if (branch_i == 3'b100) begin
         pc_result_reg <= rf_rdata_a_real + imm_i;
+      end else if (branch_i == 3'b101)  begin
+        pc_result_reg <= rf_rdata_csr_i;
+      end else if (branch_i == 3'b110)  begin
+        pc_result_reg <= rf_rdata_csr;
       end else begin
         pc_result_reg <= pc_now_i + imm_i;
       end
@@ -415,6 +419,7 @@ module exe_controller #(
         case (state_exp)
         `STATE_INIT: begin
           state_exp <= `STATE_W_mepc;
+          rf_raddr_csr <= 12'h305;
           rf_we_csr <= 1;
           rf_waddr_csr <= 12'h341;
           rf_wdata_csr <= pc_now_i;
@@ -442,10 +447,9 @@ module exe_controller #(
       end else begin
         exp_done <= 0;
       end
+    end else if(branch_i == 3'b101) begin //mret
+      mode_reg <= rf_rdata_csr_i[12:11];   //mpp
     end
-    // end else if(id_exe_if_branch_reg && id_exe_wb_csr_we_reg)begin//mret
-    //     mode_reg <= temp_mode_reg;
-    // end
   end
 
 endmodule

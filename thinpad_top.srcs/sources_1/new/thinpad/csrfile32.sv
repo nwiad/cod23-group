@@ -1,5 +1,4 @@
 module csrfile32(
-  //说明：这里实现两个写端口，方便同时写入操作等等
   input wire clk,
   input wire reset,
 
@@ -7,11 +6,6 @@ module csrfile32(
   input wire[11:0] waddr,
   input wire[31:0] wdata,
   input wire we,
-
-//   //csr寄存器的第二个读写指令
-//   input wire[11:0] waddr_exp,
-//   input wire[31:0] wdata_exp,
-//   input wire we_exp,
   
   input wire[11:0] raddr,
   output reg[31:0] rdata
@@ -34,23 +28,23 @@ reg [31:0] mip;//0x344 MTIP：7
 // machine-mode timer compare register.
 
 always_ff @ (posedge clk or posedge reset) begin
-    if (reset) begin
-        mtvec <= 0;
-        mscratch <= 0;
-        mepc <= 0;
-        mcause <= 0; 
-        mstatus <= 0;
-        mie <= 0;
-    end else if (we) begin
-        case(waddr)
-            12'h305: mtvec <= wdata;
-            12'h340: mscratch <= wdata;
-            12'h341: mepc[31:2] <= wdata[31:2];
-            12'h342: mcause <= wdata;
-            12'h300: mstatus[12:11] <= wdata[12:11];
-            12'h304: mie[7] <= wdata[7];
-        endcase
-    end
+  if (reset) begin
+    mtvec <= 0;
+    mscratch <= 0;
+    mepc <= 0;
+    mcause <= 0; 
+    mstatus <= 0;
+    mie <= 0;
+  end else if (we) begin
+    case(waddr)
+      12'h305: mtvec <= wdata;
+      12'h340: mscratch <= wdata;
+      12'h341: mepc[31:2] <= wdata[31:2];
+      12'h342: mcause <= wdata;
+      12'h300: mstatus[12:11] <= wdata[12:11];
+      12'h304: mie[7] <= wdata[7];
+    endcase
+  end
 end
 
 // always_ff @ (posedge clk) begin
@@ -74,17 +68,16 @@ end
 // end
 
 always_comb begin
-    case(raddr)
-        12'h305: rdata = mtvec;
-        12'h340: rdata = mscratch;
-        12'h341: rdata = mepc;
-        12'h342: rdata = mcause;
-        12'h300: rdata = mstatus;
-        12'h302: rdata = mstatus;
-        12'h304: rdata = mie;
-        12'h344: rdata = mip;
-        default: rdata = 0;
-    endcase
+  case(raddr)
+    12'h305: rdata = mtvec;
+    12'h340: rdata = mscratch;
+    12'h341: rdata = mepc;
+    12'h342: rdata = mcause;
+    12'h300: rdata = mstatus;  //U
+    12'h304: rdata = mie;
+    12'h344: rdata = mip;
+    default: rdata = 0;
+  endcase
 end
 
 endmodule
