@@ -101,7 +101,8 @@ module exe_controller #(
     // exception
     output reg [1:0] mode_o,
     input wire is_exception_i,
-    input wire [31:0] exception_cause_i
+    input wire [31:0] exception_cause_i,
+    output reg handling_exception_o
 );
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
@@ -121,7 +122,7 @@ module exe_controller #(
   reg [31:0] sync_refetch_pc_reg;
 
   reg [1:0] mode_reg;
-  reg is_exception_reg;
+  reg is_exception_comb;
   reg [31:0] exception_cause_reg;
 
   // ALU
@@ -254,7 +255,7 @@ module exe_controller #(
     branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
 
     //exception
-    is_exception_reg = is_exception_i;
+    is_exception_comb = is_exception_i;
     exception_cause_reg = exception_cause_i;
   end
 
@@ -315,6 +316,7 @@ module exe_controller #(
     clear_icache_o = clear_icache_reg;
     sync_refetch_pc_o = sync_refetch_pc_reg;
     EXE_csr_o = rf_raddr_csr_i;
+    handling_exception_o = (is_exception_comb) && (!exp_done);
   end
 
   always_ff @(posedge clk_i) begin
@@ -347,6 +349,12 @@ module exe_controller #(
       // do nothing
     end else if (bubble_i) begin
       // won'b be flushed ?
+      mem_read_reg <= 1'b0;
+      mem_write_reg <= 1'b0;
+      mem_to_reg_reg <= 1'b0;
+      reg_write_reg <= 1'b0;
+      imm_to_reg_reg <= 1'b0;
+      reg_to_csr_reg <= 1'b0;
     end else begin
       alu_result_reg <= alu_result;
       rf_rdata_b_reg <= rf_rdata_b_real;
@@ -392,7 +400,7 @@ module exe_controller #(
   logic [1:0] state_exp;
   logic exp_done;
   always_ff @(posedge clk_i) begin
-    if(rst_i) begin
+    if (rst_i) begin
       state_exp <= `STATE_INIT;
       //csr init 
       rf_raddr_csr <= 12'b0;
@@ -402,9 +410,9 @@ module exe_controller #(
       rf_we_csr <= 1'b0;
       exp_done <= 0;
       mode_reg <= 2'b11;
-    end else if (is_exception_reg) begin
+    end else if (is_exception_comb) begin
       if (!exp_done) begin
-        case(state_exp)
+        case (state_exp)
         `STATE_INIT: begin
           state_exp <= `STATE_W_mepc;
           rf_we_csr <= 1;
@@ -421,13 +429,14 @@ module exe_controller #(
           state_exp <= `STATE_W_mstatus;
           rf_we_csr <= 1;
           rf_waddr_csr <= 12'h300;
-          rf_wdata_csr <= {19'b0,mode_reg,11'b0};
+          rf_wdata_csr <= {19'b0, mode_reg, 11'b0};
         end
         `STATE_W_mstatus: begin
           state_exp <= `STATE_INIT;
           rf_we_csr <= 0;
           rf_waddr_csr <= 12'b0;
           rf_wdata_csr <= 32'b0;
+          exp_done <= 1;
         end
         endcase
       end else begin

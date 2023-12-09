@@ -206,6 +206,7 @@ module thinpad_master #(
   logic EXE_MEM_reg_to_csr;
   logic [31:0] EXE_MEM_alu_result_csr;
   logic [11:0] EXE_MEM_rd_csr;
+  logic EXE_handling_exception;
 
   exe_controller u_exe_controller (
     .clk_i(clk_i),
@@ -248,6 +249,7 @@ module thinpad_master #(
     .mode_o(mode),
     .is_exception_i(ID_EXE_is_exception),
     .exception_cause_i(ID_EXE_exception_cause),
+    .handling_exception_o(EXE_handling_exception),
 
     // forwarding
     .exe_rdata_a_hazard_i(EXE_rdata_a_hazard_out),
@@ -404,6 +406,8 @@ module thinpad_master #(
     .exe_csr_i(EXE_csr),
     .mem_csr_i(MEM_csr),
     .wb_csr_i(WB_csr),
+
+    .exe_handling_exception_i(EXE_handling_exception),
 
     .exe_branch_i(EXE_MEM_flush_out),
     .exe_is_load_i(exe_is_load),
