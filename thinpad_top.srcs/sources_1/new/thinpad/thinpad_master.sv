@@ -25,12 +25,54 @@ module thinpad_master #(
     output reg [DATA_WIDTH-1:0] MEM_wb_dat_o,
     input wire [DATA_WIDTH-1:0] MEM_wb_dat_i,
     output reg [DATA_WIDTH/8-1:0] MEM_wb_sel_o,
-    output reg MEM_wb_we_o
+    output reg MEM_wb_we_o,
+
+    // 时钟中断
+    input reg mtime_int_i
 );
   // exception handler
   logic [1:0] mode;
   logic ID_EXE_is_exception;
   logic [31:0] ID_EXE_exception_cause;
+
+  logic mtime_int_o;
+
+  // csr_file
+  logic [11:0] ID_rf_raddr_csr;
+  logic [31:0] ID_rf_rdata_csr;
+  logic [11:0] ID_rf_waddr_csr;
+  logic [31:0] ID_rf_wdata_csr;
+  logic ID_rf_we_csr;
+
+  logic [11:0] EXE_rf_raddr_csr;
+  logic [31:0] EXE_rf_rdata_csr;
+  logic [11:0] EXE_rf_waddr_csr;
+  logic [31:0] EXE_rf_wdata_csr;
+  logic EXE_rf_we_csr;
+
+  csrfile32 id_csrfile32 (
+    .clk(clk_i),
+    .reset(rst_i),
+
+    .raddr_1(ID_rf_raddr_csr),
+    .rdata_1(ID_rf_rdata_csr),
+
+    .raddr_2(EXE_rf_raddr_csr),
+    .rdata_2(EXE_rf_rdata_csr),
+
+    .waddr_1(ID_rf_waddr_csr),
+    .wdata_1(ID_rf_wdata_csr),
+    .we_1(ID_rf_we_csr),
+
+    .waddr_2(EXE_rf_waddr_csr),
+    .wdata_2(EXE_rf_wdata_csr),
+    .we_2(EXE_rf_we_csr),
+
+    .mtime_int_i(mtime_int_i),
+    .mtime_int_o(mtime_int_o)
+  );
+
+
 
   // IF logic & IF/ID regs
   logic IF_ID_stall_in, IF_ID_bubble_in;
@@ -178,7 +220,14 @@ module thinpad_master #(
     .csr_write_o(ID_EXE_reg_to_csr),
 
     // fence.i
-    .clear_icache_o(ID_EXE_clear_icache)
+    .clear_icache_o(ID_EXE_clear_icache),
+
+    // csr file
+    .rf_raddr_csr(ID_rf_raddr_csr),
+    .rf_rdata_csr(ID_rf_rdata_csr),
+    .rf_waddr_csr(ID_rf_waddr_csr),
+    .rf_wdata_csr(ID_rf_wdata_csr),
+    .rf_we_csr(ID_rf_we_csr)
   );
 
   // EXE logic & EXE/MEM regs
@@ -250,6 +299,7 @@ module thinpad_master #(
     .is_exception_i(ID_EXE_is_exception),
     .exception_cause_i(ID_EXE_exception_cause),
     .handling_exception_o(EXE_handling_exception),
+    .mtime_int(mtime_int_o),
 
     // forwarding
     .exe_rdata_a_hazard_i(EXE_rdata_a_hazard_out),
@@ -286,7 +336,14 @@ module thinpad_master #(
     // fence.i
     .clear_icache_i(ID_EXE_clear_icache),
     .clear_icache_o(EXE_MEM_clear_icache),
-    .sync_refetch_pc_o(EXD_MEM_sync_refetch_pc)
+    .sync_refetch_pc_o(EXD_MEM_sync_refetch_pc),
+
+    // csr file
+    .rf_raddr_csr(EXE_rf_raddr_csr),
+    .rf_rdata_csr(EXE_rf_rdata_csr),
+    .rf_waddr_csr(EXE_rf_waddr_csr),
+    .rf_wdata_csr(EXE_rf_wdata_csr),
+    .rf_we_csr(EXE_rf_we_csr)
   );
 
   // MEM logic & MEM/WB regs

@@ -79,8 +79,20 @@ module tb;
   
     // // 模拟 PC 通过直连串口，向 FPGA 发�?�字�?
     // uart.pc_send_byte(8'h32); // ASCII '2'
-    // #10000;
+    #3500000;
     // uart.pc_send_byte(8'h33); // ASCII '3'
+    uart.pc_send_byte(8'h47); // ASCII 'G'
+    #10000;
+    //800010a8
+    uart.pc_send_byte(8'hc0);
+    // uart.pc_send_byte(8'ha8);
+    #10000;
+    uart.pc_send_byte(8'h10);
+    #10000;
+    uart.pc_send_byte(8'h00);
+    #10000;
+    uart.pc_send_byte(8'h80);
+    #10000;
     #8000000 $finish;
     // #400000 $finish; // dwn
   end

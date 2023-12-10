@@ -102,8 +102,20 @@ module exe_controller #(
     output reg [1:0] mode_o,
     input wire is_exception_i,
     input wire [31:0] exception_cause_i,
-    output reg handling_exception_o
+    output reg handling_exception_o,
+    input wire mtime_int,
+
+    //csrfile
+    output reg [11:0] rf_raddr_csr,
+    input wire [31:0] rf_rdata_csr,
+    output reg [11:0] rf_waddr_csr,
+    output reg [31:0] rf_wdata_csr,
+    output reg rf_we_csr
 );
+  // mtime
+  logic mtime_int_lock;
+  logic mtime_int_comb;
+
   // outputs are bounded to these regs
   reg [31:0] alu_result_reg;
   reg [31:0] rf_rdata_b_reg;
@@ -131,7 +143,9 @@ module exe_controller #(
   logic [31:0] alu_result;
 
   logic [31:0] rf_rdata_a_real, rf_rdata_b_real;
+  logic [31:0] rf_rdata_a_real_reg, rf_rdata_b_real_reg;
   logic [31:0] csr_real;
+  logic [31:0] csr_real_reg;
 
   logic [31:0] alu_operand1_reg, alu_operand2_reg;
   logic last_stall;
@@ -148,16 +162,6 @@ module exe_controller #(
   logic [11:0] rf_waddr_csr;
   logic [31:0] rf_wdata_csr;
   logic rf_we_csr;
-
-  csrfile32 id_csrfile32 (
-    .clk(clk_i),
-    .reset(rst_i),
-    .raddr(rf_raddr_csr),
-    .rdata(rf_rdata_csr),
-    .waddr(rf_waddr_csr),
-    .wdata(rf_wdata_csr),
-    .we(rf_we_csr)
-  );
 
   // csr 
   logic [31:0] alu_csr_operand1, alu_csr_operand2;
@@ -176,13 +180,18 @@ module exe_controller #(
     alu_operand2_reg <= alu_operand2;
     alu_operand1_csr_reg <= alu_csr_operand1;
     alu_operand2_csr_reg <= alu_csr_operand2;
+    rf_rdata_a_real_reg <= rf_rdata_a_real;
+    rf_rdata_b_real_reg <= rf_rdata_b_real;
+    csr_real_reg <= csr_real;
   end
 
   always_comb begin
     exe_is_load_o = mem_read_i;
     // forwarding
 
-    if (exe_rdata_a_hazard_i) begin
+    if (last_stall) begin
+      rf_rdata_a_real = rf_rdata_a_real_reg;
+    end else if (exe_rdata_a_hazard_i) begin
       rf_rdata_a_real = alu_result_reg;
     end else if (mem_rdata_a_hazard_i) begin
       rf_rdata_a_real = rdata_from_mem_i;
@@ -192,7 +201,9 @@ module exe_controller #(
       rf_rdata_a_real = rf_rdata_a_i;
     end
 
-    if (exe_rdata_b_hazard_i) begin
+    if (last_stall) begin
+      rf_rdata_b_real = rf_rdata_b_real_reg;
+    end else if (exe_rdata_b_hazard_i) begin
       rf_rdata_b_real = alu_result_reg;
     end else if (mem_rdata_b_hazard_i) begin
       rf_rdata_b_real = rdata_from_mem_i;
@@ -203,7 +214,9 @@ module exe_controller #(
     end
 
 
-    if (exe_csr_hazard_i) begin
+    if (last_stall) begin
+      csr_real = csr_real_reg;
+    end else if (exe_csr_hazard_i) begin
       csr_real = alu_result_csr_reg;
     end else if (mem_csr_hazard_i) begin
       csr_real = csr_from_mem_i;
@@ -254,12 +267,14 @@ module exe_controller #(
     alu_op_csr = alu_csr_op_i;
 
     branch_eq_no_csr = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
-    branch_eq_csr = ((branch_i == 3'b110) || (branch_i == 3'b101)) && exp_done;
+    branch_eq_csr = (is_exception_comb == 1 && exp_done) || (branch_i == 3'b101);
     branch_eq = branch_eq_csr || branch_eq_no_csr;
 
-    // exception
-    is_exception_comb = is_exception_i;
-    exception_cause_reg = exception_cause_i;
+    //exception
+    mtime_int_comb = mtime_int && !mtime_int_lock;
+    is_exception_comb = is_exception_i || (mtime_int_comb);
+    exception_cause_reg = mtime_int_comb ? 32'b1000_0000_0000_0000_0000_0000_0000_0111 : exception_cause_i;
+    // exception_cause_reg = is_exception_i ? exception_cause_i : 32'b1000_0000_0000_0000_0000_0000_0000_0111;
   end
 
   //csr
@@ -372,9 +387,11 @@ module exe_controller #(
       // end
       // rf_rdata_b_reg <= rf_rdata_b_i;
       rd_reg <= rd_i;
-      if (branch_i == 3'b100) begin
+      if (mtime_int_comb == 1) begin
+        pc_result_reg <= rf_rdata_csr;
+      end else if (branch_i == 3'b100) begin
         pc_result_reg <= rf_rdata_a_real + imm_i;
-      end else if (branch_i == 3'b101 || branch_i == 3'b110)  begin
+      end else if (branch_i == 3'b110 || branch_i == 3'b101)  begin
         pc_result_reg <= rf_rdata_csr;
       end else begin
         pc_result_reg <= pc_now_i + imm_i;
@@ -398,6 +415,16 @@ module exe_controller #(
 
       clear_icache_reg <= clear_icache_i;
       sync_refetch_pc_reg <= pc_now_i + 32'h0000_0004;
+    end
+  end
+
+  always_ff @(posedge clk_i or posedge rst_i) begin
+    if (rst_i) begin
+      mtime_int_lock <= 0;
+    end else begin
+      if (mtime_int && exp_done) begin
+        mtime_int_lock <= 1;
+      end
     end
   end
 
@@ -438,7 +465,7 @@ module exe_controller #(
           state_exp <= `STATE_INIT;
           rf_we_csr <= 0;
           rf_waddr_csr <= 12'b0;
-          rf_wdata_csr <= 32'b0;
+          mode_reg <= 2'b11;
           exp_done <= 1;
         end
         endcase

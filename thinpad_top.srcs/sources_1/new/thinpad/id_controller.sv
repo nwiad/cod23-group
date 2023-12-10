@@ -92,7 +92,14 @@ module id_controller #(
     //exception
     input wire [1:0] mode_i,
     output reg is_exception_o,
-    output reg [31:0] exception_cause_o
+    output reg [31:0] exception_cause_o,
+
+    //csrfile
+    output reg [11:0] rf_raddr_csr,
+    input wire [31:0] rf_rdata_csr,
+    output reg [11:0] rf_waddr_csr,
+    output reg [31:0] rf_wdata_csr,
+    output reg rf_we_csr
 );
   // outputs are bounded to these regs
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg, rf_rdata_c_reg;
@@ -135,11 +142,11 @@ module id_controller #(
   );
 
   // csrfile
-  logic [11:0] rf_raddr_csr;
-  logic [31:0] rf_rdata_csr;
-  logic [11:0] rf_waddr_csr;
-  logic [31:0] rf_wdata_csr;
-  logic rf_we_csr;
+  // logic [11:0] rf_raddr_csr;
+  // logic [31:0] rf_rdata_csr;
+  // logic [11:0] rf_waddr_csr;
+  // logic [31:0] rf_wdata_csr;
+  // logic rf_we_csr;
 
   logic csr_write_o_reg;
   logic [31:0] rf_rdata_csr_o_reg;
@@ -148,16 +155,6 @@ module id_controller #(
   logic [4:0] rf_raddr_rs1_csr_o_reg;
   logic [1:0] alu_csr_reg;
   logic [1:0] alu_csr_comb;
-
-  csrfile32 id_csrfile32 (
-    .clk(clk_i),
-    .reset(rst_i),
-    .raddr(rf_raddr_csr),
-    .rdata(rf_rdata_csr),
-    .waddr(rf_waddr_csr),
-    .wdata(rf_wdata_csr),
-    .we(rf_we_csr)
-  );
 
   // immediate generator
   logic [31:0] inst;

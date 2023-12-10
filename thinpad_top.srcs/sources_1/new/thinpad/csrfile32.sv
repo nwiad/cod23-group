@@ -2,15 +2,24 @@ module csrfile32(
   input wire clk,
   input wire reset,
 
-  //csr寄存器的正常读写指令
-  input wire[11:0] waddr,
-  input wire[31:0] wdata,
-  input wire we,
+  //csr寄存器的正常读写指令   1
+  input wire[11:0] waddr_1,
+  input wire[31:0] wdata_1,
+  input wire we_1,
   
-  input wire[11:0] raddr,
-  output reg[31:0] rdata
-//   input wire mtime_exceed_i,
-//   output reg time_interupt,
+  input wire[11:0] raddr_1,
+  output reg[31:0] rdata_1,
+
+  //csr寄存器的正常读写指令   2
+  input wire[11:0] waddr_2,
+  input wire[31:0] wdata_2,
+  input wire we_2,
+  
+  input wire[11:0] raddr_2,
+  output reg[31:0] rdata_2,
+
+  input wire mtime_int_i,
+  output reg mtime_int_o
 );
 
 // todo:
@@ -35,48 +44,70 @@ always_ff @ (posedge clk or posedge reset) begin
     mcause <= 0; 
     mstatus <= 0;
     mie <= 0;
-  end else if (we) begin
-    case(waddr)
-      12'h305: mtvec <= wdata;
-      12'h340: mscratch <= wdata;
-      12'h341: mepc[31:2] <= wdata[31:2];
-      12'h342: mcause <= wdata;
-      12'h300: mstatus[12:11] <= wdata[12:11];
-      12'h304: mie[7] <= wdata[7];
-    endcase
+  end else begin
+    if(we_1) begin
+      case(waddr_1)
+        12'h305: mtvec <= wdata_1;
+        12'h340: mscratch <= wdata_1;
+        12'h341: mepc[31:2] <= wdata_1[31:2];
+        12'h342: mcause <= wdata_1;
+        12'h300: mstatus[12:11] <= wdata_1[12:11];
+        12'h304: mie[7] <= wdata_1[7];
+      endcase
+    end else if (we_2) begin
+      case(waddr_2)
+        12'h305: mtvec <= wdata_2;
+        12'h340: mscratch <= wdata_2;
+        12'h341: mepc[31:2] <= wdata_2[31:2];
+        12'h342: mcause <= wdata_2;
+        12'h300: mstatus[12:11] <= wdata_2[12:11];
+        12'h304: mie[7] <= wdata_2[7];
+      endcase
+    end
   end
 end
 
-// always_ff @ (posedge clk) begin
-//     if (reset) begin
-//         mip <= 0;
-//     end else if (mtime_exceed_i) begin
-//         mip[7] <= 1;
-//     end else begin
-//         mip[7] <= 0;
-//     end
-// end
-
-// always_comb begin
-//     if (reset) begin
-//         time_interupt = 0;
-//     end else if (mip[7] && mie[7]) begin
-//         time_interupt = 1;
-//     end else begin
-//         time_interupt = 0;
-//     end
-// end
+always_ff @ (posedge clk or posedge reset) begin
+  if (reset) begin
+    mip <= 0;
+  end else begin
+    if (mtime_int_i == 1) begin
+      mip[7] <= 1;
+    end else begin
+      mip[7] <= 0;
+    end
+  end
+end
 
 always_comb begin
-  case(raddr)
-    12'h305: rdata = mtvec;
-    12'h340: rdata = mscratch;
-    12'h341: rdata = mepc;
-    12'h342: rdata = mcause;
-    12'h300: rdata = mstatus;  //U
-    12'h304: rdata = mie;
-    12'h344: rdata = mip;
-    default: rdata = 0;
+  if (mip[7] == 1 && mie[7] == 1) begin
+    mtime_int_o = 1;
+  end else begin
+    mtime_int_o = 0;
+  end
+end
+
+always_comb begin
+  case(raddr_1)
+    12'h305: rdata_1 = mtvec;
+    12'h340: rdata_1 = mscratch;
+    12'h341: rdata_1 = mepc;
+    12'h342: rdata_1 = mcause;
+    12'h300: rdata_1 = mstatus;  //U
+    12'h304: rdata_1 = mie;
+    12'h344: rdata_1 = mip;
+    default: rdata_1 = 0;
+  endcase
+
+  case(raddr_2)
+    12'h305: rdata_2 = mtvec;
+    12'h340: rdata_2 = mscratch;
+    12'h341: rdata_2 = mepc;
+    12'h342: rdata_2 = mcause;
+    12'h300: rdata_2 = mstatus;  //U
+    12'h304: rdata_2 = mie;
+    12'h344: rdata_2 = mip;
+    default: rdata_2 = 0;
   endcase
 end
 
