@@ -9,9 +9,17 @@ module stall_controller (
 
   input wire [4:0] id_rs1_i,    // ID段的两个寄存器
   input wire [4:0] id_rs2_i,
-  input wire [4:0] exe_rd_i,    // ID段需要写的寄存器
+  input wire [4:0] exe_rd_i,    // EXE段的目的寄存器
   input wire [4:0] mem_rd_i,    // MEM段需要写的寄存器
   input wire [4:0] wb_rd_i,     // WB段需要写的寄存器
+
+  // csr
+  input wire [11:0] id_csr_i,   // ID段需要操作的csr
+  input wire [11:0] exe_csr_i,  // EXE段需要写的csr
+  input wire [11:0] mem_csr_i,  // MEM段需要写的csr
+  input wire [11:0] wb_csr_i,   // WB段需要写的csr
+
+  input wire exe_handling_exception_i,
 
   input wire exe_branch_i,       // EXE段检测出是否需要跳转
   input wire exe_is_load_i,      // 当前EXE段是否是load指令
@@ -48,7 +56,12 @@ module stall_controller (
   output reg mem_rdata_b_hazard_o,
 
   output reg wb_rdata_a_hazard_o,
-  output reg wb_rdata_b_hazard_o
+  output reg wb_rdata_b_hazard_o,
+
+  // csr
+  output reg exe_csr_hazard_o,
+  output reg mem_csr_hazard_o,
+  output reg wb_csr_hazard_o
 
 );
 
@@ -68,6 +81,9 @@ always_comb begin
   mem_rdata_b_hazard_o = ((mem_rd_i != 5'b00000) && (id_rs2_i == mem_rd_i));
   wb_rdata_a_hazard_o = ((wb_rd_i != 5'b00000) && (id_rs1_i == wb_rd_i));
   wb_rdata_b_hazard_o = ((wb_rd_i != 5'b00000) && (id_rs2_i == wb_rd_i));
+  exe_csr_hazard_o = (id_csr_i != 12'b0000_0000 && id_csr_i == exe_csr_i);
+  mem_csr_hazard_o = (id_csr_i != 12'b0000_0000 && id_csr_i == mem_csr_i);
+  wb_csr_hazard_o = (id_csr_i != 12'b0000_0000 && id_csr_i == wb_csr_i);
 end
 
 
@@ -113,7 +129,7 @@ end
 
 always_comb begin
   // 检查if_id段是否需要stall/bubble
-  if (stall_mem_i) begin
+  if (stall_mem_i || exe_handling_exception_i) begin
     stall_if_o = 1;
     bubble_if_o = 0;
   end else if (flush_exe_i) begin  // 需要首先检查是否flush
@@ -134,7 +150,7 @@ always_comb begin
   end
 
   // 检查id_exe段是否需要stall/bubble
-  if (stall_mem_i) begin
+  if (stall_mem_i || exe_handling_exception_i) begin
     stall_id_o = 1;
     bubble_id_o = 0;
   end else if (stall_id_i || flush_exe_i) begin  // ID段检测到数据冲突，
@@ -149,6 +165,9 @@ always_comb begin
   if (stall_mem_i) begin
     stall_exe_o = 1;
     bubble_exe_o = 0;
+  end else if (exe_handling_exception_i) begin
+    stall_exe_o = 0;
+    bubble_exe_o = 1;
   end else begin
     stall_exe_o = 0;
     bubble_exe_o = 0;

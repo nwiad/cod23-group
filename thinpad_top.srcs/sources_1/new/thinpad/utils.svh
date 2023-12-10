@@ -3,6 +3,7 @@
 `define TYPE_B 3'b011
 `define TYPE_U 3'b100
 `define TYPE_J 3'b101
+`define TYPE_CSR 3'b110
 
 `define ALU_ADD 4'b0001
 `define ALU_SUB 4'b0010
@@ -17,5 +18,12 @@
 `define ALU_PCNT 4'b1011
 `define ALU_MIN 4'b1100
 `define ALU_SBCLR 4'b1101
+`define ALU_SLTU 4'b1110
+`define ALU_SETBIT 4'b1111
 
 `define PC_INIT 32'h8000_0000
+
+`define STATE_INIT 2'b00
+`define STATE_W_mepc 2'b01
+`define STATE_W_mcause 2'b10
+`define STATE_W_mstatus 2'b11

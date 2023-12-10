@@ -97,6 +97,7 @@ module thinpad_top (
   );
 
   logic reset_of_clk10M;
+//   logic reset_of_clk20M;
   // 异步复位，同步释放，将 locked 信号转为后级电路的复位 reset_of_clk10M
   always_ff @(posedge clk_10M or negedge locked) begin
     if (~locked) reset_of_clk10M <= 1'b1;
@@ -107,6 +108,9 @@ module thinpad_top (
 
   logic sys_clk;
   logic sys_rst;
+
+  // 是否超时信号
+  logic mtime_int;
 
   assign sys_clk = clk_10M;
   assign sys_rst = reset_of_clk10M;
@@ -160,7 +164,9 @@ module thinpad_top (
       .MEM_wb_dat_o(MEM_wbm_dat_o),
       .MEM_wb_dat_i(MEM_wbm_dat_i),
       .MEM_wb_sel_o(MEM_wbm_sel_o),
-      .MEM_wb_we_o(MEM_wbm_we_o)
+      .MEM_wb_we_o(MEM_wbm_we_o),
+
+      .mtime_int_i(mtime_int)
   );
 
   /* =========== Lab6 Master end =========== */
@@ -244,6 +250,15 @@ module thinpad_top (
   logic [3:0] wbs2_sel_o;
   logic wbs2_we_o;
 
+  logic wbs3_cyc_o;
+  logic wbs3_stb_o;
+  logic wbs3_ack_i;
+  logic [31:0] wbs3_adr_o;
+  logic [31:0] wbs3_dat_o;
+  logic [31:0] wbs3_dat_i;
+  logic [3:0] wbs3_sel_o;
+  logic wbs3_we_o;
+
   wb_mux_3 wb_mux (
       .clk(sys_clk),
       .rst(sys_rst),
@@ -306,7 +321,26 @@ module thinpad_top (
       .wbs2_ack_i(wbs2_ack_i),
       .wbs2_err_i('0),
       .wbs2_rty_i('0),
-      .wbs2_cyc_o(wbs2_cyc_o)
+      .wbs2_cyc_o(wbs2_cyc_o),
+
+      // Slave interface 3 (to Mtime controller)
+      // Address range: 0x0200_0000 ~ 0x0200_FFFF
+      // #define CLINT 0x2000000
+      // #define CLINT_MTIME (CLINT + 0xBFF8)
+      // #define CLINT_MTIMECMP (CLINT + 0x4000)
+      .wbs3_addr    (32'h0200_0000),
+      .wbs3_addr_msk(32'hFFFF_0000),
+
+      .wbs3_adr_o(wbs3_adr_o),
+      .wbs3_dat_i(wbs3_dat_i),
+      .wbs3_dat_o(wbs3_dat_o),
+      .wbs3_we_o (wbs3_we_o),
+      .wbs3_sel_o(wbs3_sel_o),
+      .wbs3_stb_o(wbs3_stb_o),
+      .wbs3_ack_i(wbs3_ack_i),
+      .wbs3_err_i('0),
+      .wbs3_rty_i('0),
+      .wbs3_cyc_o(wbs3_cyc_o)
   );
 
   /* =========== Lab6 MUX end =========== */
@@ -385,6 +419,22 @@ module thinpad_top (
       // to UART pins
       .uart_txd_o(txd),
       .uart_rxd_i(rxd)
+  );
+
+  mtime_controller mtime_controller_1(
+      .clk_i(sys_clk),
+      .rst_i(sys_rst),
+
+      .wb_cyc_i(wbs3_cyc_o),
+      .wb_stb_i(wbs3_stb_o),
+      .wb_ack_o(wbs3_ack_i),
+      .wb_adr_i(wbs3_adr_o),
+      .wb_dat_i(wbs3_dat_o),
+      .wb_dat_o(wbs3_dat_i),
+      .wb_sel_i(wbs3_sel_o),
+      .wb_we_i (wbs3_we_o),
+      
+      .mtime_int_o(mtime_int)
   );
 
   /* =========== Lab6 Slaves end =========== */

@@ -18,6 +18,11 @@ module id_controller #(
     input wire [4:0] rf_waddr_i,
     input wire [31:0] rf_wdata_i,
 
+    // WB -> ID csr
+    input wire rf_we_csr_i,
+    input wire [11:0] rf_waddr_csr_i,
+    input wire [31:0] rf_wdata_csr_i,
+
     // IF -> ID
     input wire [31:0] pc_now_i,
     input wire [31:0] inst_i,
@@ -32,18 +37,27 @@ module id_controller #(
     output reg [4:0]  rd_o,
     output reg [31:0] pc_now_o,
 
+    // ID -> EXE csr
+    output reg [31:0] rf_rdata_csr_o,
+    output reg [11:0] rf_raddr_csr_o,
+    output reg [31:0] rf_rdata_rs1_csr_o,
+    output reg [4:0] rf_raddr_rs1_csr_o,
+    output reg [1:0] alu_csr_op,
+
     // EXE control
     output reg [3:0] alu_op_o,
     output reg alu_src_o_1, // reg1 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
     output reg alu_src_o_2, // reg2 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
 
     // forwarding
-    input reg exe_rdata_a_hazard_i,
-    input reg exe_rdata_b_hazard_i,
-    input reg mem_rdata_a_hazard_i,
-    input reg mem_rdata_b_hazard_i,
-    input reg wb_rdata_a_hazard_i,
-    input reg wb_rdata_b_hazard_i,
+    output reg [11:0] ID_csr_o,
+
+    input wire exe_rdata_a_hazard_i,
+    input wire exe_rdata_b_hazard_i,
+    input wire mem_rdata_a_hazard_i,
+    input wire mem_rdata_b_hazard_i,
+    input wire wb_rdata_a_hazard_i,
+    input wire wb_rdata_b_hazard_i,
 
     output reg exe_rdata_a_hazard_o,
     output reg exe_rdata_b_hazard_o,
@@ -52,6 +66,14 @@ module id_controller #(
     output reg wb_rdata_a_hazard_o,
     output reg wb_rdata_b_hazard_o,
 
+    input wire exe_csr_hazard_i,
+    input wire mem_csr_hazard_i,
+    input wire wb_csr_hazard_i,
+
+    output reg exe_csr_hazard_o,
+    output reg mem_csr_hazard_o,
+    output reg wb_csr_hazard_o,
+
     // MEM control
     output reg [2:0] branch_o, // for IF
     output reg mem_read_o,
@@ -59,6 +81,7 @@ module id_controller #(
     output reg [3:0] mem_sel_o,
 
     // WB control
+    output reg csr_write_o,
     output reg mem_to_reg_o,
     output reg reg_write_o,
     output reg imm_to_reg_o,
@@ -69,7 +92,19 @@ module id_controller #(
     output reg [31:0] ID_pc_now_o,
     output reg ID_is_branch_o,
     output reg ID_is_jalr_o,
-    output reg [31:0] ID_imm_o
+    output reg [31:0] ID_imm_o,
+
+    //exception
+    input wire [1:0] mode_i,
+    output reg is_exception_o,
+    output reg [31:0] exception_cause_o,
+
+    //csrfile
+    output reg [11:0] rf_raddr_csr,
+    input wire [31:0] rf_rdata_csr,
+    output reg [11:0] rf_waddr_csr,
+    output reg [31:0] rf_wdata_csr,
+    output reg rf_we_csr
 );
   // outputs are bounded to these regs
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg, rf_rdata_c_reg;
@@ -89,12 +124,16 @@ module id_controller #(
 
   reg clear_icache_reg;
 
-  // regfile
+  reg is_exception_reg;
+  reg [31:0] exception_cause_reg;
+
+  // regfile 
   logic [4:0] rf_raddr_a, rf_raddr_b;
   logic [31:0] rf_rdata_a, rf_rdata_b;
   logic [4:0] rf_waddr;
   logic [31:0] rf_wdata;
   logic rf_we;
+
   regfile32 id_regfile32 (
     .clk(clk_i),
     .reset(rst_i),
@@ -106,6 +145,21 @@ module id_controller #(
     .rf_wdata(rf_wdata),
     .rf_we(rf_we)
   );
+
+  // csrfile
+  // logic [11:0] rf_raddr_csr;
+  // logic [31:0] rf_rdata_csr;
+  // logic [11:0] rf_waddr_csr;
+  // logic [31:0] rf_wdata_csr;
+  // logic rf_we_csr;
+
+  logic csr_write_o_reg;
+  logic [31:0] rf_rdata_csr_o_reg;
+  logic [11:0] rf_raddr_csr_o_reg;
+  logic [31:0] rf_rdata_rs1_csr_o_reg;
+  logic [4:0] rf_raddr_rs1_csr_o_reg;
+  logic [1:0] alu_csr_reg;
+  logic [1:0] alu_csr_comb;
 
   // immediate generator
   logic [31:0] inst;
@@ -120,7 +174,7 @@ module id_controller #(
   //types
   logic is_rtype_comb, is_itype_comb, is_stype_comb, is_btype_comb, is_jtype_comb, is_utype_comb, is_load_comb;
   //Rtype
-  logic is_add_comb, is_and_comb, is_or_comb, is_xor_comb;
+  logic is_add_comb, is_and_comb, is_or_comb, is_xor_comb, is_sltu_comb;
   //Itype
   logic is_addi_comb, is_andi_comb, is_lb_comb, is_lw_comb, is_ori_comb, is_slli_comb, is_srli_comb, is_jalr_comb;
   //Utype
@@ -141,6 +195,12 @@ module id_controller #(
 
   logic is_lh_comb;
   logic is_sh_comb;
+  
+  //CSR
+  logic is_csr_comb;
+  logic is_csrrw_comb, is_csrrs_comb, is_csrrc_comb;
+  logic is_ebreak_comb, is_ecall_comb;
+  logic is_mret_comb;
 
   logic [4:0] rd_comb, rs1_comb, rs2_comb;
   logic [3:0] alu_op_comb;
@@ -148,6 +208,7 @@ module id_controller #(
   logic [3:0] mem_sel_comb;
 
   always_comb begin
+
     is_rtype_comb = (inst_i[6:0] == 7'b011_0011);
     is_itype_comb = (inst_i[6:0] == 7'b001_0011) || (inst_i[6:0] == 7'b110_0111); // 不包括 load
     is_load_comb  = (inst_i[6:0] == 7'b000_0011);
@@ -155,6 +216,7 @@ module id_controller #(
     is_utype_comb = (inst_i[6:0] == 7'b001_0111) || (inst_i[6:0] == 7'b011_0111);
     is_stype_comb = (inst_i[6:0] == 7'b010_0011);
     is_btype_comb = (inst_i[6:0] == 7'b110_0011);
+    is_csr_comb = (inst_i[6:0] == 7'b111_0011);
 
     is_lh_comb = (is_load_comb && (inst_i[14:12] == 3'b001));
 
@@ -168,6 +230,14 @@ module id_controller #(
 
     is_sbclr_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b001)) && (inst_i[31:25] == 7'b010_0100);
 
+    is_csrrw_comb = is_csr_comb && (inst_i[14:12] == 3'b001);
+    is_csrrs_comb = is_csr_comb && (inst_i[14:12] == 3'b010);
+    is_csrrc_comb = is_csr_comb && (inst_i[14:12] == 3'b011);
+    is_ebreak_comb = is_csr_comb && (inst_i[14:12] == 3'b000) && (inst_i[31:20] == 12'b0000_0000_0001);
+    is_ecall_comb = is_csr_comb && (inst_i[14:12] == 3'b000) && (inst_i[31:20] == 12'b0000_0000_0000);
+    is_mret_comb = is_csr_comb && (inst_i[14:12] == 3'b000) && (inst_i[31:20] == 12'b0011_0000_0010);
+    
+    is_sltu_comb = is_rtype_comb && (inst_i[14:12] == 3'b011);
     //ADD   0000000SSSSSsssss000ddddd0110011
     is_add_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b000));
     //ADDI  iiiiiiiiiiiisssss000ddddd0010011
@@ -215,7 +285,7 @@ module id_controller #(
     //   1bit_num_comb = 1bit_num_comb + rf_rdata_a[bit_counter];
     // end
 
-    if (is_add_comb || is_addi_comb || is_lb_comb || is_lh_comb || is_lw_comb || is_sb_comb || is_sh_comb || is_sw_comb || is_utype_comb || is_jtype_comb || is_jalr_comb) begin
+    if (is_add_comb || is_addi_comb || is_lb_comb || is_lh_comb || is_lw_comb || is_sb_comb || is_sh_comb || is_sw_comb || is_utype_comb || is_jtype_comb || is_jalr_comb || is_csrrc_comb || is_csrrw_comb || is_csrrs_comb) begin
       alu_op_comb = 4'b0001;
     end else if (is_andi_comb || is_and_comb) begin
       alu_op_comb = 4'b0011;
@@ -233,11 +303,13 @@ module id_controller #(
       alu_op_comb = 4'b1100;
     end else if (is_sbclr_comb) begin
       alu_op_comb = 4'b1101;
+    end else if (is_sltu_comb) begin
+      alu_op_comb = 4'b1110;
     end else begin
       alu_op_comb = 4'b0000;
     end
 
-    alu_src_comb_1 = !(is_lui_comb || is_auipc_comb || is_jtype_comb || is_jalr_comb);
+    alu_src_comb_1 = !(is_lui_comb || is_auipc_comb || is_jtype_comb || is_jalr_comb || is_csrrc_comb || is_csrrw_comb || is_csrrs_comb);
     alu_src_comb_2 = is_rtype_comb;
 
     if (is_lb_comb || is_sb_comb) begin
@@ -255,6 +327,26 @@ module id_controller #(
     rf_waddr = rf_waddr_i;
     rf_wdata = rf_wdata_i;
     rf_we = rf_we_i;
+
+    // csr
+    if (is_mret_comb) begin
+      rf_raddr_csr = 12'h300;
+    end else begin
+      rf_raddr_csr = inst_i[31:20];
+    end
+    rf_waddr_csr = rf_waddr_csr_i;
+    rf_wdata_csr = rf_wdata_csr_i;
+    rf_we_csr = rf_we_csr_i;
+
+    if (is_csrrw_comb) begin
+      alu_csr_comb = 2'b01;   //just the rs1
+    end else if (is_csrrs_comb) begin
+      alu_csr_comb = 2'b10;   //use rs1 to make csr 1
+    end else if (is_csrrc_comb) begin
+      alu_csr_comb = 2'b11;   //use rs1 to make csr 0
+    end else begin
+      alu_csr_comb = 2'b00;   //whatever no effect
+    end
 
     inst = inst_i;
     if (is_itype_comb || is_load_comb) begin
@@ -284,6 +376,15 @@ module id_controller #(
     rf_rdata_a_o = rf_rdata_a_reg;
     rf_rdata_b_o = rf_rdata_b_reg;
     rf_rdata_c_o = rf_rdata_c_reg;
+    rf_rdata_csr_o = rf_rdata_csr_o_reg;
+    rf_raddr_csr_o = rf_raddr_csr_o_reg;
+    rf_rdata_rs1_csr_o = rf_rdata_rs1_csr_o_reg;
+    rf_raddr_rs1_csr_o = rf_raddr_rs1_csr_o_reg;
+    alu_csr_op = alu_csr_reg;
+
+    //exception
+    is_exception_o = is_exception_reg;
+    exception_cause_o = exception_cause_reg;
 
     imm_o = imm_reg;
     rs1_o = rs1_reg;
@@ -303,8 +404,10 @@ module id_controller #(
     mem_to_reg_o = mem_to_reg_reg;
     reg_write_o = reg_write_reg;
     imm_to_reg_o = imm_to_reg_reg;
+    csr_write_o = csr_write_o_reg;
 
     clear_icache_o = clear_icache_reg;
+    ID_csr_o = (is_csrrc_comb || is_csrrw_comb || is_csrrs_comb || is_mret_comb) ? rf_raddr_csr : 12'b0000_0000;
   end
 
   always_ff @(posedge clk_i) begin
@@ -317,6 +420,17 @@ module id_controller #(
       rs2_reg <= 5'b00000;
       rd_reg <= 5'b00000;
       pc_now_reg <= 32'h8000_0000;
+
+      //exception
+      is_exception_reg <= 1'b0;
+      exception_cause_reg <= 32'b0000_0000;
+
+      //csr
+      rf_rdata_csr_o_reg <= 32'h0000_0000;
+      rf_raddr_csr_o_reg <= 12'h0000_0000;
+      rf_rdata_rs1_csr_o_reg <= 32'h0000_0000;
+      rf_raddr_rs1_csr_o_reg <= 5'h0000_0000;
+      alu_csr_reg <= 2'h00;
 
       alu_op_reg <= 4'b0000;
       alu_src_reg_1 <= 1'b0;
@@ -342,6 +456,17 @@ module id_controller #(
       rs2_reg <= 5'b00000;
       rd_reg <= 5'b00000;
 
+      //exception
+      is_exception_reg <= 1'b0;
+      exception_cause_reg <= 32'b0000_0000;
+
+      //csr
+      rf_rdata_csr_o_reg <= 32'h0000_0000;
+      rf_raddr_csr_o_reg <= 12'h0000_0000;
+      rf_rdata_rs1_csr_o_reg <= 32'h0000_0000;
+      rf_raddr_rs1_csr_o_reg <= 5'h0000_0000;
+      alu_csr_reg <= 2'h00;
+
       // controls of addi zero, zero, 0
       alu_op_reg <= 4'b0001;
       alu_src_reg_1 <= 1'b0;
@@ -364,25 +489,55 @@ module id_controller #(
         rf_rdata_c_reg <= 32'b0;
       end else if (is_auipc_comb || is_jtype_comb || is_jalr_comb) begin
         rf_rdata_c_reg <= pc_now_i;
+      end else if (is_csrrc_comb || is_csrrw_comb || is_csrrs_comb) begin
+        rf_rdata_c_reg <= rf_rdata_csr;
       end else begin
         rf_rdata_c_reg <= 32'b0;
       end
+
       if (is_jtype_comb || is_jalr_comb) begin
         rf_rdata_b_reg <= 32'b100;
       end else begin
         rf_rdata_b_reg <= rf_rdata_b;
       end
 
-      imm_reg <= imm;
+      if (is_csrrc_comb || is_csrrw_comb || is_csrrs_comb) begin
+        imm_reg <= 0;
+      end else begin
+        imm_reg <= imm;
+      end
       // if (is_pcnt_comb) begin
       //   imm_reg <= 1bit_num_comb;
       // end else begin
       //   imm_reg <= imm;
       // end
 
+      //exception
+      if ( is_ecall_comb ) begin
+        is_exception_reg <= 1'b1;
+        if (mode_i == 2'b00) begin
+          exception_cause_reg <= 8; //environment call from U mode
+        end else begin
+          exception_cause_reg <= 11; //environment call from M mode
+        end
+      end else if ( is_ebreak_comb ) begin
+        is_exception_reg <= 1'b1;
+        exception_cause_reg <= 3; //Ebreak
+      end else begin
+        is_exception_reg <= 1'b0;
+        exception_cause_reg <= 32'b0000_0000;
+      end
+
+      //csr
+      rf_rdata_csr_o_reg <= rf_rdata_csr;
+      rf_raddr_csr_o_reg <= rf_raddr_csr;
+      rf_rdata_rs1_csr_o_reg <= rf_rdata_a;
+      rf_raddr_rs1_csr_o_reg <= rs1_comb;
+      alu_csr_reg <= alu_csr_comb;
+
       rs1_reg <= rs1_comb;
       rs2_reg <= rs2_comb;
-      if (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb) begin
+      if (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb || (is_csrrc_comb || is_csrrw_comb || is_csrrs_comb)) begin
         rd_reg <= rd_comb;
       end else begin
         rd_reg <= 5'b0;
@@ -401,6 +556,10 @@ module id_controller #(
         branch_reg <= 3'b011;
       end else if (is_jalr_comb) begin
         branch_reg <= 3'b100;
+      end else if (is_mret_comb) begin
+        branch_reg <= 3'b101;
+      end else if (is_ecall_comb || is_ebreak_comb) begin
+        branch_reg <= 3'b110;
       end else begin
         branch_reg <= 3'b000;
       end
@@ -409,8 +568,11 @@ module id_controller #(
       mem_sel_reg <= mem_sel_comb;
 
       mem_to_reg_reg <= is_lb_comb || is_lh_comb || is_lw_comb;
-      reg_write_reg <= (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb);
+      reg_write_reg <= (is_rtype_comb || is_utype_comb || is_itype_comb || is_jtype_comb || is_load_comb || (is_csrrc_comb || is_csrrw_comb || is_csrrs_comb));
       imm_to_reg_reg <= 1'b0;
+
+      //csr
+      csr_write_o_reg <= (is_csrrc_comb || is_csrrw_comb || is_csrrs_comb);
 
       clear_icache_reg <= is_fence_i_comb;
 
@@ -421,6 +583,10 @@ module id_controller #(
       mem_rdata_b_hazard_o <= mem_rdata_b_hazard_i;
       wb_rdata_a_hazard_o <= wb_rdata_a_hazard_i;
       wb_rdata_b_hazard_o <= wb_rdata_b_hazard_i;
+
+      exe_csr_hazard_o <= exe_csr_hazard_i;
+      mem_csr_hazard_o <= mem_csr_hazard_i;
+      wb_csr_hazard_o <= wb_csr_hazard_i;
     end
   end
 
