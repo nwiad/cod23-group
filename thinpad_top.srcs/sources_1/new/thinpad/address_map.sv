@@ -33,7 +33,7 @@ module address_map (
 
   typedef enum logic [1:0] {
     U_MODE = 2'b00,
-    M_MODE = 2'b11
+    M_MODE = 2'b11 // no translation
   } mode_t;
 
   typedef enum logic { 
@@ -48,7 +48,8 @@ module address_map (
     MAP_2      = 3,
     MAP_2_DONE = 4,
     REQUEST    = 5,
-    DONE       = 6
+    DONE       = 6,
+    BARE_WB    = 7
   } state_t;
   state_t state;
 
@@ -69,6 +70,8 @@ module address_map (
 
   logic page_fault;
   logic user_code, user_data, kernel_code_1, kernel_code_2;
+
+  logic addr_valid_for_mapping;
 
   logic satp_mode;
   logic [31:0] page_table_1;
@@ -97,11 +100,14 @@ module address_map (
     user_data = (v_wb_adr_i >= `MIN_USER_DATA_ADDR && v_wb_adr_i <= `MAX_USER_DATA_ADDR);
     kernel_code_1 = (v_wb_adr_i >= `MIN_KERNEL_CODE_ADDR_1 && v_wb_adr_i <= `MAX_KERNEL_CODE_ADDR_1);
     kernel_code_2 = (v_wb_adr_i >= `MIN_KERNEL_CODE_ADDR_2 && v_wb_adr_i <= `MAX_KERNEL_CODE_ADDR_2);
-    page_fault = (mode_i == U_MODE) && v_wb_cyc_i && v_wb_stb_i && (satp_mode == SV32) && !(serial || user_code || user_data || kernel_code_1 || kernel_code_2);
+
+    addr_valid_for_mapping = (serial || user_code || user_data || kernel_code_1 || kernel_code_2);
+
+    page_fault = (mode_i == U_MODE) && (satp_mode == SV32) && v_wb_cyc_i && v_wb_stb_i && !addr_valid_for_mapping;
 
     page_fault_o = page_fault;
 
-    if (mode_i == M_MODE ||satp_mode == BARE || kernel_code_1 || kernel_code_2 || serial) begin // no translation
+    if (mode_i == M_MODE || satp_mode == BARE || serial) begin // no translation
       wb_cyc_o = v_wb_cyc_i;
       wb_stb_o = v_wb_stb_i;
       wb_adr_o = v_wb_adr_i;
@@ -110,7 +116,7 @@ module address_map (
       wb_we_o = v_wb_we_i;
       v_wb_ack_o = wb_ack_i;
       v_wb_dat_o = wb_dat_i;
-    end else if (satp_mode == SV32) begin // 32-bit sv32
+    end else begin // mode_i == S_MODE && satp_mode == SV32 && !serial
       wb_cyc_o = 1'b0;
       wb_stb_o = 1'b0;
       wb_adr_o = 32'h0000_0000;
@@ -174,16 +180,18 @@ module address_map (
           v_wb_ack_o = 1'b1; // becomes 1 when STATE_MAP_2 is over
           v_wb_dat_o = v_wb_we_i ? 32'h0000_0000 : sram_data;
         end
+
+        BARE_WB: begin
+          wb_cyc_o = v_wb_cyc_i;
+          wb_stb_o = v_wb_stb_i;
+          wb_adr_o = v_wb_adr_i;
+          wb_dat_o = v_wb_dat_i;
+          wb_sel_o = v_wb_sel_i;
+          wb_we_o = v_wb_we_i;
+          v_wb_ack_o = wb_ack_i;
+          v_wb_dat_o = wb_dat_i;
+        end
       endcase
-    end else begin // won't happen
-      wb_cyc_o = 1'b0;
-      wb_stb_o = 1'b0;
-      wb_adr_o = 32'h0000_0000;
-      wb_dat_o = 32'h0000_0000;
-      wb_sel_o = 4'b0000;
-      wb_we_o = 1'b0;
-      v_wb_ack_o = 1'b0;
-      v_wb_dat_o = 32'h0000_0000;
     end
   end
 
@@ -191,11 +199,12 @@ module address_map (
     if (rst_i) begin
       page_table_2 <= 32'h0000_0000;
       sram_data <= 32'h0000_0000;
-      state <= STAND_BY;
+      // state <= STAND_BY;
+      state <= BARE_WB;
     end else begin
       case (state)
-        STAND_BY: begin
-          if (satp_mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !page_fault && !kernel_code_1 && !kernel_code_2 && !serial) begin
+        STAND_BY: begin // transit to MAP_1 only when necessary
+          if (mode_i == U_MODE && satp_mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !page_fault && !serial) begin
             state <= MAP_1;
           end
         end
@@ -253,6 +262,16 @@ module address_map (
 
         DONE: begin
           state <= STAND_BY;
+        end
+
+        BARE_WB: begin // once paging is enabled, transit to STAND_BY after last wishbone request is done
+          if (wb_cyc_o == 1'b1 && wb_stb_o == 1'b1) begin // wishbone requestc on-going
+            if (satp_mode == SV32 && wb_ack_i == 1'b1) begin // don't interrupt
+              state <= STAND_BY;
+            end
+          end else if (satp_mode == SV32) begin
+            state <= STAND_BY;
+          end
         end
       endcase
     end
