@@ -50,10 +50,11 @@ module tb;
   `define DWN_FENCE_I "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\rvtests_simple\\rv32ui-p-fence_i.bin"
   `define DWN_LAB6_FENCE_I "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\lab6_fence_i.bin"
   `define DWN_KERNEL_ONLINE "D:\\rv-2023\\supervisor-rv\\kernel\\kernel-rv32-no16550.bin"
+  `define DWN_KERNEL_PAGING "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\assembly\\kernel_paging.bin"
   `define WJL "D:\\Codefield\\cod23-grp53\\rvtests_simple\\testall.bin"
   `define YJX_KERNEL "D:\\rv-2023\\supervisor-rv\\kernel\\kernel.bin"
   // parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin";
-  parameter BASE_RAM_INIT_FILE = `DWN; // dwn
+  parameter BASE_RAM_INIT_FILE = `DWN_KERNEL_PAGING; // dwn
   // parameter BASE_RAM_INIT_FILE = `YJX_KERNEL; // yjx
   parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
@@ -70,7 +71,7 @@ module tb;
     #100;
     reset_btn = 0;
 
-    // #3500000;
+    #3500000
 
     // $display("test D");
     // // send 'D' to uart
@@ -119,8 +120,8 @@ module tb;
     // #10000;
     // uart.pc_send_byte(8'h80);
     // #10000;
-    // #8000000 $finish;
-    #400000 $finish; // lab6
+    #8000000 $finish;
+    // #400000 $finish; // lab6
   end
 
   // 待测试用户设�??

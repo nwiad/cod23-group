@@ -58,6 +58,8 @@ module address_map (
   `define MAX_KERNEL_CODE_ADDR_2 32'h80100FFF
   // otherwise triggers exception
 
+  logic serial;
+
   logic page_fault;
   logic user_code, user_data, kernel_code_1, kernel_code_2;
 
@@ -82,15 +84,17 @@ module address_map (
     pte_addr_1 = page_table_1 + (vpn_1 << 2);
     pte_addr_2 = page_table_2 + (vpn_0 << 2) ;
 
+    serial = (v_wb_adr_i == 32'h1000_0000 || v_wb_adr_i == 32'h1000_0005);
+
     user_code = (v_wb_adr_i >= `MIN_USER_CODE_ADDR && v_wb_adr_i <= `MAX_USER_CODE_ADDR);
     user_data = (v_wb_adr_i >= `MIN_USER_DATA_ADDR && v_wb_adr_i <= `MAX_USER_DATA_ADDR);
     kernel_code_1 = (v_wb_adr_i >= `MIN_KERNEL_CODE_ADDR_1 && v_wb_adr_i <= `MAX_KERNEL_CODE_ADDR_1);
     kernel_code_2 = (v_wb_adr_i >= `MIN_KERNEL_CODE_ADDR_2 && v_wb_adr_i <= `MAX_KERNEL_CODE_ADDR_2);
-    page_fault = v_wb_cyc_i && v_wb_stb_i && (mode == SV32) && !(user_code || user_data || kernel_code_1 || kernel_code_2);
+    page_fault = v_wb_cyc_i && v_wb_stb_i && (mode == SV32) && !(serial || user_code || user_data || kernel_code_1 || kernel_code_2);
 
     page_fault_o = page_fault;
 
-    if (mode == BARE) begin // no translation
+    if (mode == BARE || kernel_code_1 || kernel_code_2 || serial) begin // no translation
       wb_cyc_o = v_wb_cyc_i;
       wb_stb_o = v_wb_stb_i;
       wb_adr_o = v_wb_adr_i;
@@ -184,7 +188,7 @@ module address_map (
     end else begin
       case (state)
         STAND_BY: begin
-          if (mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !page_fault) begin
+          if (mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !page_fault && !kernel_code_1 && !kernel_code_2 && !serial) begin
             state <= MAP_1;
           end
         end
