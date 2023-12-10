@@ -420,13 +420,13 @@ module exe_controller #(
       end
 
       if (mtime_int_comb == 1) begin
-        pc_result_reg <= rf_rdata_csr;
+        pc_result_for_IF_o <= rf_rdata_csr;
       end else if (EXE_is_branch_o && !branch_eq) begin
         pc_result_for_IF_o <= pc_now_i + 4;
       end else if (branch_i == 3'b100) begin
         pc_result_for_IF_o <= rf_rdata_a_real + imm_i;
       end else if (branch_i == 3'b110 || branch_i == 3'b101) begin
-        pc_result_reg <= rf_rdata_csr;
+        pc_result_for_IF_o <= rf_rdata_csr;
       end else begin
         pc_result_for_IF_o <= pc_now_i + imm_i;
       end
