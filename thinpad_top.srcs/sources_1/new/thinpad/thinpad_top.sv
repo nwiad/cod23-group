@@ -119,8 +119,7 @@ module thinpad_top (
   assign uart_rdn = 1'b1;
   assign uart_wrn = 1'b1;
 
-  /* =========== Lab6 Master begin =========== */
-  // Lab6 Master => Wishbone MUX (Slave)
+  /* =========== Master begin =========== */
   logic IF_wbm_cyc_o;
   logic IF_wbm_stb_o;
   logic IF_wbm_ack_i;
@@ -138,6 +137,8 @@ module thinpad_top (
   logic [31:0] MEM_wbm_dat_i;
   logic [ 3:0] MEM_wbm_sel_o;
   logic MEM_wbm_we_o;
+
+  logic [31:0] satp;
 
   thinpad_master #(
       .ADDR_WIDTH(32),
@@ -166,63 +167,110 @@ module thinpad_top (
       .MEM_wb_sel_o(MEM_wbm_sel_o),
       .MEM_wb_we_o(MEM_wbm_we_o),
 
-      .mtime_int_i(mtime_int)
+      .mtime_int_i(mtime_int),
+
+      .satp_o(satp),
+
+      .page_fault_i(page_fault)
   );
 
-  /* =========== Lab6 Master end =========== */
+  /* =========== Master end =========== */
 
-  /* =========== Lab6 Arbiter begin =========== */
-    logic        wbm_cyc_o;
-    logic        wbm_stb_o;
-    logic        wbm_ack_i;
-    logic [31:0] wbm_adr_o;
-    logic [31:0] wbm_dat_o;
-    logic [31:0] wbm_dat_i;
-    logic [ 3:0] wbm_sel_o;
-    logic        wbm_we_o;
-    wb_arbiter_2 u_wb_arbiter_2 (
-      .clk(sys_clk),
-      .rst(sys_rst),
+  /* =========== Arbiter begin =========== */
+  logic        wbm_cyc_o;
+  logic        wbm_stb_o;
+  logic        wbm_ack_i;
+  logic [31:0] wbm_adr_o;
+  logic [31:0] wbm_dat_o;
+  logic [31:0] wbm_dat_i;
+  logic [ 3:0] wbm_sel_o;
+  logic        wbm_we_o;
+  wb_arbiter_2 u_wb_arbiter_2 (
+    .clk(sys_clk),
+    .rst(sys_rst),
 
-      // Master interface (to Lab6 master)
-      .wbm0_adr_i(IF_wbm_adr_o),
-      .wbm0_dat_i(IF_wbm_dat_o),
-      .wbm0_dat_o(IF_wbm_dat_i),
-      .wbm0_we_i (IF_wbm_we_o),
-      .wbm0_sel_i(IF_wbm_sel_o),
-      .wbm0_stb_i(IF_wbm_stb_o),
-      .wbm0_ack_o(IF_wbm_ack_i),
-      .wbm0_err_o(),
-      .wbm0_rty_o(),
-      .wbm0_cyc_i(IF_wbm_cyc_o),
+    // Master interface (to Lab6 master)
+    .wbm0_adr_i(IF_wbm_adr_o),
+    .wbm0_dat_i(IF_wbm_dat_o),
+    .wbm0_dat_o(IF_wbm_dat_i),
+    .wbm0_we_i (IF_wbm_we_o),
+    .wbm0_sel_i(IF_wbm_sel_o),
+    .wbm0_stb_i(IF_wbm_stb_o),
+    .wbm0_ack_o(IF_wbm_ack_i),
+    .wbm0_err_o(),
+    .wbm0_rty_o(),
+    .wbm0_cyc_i(IF_wbm_cyc_o),
 
-      .wbm1_adr_i(MEM_wbm_adr_o),
-      .wbm1_dat_i(MEM_wbm_dat_o),
-      .wbm1_dat_o(MEM_wbm_dat_i),
-      .wbm1_we_i (MEM_wbm_we_o),
-      .wbm1_sel_i(MEM_wbm_sel_o),
-      .wbm1_stb_i(MEM_wbm_stb_o),
-      .wbm1_ack_o(MEM_wbm_ack_i),
-      .wbm1_err_o(),
-      .wbm1_rty_o(),
-      .wbm1_cyc_i(MEM_wbm_cyc_o),
+    .wbm1_adr_i(MEM_wbm_adr_o),
+    .wbm1_dat_i(MEM_wbm_dat_o),
+    .wbm1_dat_o(MEM_wbm_dat_i),
+    .wbm1_we_i (MEM_wbm_we_o),
+    .wbm1_sel_i(MEM_wbm_sel_o),
+    .wbm1_stb_i(MEM_wbm_stb_o),
+    .wbm1_ack_o(MEM_wbm_ack_i),
+    .wbm1_err_o(),
+    .wbm1_rty_o(),
+    .wbm1_cyc_i(MEM_wbm_cyc_o),
 
-      // Slave interface (to MUX)
-      .wbs_cyc_o(wbm_cyc_o),
-      .wbs_dat_i(wbm_dat_i),
-      .wbs_dat_o(wbm_dat_o),
-      .wbs_we_o (wbm_we_o),
-      .wbs_sel_o(wbm_sel_o),
-      .wbs_stb_o(wbm_stb_o),
-      .wbs_ack_i(wbm_ack_i),
-      .wbs_err_i('0),
-      .wbs_rty_i('0),
-      .wbs_adr_o(wbm_adr_o)
-    );
-  /* =========== Lab6 Arbiter end =========== */
+    // Slave interface (to address map)
+    .wbs_cyc_o(wbm_cyc_o),
+    .wbs_dat_i(wbm_dat_i),
+    .wbs_dat_o(wbm_dat_o),
+    .wbs_we_o (wbm_we_o),
+    .wbs_sel_o(wbm_sel_o),
+    .wbs_stb_o(wbm_stb_o),
+    .wbs_ack_i(wbm_ack_i),
+    .wbs_err_i('0),
+    .wbs_rty_i('0),
+    .wbs_adr_o(wbm_adr_o)
+  );
+  /* =========== Arbiter end =========== */
 
-  /* =========== Lab6 MUX begin =========== */
-  // Wishbone MUX (Masters) => bus slaves
+  /* =========== Address Map begin =========== */
+  logic mapped_cyc_o;
+  logic mapped_stb_o;
+  logic mapped_ack_i;
+  logic [31:0] mapped_adr_o;
+  logic [31:0] mapped_dat_o;
+  logic [31:0] mapped_dat_i;
+  logic [ 3:0] mapped_sel_o;
+  logic mapped_we_o;
+
+  logic page_fault;
+
+  address_map u_address_map (
+    .clk_i(sys_clk),
+    .rst_i(sys_rst),
+
+    // from arbiter
+    .v_wb_cyc_i(wbm_cyc_o),
+    .v_wb_stb_i(wbm_stb_o),
+    .v_wb_ack_o(wbm_ack_i),
+    .v_wb_adr_i(wbm_adr_o),
+    .v_wb_dat_i(wbm_dat_o),
+    .v_wb_dat_o(wbm_dat_i),
+    .v_wb_sel_i(wbm_sel_o),
+    .v_wb_we_i (wbm_we_o),
+
+    // to MUX
+    .wb_cyc_o(mapped_cyc_o),
+    .wb_stb_o(mapped_stb_o),
+    .wb_ack_i(mapped_ack_i),
+    .wb_adr_o(mapped_adr_o),
+    .wb_dat_o(mapped_dat_o),
+    .wb_dat_i(mapped_dat_i),
+    .wb_sel_o(mapped_sel_o),
+    .wb_we_o (mapped_we_o),
+
+    // satp
+    .satp_i(satp),
+
+    // page fault
+    .page_fault_o(page_fault)
+  );
+  /* =========== Address Map end =========== */
+
+  /* =========== MUX begin =========== */
   logic wbs0_cyc_o;
   logic wbs0_stb_o;
   logic wbs0_ack_i;
@@ -263,17 +311,17 @@ module thinpad_top (
       .clk(sys_clk),
       .rst(sys_rst),
 
-      // Master interface (to Lab6 master)
-      .wbm_adr_i(wbm_adr_o),
-      .wbm_dat_i(wbm_dat_o),
-      .wbm_dat_o(wbm_dat_i),
-      .wbm_we_i (wbm_we_o),
-      .wbm_sel_i(wbm_sel_o),
-      .wbm_stb_i(wbm_stb_o),
-      .wbm_ack_o(wbm_ack_i),
+      // Master interface (to address map)
+      .wbm_adr_i(mapped_adr_o),
+      .wbm_dat_i(mapped_dat_o),
+      .wbm_dat_o(mapped_dat_i),
+      .wbm_we_i (mapped_we_o),
+      .wbm_sel_i(mapped_sel_o),
+      .wbm_stb_i(mapped_stb_o),
+      .wbm_ack_o(mapped_ack_i),
       .wbm_err_o(),
       .wbm_rty_o(),
-      .wbm_cyc_i(wbm_cyc_o),
+      .wbm_cyc_i(mapped_cyc_o),
 
       // Slave interface 0 (to BaseRAM controller)
       // Address range: 0x8000_0000 ~ 0x803F_FFFF
@@ -343,9 +391,9 @@ module thinpad_top (
       .wbs3_cyc_o(wbs3_cyc_o)
   );
 
-  /* =========== Lab6 MUX end =========== */
+  /* =========== MUX end =========== */
 
-  /* =========== Lab6 Slaves begin =========== */
+  /* =========== Slaves begin =========== */
   sram_controller #(
       .SRAM_ADDR_WIDTH(20),
       .SRAM_DATA_WIDTH(32)
@@ -437,6 +485,6 @@ module thinpad_top (
       .mtime_int_o(mtime_int)
   );
 
-  /* =========== Lab6 Slaves end =========== */
+  /* =========== Slaves end =========== */
 
 endmodule

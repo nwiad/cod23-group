@@ -19,7 +19,9 @@ module csrfile32(
   output reg[31:0] rdata_2,
 
   input wire mtime_int_i,
-  output reg mtime_int_o
+  output reg mtime_int_o,
+
+  output reg [31:0] satp_o
 );
 
 // todo:
@@ -32,6 +34,7 @@ reg [31:0] mcause;//0x342
 reg [31:0] mstatus;//0x300 MPP[1:0] => 12:11
 reg [31:0] mie;//0x304 MTIE：7
 reg [31:0] mip;//0x344 MTIP：7
+reg [31:0] satp; //0x180 MODE[0] => 31
 // Bits mip.MTIP and mie.MTIE are the interrupt-pending and interrupt-enable bits for machine
 // timer interrupts. MTIP is read-only in mip, and is cleared by writing to the memory-mapped
 // machine-mode timer compare register.
@@ -44,6 +47,7 @@ always_ff @ (posedge clk or posedge reset) begin
     mcause <= 0; 
     mstatus <= 0;
     mie <= 0;
+    satp <= 0;
   end else begin
     if(we_1) begin
       case(waddr_1)
@@ -53,6 +57,7 @@ always_ff @ (posedge clk or posedge reset) begin
         12'h342: mcause <= wdata_1;
         12'h300: mstatus[12:11] <= wdata_1[12:11];
         12'h304: mie[7] <= wdata_1[7];
+        12'h180: satp <= wdata_1;
       endcase
     end else if (we_2) begin
       case(waddr_2)
@@ -62,6 +67,7 @@ always_ff @ (posedge clk or posedge reset) begin
         12'h342: mcause <= wdata_2;
         12'h300: mstatus[12:11] <= wdata_2[12:11];
         12'h304: mie[7] <= wdata_2[7];
+        12'h180: satp <= wdata_1;
       endcase
     end
   end
@@ -85,6 +91,7 @@ always_comb begin
   end else begin
     mtime_int_o = 0;
   end
+  satp_o = satp;
 end
 
 always_comb begin
@@ -96,6 +103,7 @@ always_comb begin
     12'h300: rdata_1 = mstatus;  //U
     12'h304: rdata_1 = mie;
     12'h344: rdata_1 = mip;
+    12'h180: rdata_1 = satp;
     default: rdata_1 = 0;
   endcase
 
@@ -107,6 +115,7 @@ always_comb begin
     12'h300: rdata_2 = mstatus;  //U
     12'h304: rdata_2 = mie;
     12'h344: rdata_2 = mip;
+    12'h180: rdata_1 = satp;
     default: rdata_2 = 0;
   endcase
 end

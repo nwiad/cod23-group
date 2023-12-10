@@ -28,7 +28,11 @@ module thinpad_master #(
     output reg MEM_wb_we_o,
 
     // 时钟中断
-    input reg mtime_int_i
+    input reg mtime_int_i,
+
+    output reg [31:0] satp_o,
+
+    input wire page_fault_i
 );
   // exception handler
   logic [1:0] mode;
@@ -69,7 +73,9 @@ module thinpad_master #(
     .we_2(EXE_rf_we_csr),
 
     .mtime_int_i(mtime_int_i),
-    .mtime_int_o(mtime_int_o)
+    .mtime_int_o(mtime_int_o),
+    
+    .satp_o(satp_o)
   );
 
 

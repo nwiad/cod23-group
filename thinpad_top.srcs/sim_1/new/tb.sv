@@ -52,10 +52,9 @@ module tb;
   `define DWN_KERNEL_ONLINE "D:\\rv-2023\\supervisor-rv\\kernel\\kernel-rv32-no16550.bin"
   `define WJL "D:\\Codefield\\cod23-grp53\\rvtests_simple\\testall.bin"
   `define YJX_KERNEL "D:\\rv-2023\\supervisor-rv\\kernel\\kernel.bin"
-  // parameter BASE_RAM_INIT_FILE = "D:\\Codefield\\ComputerOrganization\\rv-2023\\asmcode\\test.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�?
   // parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin";
-  // parameter BASE_RAM_INIT_FILE = `WJL; // dwn
-  parameter BASE_RAM_INIT_FILE = `YJX_KERNEL; // yjx
+  parameter BASE_RAM_INIT_FILE = `DWN; // dwn
+  // parameter BASE_RAM_INIT_FILE = `YJX_KERNEL; // yjx
   parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
 
@@ -71,57 +70,57 @@ module tb;
     #100;
     reset_btn = 0;
 
-    #3500000;
+    // #3500000;
 
-    $display("test D");
-    // send 'D' to uart
-    uart.pc_send_byte(8'h44); // ASCII 'D'
-    // send 0x80100000 to uart
-    #10000;
-    $display("send 0x00");
-    uart.pc_send_byte(8'h00);
-    #10000;
-    $display("send 0x00");
-    uart.pc_send_byte(8'h00);
-    #10000;
-    $display("send 0x10");
-    uart.pc_send_byte(8'h10);
-    #10000;
-    $display("send 0x80");
-    uart.pc_send_byte(8'h80);
+    // $display("test D");
+    // // send 'D' to uart
+    // uart.pc_send_byte(8'h44); // ASCII 'D'
+    // // send 0x80100000 to uart
+    // #10000;
+    // $display("send 0x00");
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("send 0x00");
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("send 0x10");
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // $display("send 0x80");
+    // uart.pc_send_byte(8'h80);
 
-    // send 0x0000_0090 to uart
-    #10000;
-    $display("send 0x90");
-    uart.pc_send_byte(8'h90);
-    #10000;
-    $display("send 0x00");
-    uart.pc_send_byte(8'h00);
-    #10000;
-    $display("send 0x00");
-    uart.pc_send_byte(8'h00);
-    #10000;
-    $display("send 0x00");
-    uart.pc_send_byte(8'h00);
+    // // send 0x0000_0090 to uart
+    // #10000;
+    // $display("send 0x90");
+    // uart.pc_send_byte(8'h90);
+    // #10000;
+    // $display("send 0x00");
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("send 0x00");
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("send 0x00");
+    // uart.pc_send_byte(8'h00);
   
-    // // 模拟 PC 通过直连串口，向 FPGA 发�?�字�?
-    // uart.pc_send_byte(8'h32); // ASCII '2'
-    #3500000;
-    // uart.pc_send_byte(8'h33); // ASCII '3'
-    uart.pc_send_byte(8'h47); // ASCII 'G'
-    #10000;
-    //800010a8
-    uart.pc_send_byte(8'hc0);
-    // uart.pc_send_byte(8'ha8);
-    #10000;
-    uart.pc_send_byte(8'h10);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h80);
-    #10000;
-    #8000000 $finish;
-    // #400000 $finish; // dwn
+    // // // 模拟 PC 通过直连串口，向 FPGA 发�?�字�?
+    // // uart.pc_send_byte(8'h32); // ASCII '2'
+    // #3500000;
+    // // uart.pc_send_byte(8'h33); // ASCII '3'
+    // uart.pc_send_byte(8'h47); // ASCII 'G'
+    // #10000;
+    // //800010a8
+    // uart.pc_send_byte(8'hc0);
+    // // uart.pc_send_byte(8'ha8);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // #8000000 $finish;
+    #400000 $finish; // lab6
   end
 
   // 待测试用户设�??
