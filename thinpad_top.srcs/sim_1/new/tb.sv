@@ -71,7 +71,23 @@ module tb;
     #100;
     reset_btn = 0;
 
-    #3500000
+    #6000000 // 启用页表后打印欢迎信息至少要等待的时间
+
+    $display("test G");
+    uart.pc_send_byte(8'h47); // ASCII 'G'
+    #10000;
+    // 0x7fc1_0000
+    $display("send 0x00");
+    uart.pc_send_byte(8'h00);
+    #10000;
+    $display("send 0x00");
+    uart.pc_send_byte(8'h00);
+    #10000;
+    $display("send 0xc1");
+    uart.pc_send_byte(8'hc1);
+    #10000;
+    $display("send 0x7f");
+    uart.pc_send_byte(8'h7f);
 
     // $display("test D");
     // // send 'D' to uart

@@ -26,13 +26,20 @@ module address_map (
 
   input wire [31:0] satp_i, // satp register
 
+  input wire [1:0] mode_i, // mode
+
   output reg page_fault_o
 );
+
+  typedef enum logic [1:0] {
+    U_MODE = 2'b00,
+    M_MODE = 2'b11
+  } mode_t;
 
   typedef enum logic { 
     BARE = 0, // no translation
     SV32 = 1 // 32-bit sv32
-  } mode_t;
+  } satp_mode_t;
 
   typedef enum logic [3:0] {
     STAND_BY   = 0,
@@ -63,7 +70,7 @@ module address_map (
   logic page_fault;
   logic user_code, user_data, kernel_code_1, kernel_code_2;
 
-  logic mode;
+  logic satp_mode;
   logic [31:0] page_table_1;
   logic [31:0] vpn_1, vpn_0; // virtual page number
   logic [31:0] vpo; // virtual page offset
@@ -75,7 +82,7 @@ module address_map (
   reg [31:0] sram_data;
 
   always_comb begin
-    mode = satp_i[31];
+    satp_mode = satp_i[31];
     page_table_1 = satp_i[19:0] << 12;
     vpn_1 = v_wb_adr_i[31:22];
     vpn_0 = v_wb_adr_i[21:12];
@@ -90,11 +97,11 @@ module address_map (
     user_data = (v_wb_adr_i >= `MIN_USER_DATA_ADDR && v_wb_adr_i <= `MAX_USER_DATA_ADDR);
     kernel_code_1 = (v_wb_adr_i >= `MIN_KERNEL_CODE_ADDR_1 && v_wb_adr_i <= `MAX_KERNEL_CODE_ADDR_1);
     kernel_code_2 = (v_wb_adr_i >= `MIN_KERNEL_CODE_ADDR_2 && v_wb_adr_i <= `MAX_KERNEL_CODE_ADDR_2);
-    page_fault = v_wb_cyc_i && v_wb_stb_i && (mode == SV32) && !(serial || user_code || user_data || kernel_code_1 || kernel_code_2);
+    page_fault = (mode_i == U_MODE) && v_wb_cyc_i && v_wb_stb_i && (satp_mode == SV32) && !(serial || user_code || user_data || kernel_code_1 || kernel_code_2);
 
     page_fault_o = page_fault;
 
-    if (mode == BARE || kernel_code_1 || kernel_code_2 || serial) begin // no translation
+    if (mode_i == M_MODE ||satp_mode == BARE || kernel_code_1 || kernel_code_2 || serial) begin // no translation
       wb_cyc_o = v_wb_cyc_i;
       wb_stb_o = v_wb_stb_i;
       wb_adr_o = v_wb_adr_i;
@@ -103,7 +110,7 @@ module address_map (
       wb_we_o = v_wb_we_i;
       v_wb_ack_o = wb_ack_i;
       v_wb_dat_o = wb_dat_i;
-    end else if (mode == SV32) begin // 32-bit sv32
+    end else if (satp_mode == SV32) begin // 32-bit sv32
       wb_cyc_o = 1'b0;
       wb_stb_o = 1'b0;
       wb_adr_o = 32'h0000_0000;
@@ -188,7 +195,7 @@ module address_map (
     end else begin
       case (state)
         STAND_BY: begin
-          if (mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !page_fault && !kernel_code_1 && !kernel_code_2 && !serial) begin
+          if (satp_mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !page_fault && !kernel_code_1 && !kernel_code_2 && !serial) begin
             state <= MAP_1;
           end
         end
@@ -198,7 +205,7 @@ module address_map (
             state <= STAND_BY;
           end else begin
             if (wb_ack_i == 1'b1) begin
-              page_table_2 <= wb_dat_i[31:12] << 12;
+              page_table_2 <= wb_dat_i[31:10] << 12;
               state <= MAP_1_DONE;
             end
           end
@@ -217,7 +224,7 @@ module address_map (
             state <= STAND_BY;
           end else begin
             if (wb_ack_i == 1'b1) begin
-              ppn <= wb_dat_i[31:12];
+              ppn <= wb_dat_i[31:10];
               state <= MAP_2_DONE;
             end
           end

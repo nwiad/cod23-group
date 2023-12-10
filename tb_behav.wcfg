@@ -11,15 +11,175 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="4108470000fs"></ZoomStartTime>
-      <ZoomEndTime time="4115670001fs"></ZoomEndTime>
-      <Cursor1Time time="4112710000fs"></Cursor1Time>
+      <ZoomStartTime time="5590410870fs"></ZoomStartTime>
+      <ZoomEndTime time="5596510871fs"></ZoomEndTime>
+      <Cursor1Time time="5595494204fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="297"></NameColumnWidth>
-      <ValueColumnWidth column_width="191"></ValueColumnWidth>
+      <NameColumnWidth column_width="153"></NameColumnWidth>
+      <ValueColumnWidth column_width="155"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="172" />
+   <WVObjectSize size="212" />
+   <wvobject fp_name="/tb/dut/u_address_map/clk_i" type="logic">
+      <obj_property name="ElementShortName">clk_i</obj_property>
+      <obj_property name="ObjectShortName">clk_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/rst_i" type="logic">
+      <obj_property name="ElementShortName">rst_i</obj_property>
+      <obj_property name="ObjectShortName">rst_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/wbm_cyc_o" type="logic">
+      <obj_property name="ElementShortName">wbm_cyc_o</obj_property>
+      <obj_property name="ObjectShortName">wbm_cyc_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/wbm_stb_o" type="logic">
+      <obj_property name="ElementShortName">wbm_stb_o</obj_property>
+      <obj_property name="ObjectShortName">wbm_stb_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/v_wb_cyc_i" type="logic">
+      <obj_property name="ElementShortName">v_wb_cyc_i</obj_property>
+      <obj_property name="ObjectShortName">v_wb_cyc_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/v_wb_stb_i" type="logic">
+      <obj_property name="ElementShortName">v_wb_stb_i</obj_property>
+      <obj_property name="ObjectShortName">v_wb_stb_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/v_wb_ack_o" type="logic">
+      <obj_property name="ElementShortName">v_wb_ack_o</obj_property>
+      <obj_property name="ObjectShortName">v_wb_ack_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/v_wb_adr_i" type="array">
+      <obj_property name="ElementShortName">v_wb_adr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">v_wb_adr_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/v_wb_dat_i" type="array">
+      <obj_property name="ElementShortName">v_wb_dat_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">v_wb_dat_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/v_wb_dat_o" type="array">
+      <obj_property name="ElementShortName">v_wb_dat_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">v_wb_dat_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/v_wb_sel_i" type="array">
+      <obj_property name="ElementShortName">v_wb_sel_i[3:0]</obj_property>
+      <obj_property name="ObjectShortName">v_wb_sel_i[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/v_wb_we_i" type="logic">
+      <obj_property name="ElementShortName">v_wb_we_i</obj_property>
+      <obj_property name="ObjectShortName">v_wb_we_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/wb_cyc_o" type="logic">
+      <obj_property name="ElementShortName">wb_cyc_o</obj_property>
+      <obj_property name="ObjectShortName">wb_cyc_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/wb_stb_o" type="logic">
+      <obj_property name="ElementShortName">wb_stb_o</obj_property>
+      <obj_property name="ObjectShortName">wb_stb_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/wb_ack_i" type="logic">
+      <obj_property name="ElementShortName">wb_ack_i</obj_property>
+      <obj_property name="ObjectShortName">wb_ack_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/wb_adr_o" type="array">
+      <obj_property name="ElementShortName">wb_adr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_adr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/wb_dat_o" type="array">
+      <obj_property name="ElementShortName">wb_dat_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_dat_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/wb_dat_i" type="array">
+      <obj_property name="ElementShortName">wb_dat_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_dat_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/wb_sel_o" type="array">
+      <obj_property name="ElementShortName">wb_sel_o[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_sel_o[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/wb_we_o" type="logic">
+      <obj_property name="ElementShortName">wb_we_o</obj_property>
+      <obj_property name="ObjectShortName">wb_we_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/satp_i" type="array">
+      <obj_property name="ElementShortName">satp_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">satp_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/page_fault_o" type="logic">
+      <obj_property name="ElementShortName">page_fault_o</obj_property>
+      <obj_property name="ObjectShortName">page_fault_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/state" type="array">
+      <obj_property name="ElementShortName">state[3:0]</obj_property>
+      <obj_property name="ObjectShortName">state[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/serial" type="logic">
+      <obj_property name="ElementShortName">serial</obj_property>
+      <obj_property name="ObjectShortName">serial</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/page_fault" type="logic">
+      <obj_property name="ElementShortName">page_fault</obj_property>
+      <obj_property name="ObjectShortName">page_fault</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/user_code" type="logic">
+      <obj_property name="ElementShortName">user_code</obj_property>
+      <obj_property name="ObjectShortName">user_code</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/user_data" type="logic">
+      <obj_property name="ElementShortName">user_data</obj_property>
+      <obj_property name="ObjectShortName">user_data</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/kernel_code_1" type="logic">
+      <obj_property name="ElementShortName">kernel_code_1</obj_property>
+      <obj_property name="ObjectShortName">kernel_code_1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/kernel_code_2" type="logic">
+      <obj_property name="ElementShortName">kernel_code_2</obj_property>
+      <obj_property name="ObjectShortName">kernel_code_2</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/mode" type="logic">
+      <obj_property name="ElementShortName">mode</obj_property>
+      <obj_property name="ObjectShortName">mode</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/page_table_1" type="array">
+      <obj_property name="ElementShortName">page_table_1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">page_table_1[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/vpn_1" type="array">
+      <obj_property name="ElementShortName">vpn_1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">vpn_1[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/vpn_0" type="array">
+      <obj_property name="ElementShortName">vpn_0[31:0]</obj_property>
+      <obj_property name="ObjectShortName">vpn_0[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/vpo" type="array">
+      <obj_property name="ElementShortName">vpo[31:0]</obj_property>
+      <obj_property name="ObjectShortName">vpo[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/ppo" type="array">
+      <obj_property name="ElementShortName">ppo[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ppo[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/pte_addr_1" type="array">
+      <obj_property name="ElementShortName">pte_addr_1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pte_addr_1[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/pte_addr_2" type="array">
+      <obj_property name="ElementShortName">pte_addr_2[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pte_addr_2[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/page_table_2" type="array">
+      <obj_property name="ElementShortName">page_table_2[31:0]</obj_property>
+      <obj_property name="ObjectShortName">page_table_2[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/ppn" type="array">
+      <obj_property name="ElementShortName">ppn[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ppn[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_address_map/sram_data" type="array">
+      <obj_property name="ElementShortName">sram_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">sram_data[31:0]</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb/dut/u_thinpad_master/clk_i" type="logic">
       <obj_property name="ElementShortName">clk_i</obj_property>
       <obj_property name="ObjectShortName">clk_i</obj_property>
@@ -655,6 +815,7 @@
    <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf" type="array">
       <obj_property name="ElementShortName">rf[31:0][31:0]</obj_property>
       <obj_property name="ObjectShortName">rf[31:0][31:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/is_exception_i" type="logic">
       <obj_property name="ElementShortName">is_exception_i</obj_property>

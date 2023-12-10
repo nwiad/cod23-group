@@ -140,6 +140,8 @@ module thinpad_top (
 
   logic [31:0] satp;
 
+  logic [1:0] mode;
+
   thinpad_master #(
       .ADDR_WIDTH(32),
       .DATA_WIDTH(32)
@@ -170,6 +172,8 @@ module thinpad_top (
       .mtime_int_i(mtime_int),
 
       .satp_o(satp),
+
+      .mode_o(mode),
 
       .page_fault_i(page_fault)
   );
@@ -264,6 +268,9 @@ module thinpad_top (
 
     // satp
     .satp_i(satp),
+
+    // mode
+    .mode_i(mode),
 
     // page fault
     .page_fault_o(page_fault)

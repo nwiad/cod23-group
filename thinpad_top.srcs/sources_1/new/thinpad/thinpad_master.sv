@@ -32,10 +32,15 @@ module thinpad_master #(
 
     output reg [31:0] satp_o,
 
+    output reg [1:0] mode_o,
+
     input wire page_fault_i
 );
   // exception handler
   logic [1:0] mode;
+  always_comb begin
+    mode_o = mode;
+  end
   logic ID_EXE_is_exception;
   logic [31:0] ID_EXE_exception_cause;
 
