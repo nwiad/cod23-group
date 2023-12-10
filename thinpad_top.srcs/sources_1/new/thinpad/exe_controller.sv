@@ -179,7 +179,6 @@ module exe_controller #(
 
   logic branch_eq_csr, branch_eq_no_csr;
   logic branch_eq;
-  logic branch_eq_X;
 
   always_ff @(posedge clk_i) begin
     last_stall <= stall_i;
@@ -264,7 +263,7 @@ module exe_controller #(
     branch_eq_no_csr = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
     branch_eq_csr = (is_exception_comb == 1 && exp_done) || (branch_i == 3'b101);
     branch_eq = branch_eq_csr || branch_eq_no_csr;
-    branch_eq_o = branch_eq;
+    branch_eq_o = branch_eq_no_csr;
     // if (branch_eq_X) begin
     //   branch_eq = 1'b0;
     // end
@@ -324,7 +323,7 @@ module exe_controller #(
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
-    if ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i) || branch_eq_X || clear_icache_i) begin
+    if ((branch_eq_no_csr && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq_no_csr && ID_take_predict_i) || clear_icache_i) begin
       flush_o = 1'b1;
     end else begin
       flush_o = 1'b0;
@@ -427,12 +426,12 @@ module exe_controller #(
         pc_result_for_IF_o <= pc_now_i + imm_i;
       end
       imm_reg <= imm_i;
-      if (((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) === 1'b1 ||| ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) === 1'b0) begin
-        branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
-      end else begin
-        branch_reg <= 1'b1;
-      end
-      // branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
+      // if (((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) === 1'b1 || ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) === 1'b0) begin
+      //   branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
+      // end else begin
+      //   branch_reg <= 1'b1;
+      // end
+      branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
       
       // csr
       alu_result_csr_reg <= alu_result_csr;
