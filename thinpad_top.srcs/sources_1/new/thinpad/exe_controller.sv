@@ -16,6 +16,7 @@ module exe_controller #(
     input wire mode_i,
     input wire [31:0] satp_i,
 
+    //exception
     input wire inst_page_fault_i,
     input wire [31:0] inst_mcause_i, // 0xc when inst_page_fault_i is 1
 
@@ -305,8 +306,17 @@ module exe_controller #(
 
     //exception
     mtime_int_comb = mtime_int && !mtime_int_lock;
-    is_exception_comb = is_exception_i || (mtime_int_comb);
-    exception_cause_reg = mtime_int_comb ? 32'b1000_0000_0000_0000_0000_0000_0000_0111 : exception_cause_i;
+    is_exception_comb = is_exception_i || mtime_int_comb || inst_page_fault_i || mem_page_fault;
+    if (mtime_int_comb) begin
+      exception_cause_reg = 32'b1000_0000_0000_0000_0000_0000_0000_0111; 
+    end else if (is_exception_i) begin
+      exception_cause_reg = exception_cause_i;
+    end else if (inst_page_fault_i) begin
+      exception_cause_reg = inst_mcause_i;
+    end else if (mem_page_fault) begin
+      exception_cause_reg = mem_mcause;
+    end
+    // exception_cause_reg = mtime_int_comb ? 32'b1000_0000_0000_0000_0000_0000_0000_0111 : exception_cause_i;
     // exception_cause_reg = is_exception_i ? exception_cause_i : 32'b1000_0000_0000_0000_0000_0000_0000_0111;
   end
 
