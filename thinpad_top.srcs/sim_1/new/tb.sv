@@ -51,11 +51,11 @@ module tb;
   `define DWN_LAB6_FENCE_I "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\lab6_fence_i.bin"
   `define DWN_KERNEL_ONLINE "D:\\rv-2023\\supervisor-rv\\kernel\\kernel-rv32-no16550.bin"
   `define DWN_KERNEL_PAGING "D:\\Codefield\\Code_SystemVerilog\\cod23-grp53\\assembly\\kernel_paging.bin"
-  `define WJL_KERNEL_PAGING "D:\\Codefield\\ComputerOrganization\\rv-2023\\supervisor-rv\\kernel\\kernel.bin"
+  `define WJL_KERNEL_PAGING "D:\\Codefield\\ComputerOrganization\\rv-2023\\supervisor-rv\\kernel\\kernel_paging.bin"
   `define YJX_KERNEL "D:\\rv-2023\\supervisor-rv\\kernel\\kernel.bin"
   // parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin";
   // parameter BASE_RAM_INIT_FILE = `WJL_KERNEL_PAGING; // wjl
-  parameter BASE_RAM_INIT_FILE = `DWN_KERNEL_PAGING; // dwn
+  parameter BASE_RAM_INIT_FILE = `WJL_KERNEL_PAGING; // dwn
   // parameter BASE_RAM_INIT_FILE = `YJX_KERNEL; // yjx
   parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
@@ -74,18 +74,18 @@ module tb;
 
     #6000000 // 启用页表后打印欢迎信息至少要等待的时间
 
-    // $display("test G");
-    // uart.pc_send_byte(8'h47); // ASCII 'G'
-    // #10000;
-    // // 0x7fc1_0000
-    // uart.pc_send_byte(8'ha8);
-    // #10000;
-    // uart.pc_send_byte(8'h10);
-    // #10000;
-    // uart.pc_send_byte(8'h00);
-    // #10000;
-    // uart.pc_send_byte(8'h80);
-    // $display("send 0x800010a8");
+    $display("test G");
+    uart.pc_send_byte(8'h47); // ASCII 'G'
+    #10000;
+    // 0x7fc1_0000
+    uart.pc_send_byte(8'hc4);
+    #10000;
+    uart.pc_send_byte(8'h10);
+    #10000;
+    uart.pc_send_byte(8'h00);
+    #10000;
+    uart.pc_send_byte(8'h80);
+    $display("send 0x800010c4");
 
     // $display("test D");
     // // send 'D' to uart

@@ -419,7 +419,7 @@ module exe_controller #(
       reg_to_csr_reg <= 1'b0;
       if (mtime_int_comb == 1) begin
         pc_result_for_IF_o <= rf_rdata_csr;
-      end else if (EXE_is_branch_o && !branch_eq) begin
+      end else if (EXE_is_branch_o && !branch_eq_no_csr) begin
         pc_result_for_IF_o <= pc_now_i + 4;
       end else if (branch_i == 3'b100) begin
         pc_result_for_IF_o <= rf_rdata_a_real + imm_i;
