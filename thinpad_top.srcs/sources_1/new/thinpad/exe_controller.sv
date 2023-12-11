@@ -13,6 +13,12 @@ module exe_controller #(
     output reg stall_o,
     output reg flush_o,
 
+    input wire mode_i,
+    input wire [31:0] satp_i,
+
+    input wire inst_page_fault_i,
+    input wire [31:0] inst_mcause_i, // 0xc when inst_page_fault_i is 1
+
     // EXE control
     input wire [3:0] alu_op_i,
     input wire alu_src_i_1, // 1: alu_operand2 = rf_rdata_b; 0: alu_operand2 = imm
@@ -118,6 +124,20 @@ module exe_controller #(
     output reg [31:0] rf_wdata_csr,
     output reg rf_we_csr
 );
+  logic mem_page_fault;
+  logic [31:0] mem_mcause; // 0xd when load page fault, 0xf when store page fault
+  page_fault_detector mem_page_fault_detector (
+    .enable_i(mem_read_i || mem_write_i),
+    .mode_i(mode_i),
+    .satp_i(satp_i),
+    .is_inst_fetch_i(1'b0),
+    .is_load_i(mem_read_i),
+    .is_store_i(mem_write_i),
+    .v_addr_i(alu_result),
+    .page_fault_o(mem_page_fault),
+    .mcause_o(mem_mcause)
+  );
+
   // mtime
   logic mtime_int_lock;
   logic mtime_int_comb;

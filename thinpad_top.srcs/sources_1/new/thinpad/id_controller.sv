@@ -27,6 +27,12 @@ module id_controller #(
     input wire [31:0] pc_now_i,
     input wire [31:0] inst_i,
 
+    input wire inst_page_fault_i,
+    input wire [31:0] mcause_i,
+
+    output reg inst_page_fault_o,
+    output reg [31:0] mcause_o,
+
     // ID -> EXE
     output reg [31:0] rf_rdata_a_o,
     output reg [31:0] rf_rdata_b_o,
@@ -107,6 +113,9 @@ module id_controller #(
     output reg rf_we_csr
 );
   // outputs are bounded to these regs
+  reg inst_page_fault_reg;
+  reg [31:0] mcause_reg;
+
   reg [31:0] rf_rdata_a_reg, rf_rdata_b_reg, rf_rdata_c_reg;
   reg [31:0] imm_reg;
   reg [4:0] rs1_reg, rs2_reg, rd_reg;
@@ -373,6 +382,9 @@ module id_controller #(
     stall_o = 1'b0; // won't stall other stages ?
     flush_o = 1'b0; // won't flush other stages ?
 
+    inst_page_fault_o = inst_page_fault_reg;
+    mcause_o = mcause_reg;
+
     rf_rdata_a_o = rf_rdata_a_reg;
     rf_rdata_b_o = rf_rdata_b_reg;
     rf_rdata_c_o = rf_rdata_c_reg;
@@ -483,6 +495,9 @@ module id_controller #(
 
       clear_icache_reg <= 1'b0;
     end else begin
+      inst_page_fault_reg <= inst_page_fault_i;
+      mcause_reg <= mcause_i;
+
       rf_rdata_a_reg <= rf_rdata_a;
       // rf_rdata_b_reg <= rf_rdata_b;
       if (is_lui_comb) begin

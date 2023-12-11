@@ -94,6 +94,8 @@ module thinpad_master #(
   logic [31:0] IF_pc_now, IF_pc_predicted;
   logic IF_take_predict_in, IF_take_predict_out;
   logic IF_is_bubble;
+  logic IF_ID_inst_page_fault;
+  logic [31:0] IF_ID_mcause;
   if_controller u_if_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -110,6 +112,13 @@ module thinpad_master #(
     .wb_dat_i(IF_wb_dat_i),
     .wb_sel_o(IF_wb_sel_o),
     .wb_we_o(IF_wb_we_o),
+
+    .mode_i(mode),
+    .satp_i(satp_o),
+
+    .inst_page_fault_o(IF_ID_inst_page_fault),
+    .mcause_o(IF_ID_mcause),
+
     .pc_src_i(EXE_MEM_branch),
     .pc_result_i(pc_result_for_IF),
     .inst_o(IF_ID_inst),
@@ -165,6 +174,9 @@ module thinpad_master #(
   logic EXE_csr_hazard_out, MEM_csr_hazard_out, WB_csr_hazard_out;
   logic [11:0] ID_csr;
 
+  logic ID_EXE_inst_page_fault;
+  logic [31:0] ID_EXE_mcause;
+
   id_controller u_id_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -177,6 +189,12 @@ module thinpad_master #(
     .rf_wdata_i(WB_rf_wdata),
     .pc_now_i(IF_ID_pc_now),
     .inst_i(IF_ID_inst),
+    
+    .inst_page_fault_i(IF_ID_inst_page_fault),
+    .mcause_i(IF_ID_mcause),
+    .inst_page_fault_o(ID_EXE_inst_page_fault),
+    .mcause_o(ID_EXE_mcause),
+
     .rf_rdata_a_o(ID_EXE_rf_rdata_a),
     .rf_rdata_b_o(ID_EXE_rf_rdata_b),
     .rf_rdata_c_o(ID_EXE_rf_rdata_c),
@@ -290,6 +308,13 @@ module thinpad_master #(
     .bubble_i(EXE_MEM_bubble_in),
     .stall_o(EXE_MEM_stall_out),
     .flush_o(EXE_MEM_flush_out),
+
+    .mode_i(mode),
+    .satp_i(satp_o),
+
+    .inst_page_fault_i(ID_EXE_inst_page_fault),
+    .inst_mcause_i(ID_EXE_mcause),
+
     .alu_op_i(ID_EXE_alu_op),
     .alu_src_i_1(ID_EXE_alu_src_1),
     .alu_src_i_2(ID_EXE_alu_src_2),
@@ -543,18 +568,5 @@ module thinpad_master #(
     .IF_pc_o(IF_pc_predicted),
     .IF_take_predict_o(IF_take_predict_in)
   );
-
-  // always_comb begin    
-
-
-  // end
-
-  // always_ff @(posedge clk_i) begin
-  //   if (rst_i) begin
-      
-  //   end else begin
-
-  //   end
-  // end
 
 endmodule

@@ -24,7 +24,11 @@ module if_controller #(
     output reg [DATA_WIDTH/8-1:0] wb_sel_o,
     output reg wb_we_o,
 
+    input wire [1:0] mode_i,
+    input wire [31:0] satp_i,
+
     output reg inst_page_fault_o,
+    output reg [31:0] mcause_o,
 
     // EXE -> IF
     input wire pc_src_i,
@@ -53,6 +57,7 @@ module if_controller #(
   reg [31:0] pc_now_reg;
 
   reg inst_page_fault_reg;
+  reg [31:0] mcause_reg;
 
   // states of wishbone request
   typedef enum logic [2:0] { 
@@ -102,6 +107,34 @@ module if_controller #(
     .clear_icache_i(clear_icache_i)
   );
 
+  reg wb_inst_page_fault_reg;
+  logic wb_inst_page_fault;
+  page_fault_detector wb_page_fault_detector (
+    .enable_i(wb_cyc_o && wb_stb_o),
+    .mode_i(mode_i),
+    .satp_i(satp_i),
+    .is_inst_fetch_i(1'b1),
+    .is_load_i(1'b0),
+    .is_store_i(1'b0),
+    .v_addr_i(pc_next_comb), // for wishbone only
+    .page_fault_o(wb_inst_page_fault),
+    .mcause_o()
+  );
+
+  reg icache_inst_page_fault_reg;
+  logic icache_inst_page_fault;
+  page_fault_detector icache_page_fault_detector (
+    .enable_i(hit),
+    .mode_i(mode_i),
+    .satp_i(satp_i),
+    .is_inst_fetch_i(1'b1),
+    .is_load_i(1'b0),
+    .is_store_i(1'b0),
+    .v_addr_i(cache_pc_comb), // for icache only
+    .page_fault_o(icache_inst_page_fault),
+    .mcause_o()
+  );
+
   always_comb begin
     stall_o = 1'b0;
     flush_o = 1'b0;  // IF段不会发出flush请求
@@ -142,10 +175,14 @@ module if_controller #(
     pc_now_o = pc_now_reg;
     rs1_o = inst_reg[19:15];
     rs2_o = inst_reg[24:20];
+    inst_page_fault_o = inst_page_fault_reg;
+    mcause_o = mcause_reg;
   end
 
   always_ff @(posedge clk_i) begin
     hit_reg <= hit;
+    wb_inst_page_fault_reg <= wb_inst_page_fault;
+    icache_inst_page_fault_reg <= icache_inst_page_fault;
     if (write == 1'b1) begin
       write <= 1'b0;
     end
@@ -164,6 +201,10 @@ module if_controller #(
       refetch <= 2'b0;
       refetch_pc <= 32'h0000_0000;
       hit_reg <= 1'b0;
+      wb_inst_page_fault_reg <= 1'b0;
+      icache_inst_page_fault_reg <= 1'b0;
+      inst_page_fault_reg <= 1'b0;
+      mcause_reg <= 32'h0000_0000;
     end else if (stall_i) begin
       // do nothing
     end else if (bubble_i || (pc_src_i && refetch == 2'b0)) begin // insert bubble while waiting for bus response
@@ -173,6 +214,8 @@ module if_controller #(
       if (state == STATE_READY) begin
         state <= STATE_PENDING;
       end
+      inst_page_fault_reg <= 1'b0;
+      mcause_reg <= 32'h0000_0000;
     end else begin
       case (state)
         STATE_READY: begin
@@ -184,12 +227,28 @@ module if_controller #(
             IF_take_predict_o <= IF_take_predict_i;
             IF_is_bubble_o <= 1'b0;
             if (hit_reg == 1'b1) begin
-              inst_reg <= cached_inst;
+              if (icache_inst_page_fault_reg == 1'b1) begin
+                inst_reg <= 32'h0000_0013;
+                inst_page_fault_reg <= 1'b1;
+                mcause_reg <= 32'h0000_000C;
+              end else begin
+                inst_reg <= cached_inst;
+                inst_page_fault_reg <= 1'b0;
+                mcause_reg <= 32'h0000_0000;
+              end
             end else begin
-              inst_reg <= wb_dat_i;
-              write <= 1'b1;
-              write_pc <= pc_next_comb;
-              write_inst <= wb_dat_i;
+              if (wb_inst_page_fault_reg == 1'b1) begin
+                inst_reg <= 32'h0000_0013;
+                inst_page_fault_reg <= 1'b1;
+                mcause_reg <= 32'h0000_000C;
+              end else begin
+                inst_reg <= wb_dat_i;
+                write <= 1'b1;
+                write_pc <= pc_next_comb;
+                write_inst <= wb_dat_i;
+                inst_page_fault_reg <= 1'b0;
+                mcause_reg <= 32'h0000_0000;
+              end
             end
           end else if (refetch == 2'b01) begin
             refetch <= 2'b10;
@@ -198,12 +257,28 @@ module if_controller #(
             IF_take_predict_o <= IF_take_predict_i;
             IF_is_bubble_o <= 1'b0;
             if (hit_reg == 1'b1) begin
-              inst_reg <= cached_inst;
+              if (icache_inst_page_fault_reg == 1'b1) begin
+                inst_reg <= 32'h0000_0013;
+                inst_page_fault_reg <= 1'b1;
+                mcause_reg <= 32'h0000_000C;
+              end else begin
+                inst_reg <= cached_inst;
+                inst_page_fault_reg <= 1'b0;
+                mcause_reg <= 32'h0000_0000;
+              end
             end else begin
-              inst_reg <= wb_dat_i;
-              write <= 1'b1;
-              write_pc <= pc_next_comb;
-              write_inst <= wb_dat_i;
+              if (wb_inst_page_fault_reg == 1'b1) begin
+                inst_reg <= 32'h0000_0013;
+                inst_page_fault_reg <= 1'b1;
+                mcause_reg <= 32'h0000_000C;
+              end else begin
+                inst_reg <= wb_dat_i;
+                write <= 1'b1;
+                write_pc <= pc_next_comb;
+                write_inst <= wb_dat_i;
+                inst_page_fault_reg <= 1'b0;
+                mcause_reg <= 32'h0000_0000;
+              end
             end
             refetch <= 2'b0;
           end

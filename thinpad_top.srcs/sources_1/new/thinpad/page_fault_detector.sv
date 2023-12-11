@@ -1,6 +1,7 @@
 `default_nettype none
 
 module page_fault_detector (
+  input wire enable_i,
   input wire [1:0] mode_i,
   input wire [31:0] satp_i,
   input wire is_inst_fetch_i,
@@ -27,6 +28,10 @@ module page_fault_detector (
     SV32 = 1 // 32-bit sv32
   } satp_mode_t;
 
+  // serial registers
+  `define SERIAL_STATUS 32'h1000_0005
+  `define SERIAL_DATA   32'h1000_0000
+
   // user code
   `define MIN_USER_CODE_ADDR 32'h00000000
   `define MAX_USER_CODE_ADDR 32'h002FFFFF
@@ -41,25 +46,29 @@ module page_fault_detector (
   // otherwise triggers exception
   
   logic satp_mode;
-  logic serial;
+  logic is_serial;
   logic user_code, user_data, kernel_code_1, kernel_code_2;
   logic addr_valid_for_mapping, addr_executable, addr_writable;
   logic inst_page_fault, load_page_fault, store_page_fault;
 
   always_comb begin
     satp_mode = satp_i[31];
-    serial = (v_addr_i == 32'h1000_0000 || v_addr_i == 32'h1000_0005);
+    
+    is_serial = (v_addr_i == `SERIAL_DATA || v_addr_i == `SERIAL_STATUS);
     user_code = (v_addr_i >= `MIN_USER_CODE_ADDR && v_addr_i <= `MAX_USER_CODE_ADDR);
     user_data = (v_addr_i >= `MIN_USER_DATA_ADDR && v_addr_i <= `MAX_USER_DATA_ADDR);
     kernel_code_1 = (v_addr_i >= `MIN_KERNEL_CODE_ADDR_1 && v_addr_i <= `MAX_KERNEL_CODE_ADDR_1);
     kernel_code_2 = (v_addr_i >= `MIN_KERNEL_CODE_ADDR_2 && v_addr_i <= `MAX_KERNEL_CODE_ADDR_2);
-    addr_valid_for_mapping = (serial || user_code || user_data || kernel_code_1 || kernel_code_2);
+
+    addr_valid_for_mapping = (is_serial || user_code || user_data || kernel_code_1 || kernel_code_2);
     addr_executable = (user_code || kernel_code_1 || kernel_code_2);
     addr_writable = user_data;
-    inst_page_fault = (mode_i == U_MODE) && (satp_mode == SV32) && is_inst_fetch_i && (!addr_valid_for_mapping || !addr_executable);
-    load_page_fault = (mode_i == U_MODE) && (satp_mode == SV32) && is_load_i && !addr_valid_for_mapping;
-    store_page_fault = (mode_i == U_MODE) && (satp_mode == SV32) && is_store_i && (!addr_valid_for_mapping || !addr_writable);
-    mcause_o = inst_page_fault ? INSTRUCTION_PAGE_FAULT : ( load_page_fault ? LOAD_PAGE_FAULT : ( store_page_fault ? STORE_PAGE_FAULT : NO_PAGE_FAULT ) );
+
+    inst_page_fault  = enable_i && (mode_i == U_MODE) && (satp_mode == SV32) && is_inst_fetch_i && (!addr_valid_for_mapping || !addr_executable);
+    load_page_fault  = enable_i && (mode_i == U_MODE) && (satp_mode == SV32) && is_load_i && !addr_valid_for_mapping;
+    store_page_fault = enable_i && (mode_i == U_MODE) && (satp_mode == SV32) && is_store_i && (!addr_valid_for_mapping || !addr_writable);
+    
+    mcause_o     = inst_page_fault ? INSTRUCTION_PAGE_FAULT : ( load_page_fault ? LOAD_PAGE_FAULT : ( store_page_fault ? STORE_PAGE_FAULT : NO_PAGE_FAULT ) );
     page_fault_o = (inst_page_fault || load_page_fault || store_page_fault);
   end
 endmodule
