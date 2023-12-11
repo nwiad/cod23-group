@@ -179,6 +179,7 @@ module exe_controller #(
 
   logic branch_eq_csr, branch_eq_no_csr;
   logic branch_eq;
+  logic exception_done;
 
   always_ff @(posedge clk_i) begin
     last_stall <= stall_i;
@@ -257,16 +258,10 @@ module exe_controller #(
     alu_op = alu_op_i;
 
     EXE_is_branch_o = (branch_i == 3'b100) || (branch_i == 3'b011) || (branch_i == 3'b001) || (branch_i == 3'b010);
-    // branch_eq = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
-    // branch_eq_o = branch_eq;
-    // branch_eq_X = !(branch_eq === 0 || branch_eq === 1);
     branch_eq_no_csr = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
     branch_eq_csr = (is_exception_comb == 1 && exp_done) || (branch_i == 3'b101);
     branch_eq = branch_eq_csr || branch_eq_no_csr;
     branch_eq_o = branch_eq_no_csr;
-    // if (branch_eq_X) begin
-    //   branch_eq = 1'b0;
-    // end
     if (branch_i == 3'b100) begin
       pc_result_comb_o = rf_rdata_a_real + imm_i;
     end else begin
@@ -323,12 +318,11 @@ module exe_controller #(
 
   always_comb begin
     stall_o = 1'b0; // won't stall other stages ?
-    if ((branch_eq_no_csr && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq_no_csr && ID_take_predict_i) || clear_icache_i) begin
+    if ((branch_eq_no_csr && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq_no_csr && ID_take_predict_i) || clear_icache_i || branch_eq_csr) begin
       flush_o = 1'b1;
     end else begin
       flush_o = 1'b0;
     end
-    // flush_o = branch_eq ? 1'b1 : 1'b0;
 
     alu_result_o = alu_result_reg;
     rf_rdata_b_o = rf_rdata_b_reg;
@@ -357,6 +351,7 @@ module exe_controller #(
     sync_refetch_pc_o = sync_refetch_pc_reg;
     EXE_csr_o = rf_raddr_csr_i;
     handling_exception_o = (is_exception_comb) && (!exp_done);
+    exception_done = is_exception_comb && exp_done;
   end
 
   always_ff @(posedge clk_i) begin
@@ -395,19 +390,28 @@ module exe_controller #(
       reg_write_reg <= 1'b0;
       imm_to_reg_reg <= 1'b0;
       reg_to_csr_reg <= 1'b0;
+    end else if (exception_done) begin
+      mem_read_reg <= 1'b0;
+      mem_write_reg <= 1'b0;
+      mem_to_reg_reg <= 1'b0;
+      reg_write_reg <= 1'b0;
+      imm_to_reg_reg <= 1'b0;
+      reg_to_csr_reg <= 1'b0;
+      if (mtime_int_comb == 1) begin
+        pc_result_for_IF_o <= rf_rdata_csr;
+      end else if (EXE_is_branch_o && !branch_eq) begin
+        pc_result_for_IF_o <= pc_now_i + 4;
+      end else if (branch_i == 3'b100) begin
+        pc_result_for_IF_o <= rf_rdata_a_real + imm_i;
+      end else if (branch_i == 3'b110 || branch_i == 3'b101) begin
+        pc_result_for_IF_o <= rf_rdata_csr;
+      end else begin
+        pc_result_for_IF_o <= pc_now_i + imm_i;
+      end
+      branch_reg <= branch_eq_csr || (branch_eq_no_csr && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq_no_csr && ID_take_predict_i);
     end else begin
       alu_result_reg <= alu_result;
       rf_rdata_b_reg <= rf_rdata_b_real;
-      // if (exe_rdata_b_hazard_i) begin
-      //   rf_rdata_b_reg <= alu_result_reg;
-      // end else if (mem_rdata_b_hazard_i) begin
-      //   rf_rdata_b_reg <= rdata_from_mem_i;
-      // end else if (wb_rdata_b_hazard_i) begin
-      //   rf_rdata_b_reg <= rdata_from_wb_i;
-      // end begin
-      //   rf_rdata_b_reg <= rf_rdata_b_i;
-      // end
-      // rf_rdata_b_reg <= rf_rdata_b_i;
       rd_reg <= rd_i;
       if (mtime_int_comb == 1) begin
         pc_result_reg <= rf_rdata_csr;
@@ -431,11 +435,6 @@ module exe_controller #(
         pc_result_for_IF_o <= pc_now_i + imm_i;
       end
       imm_reg <= imm_i;
-      // if (((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) === 1'b1 || ((branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i)) === 1'b0) begin
-      //   branch_reg <= (branch_eq && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq && ID_take_predict_i);
-      // end else begin
-      //   branch_reg <= 1'b1;
-      // end
       branch_reg <= branch_eq_csr || (branch_eq_no_csr && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq_no_csr && ID_take_predict_i);
       
       // csr
