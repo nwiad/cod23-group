@@ -26,7 +26,9 @@ module address_map (
 
   input wire [31:0] satp_i, // satp register
 
-  input wire [1:0] mode_i // mode
+  input wire [1:0] mode_i, // mode
+
+  input wire sfence_i // sfence.vma
 );
 
   typedef enum logic [1:0] {
@@ -78,7 +80,8 @@ module address_map (
     .ppn_o(TLB_ppn_i),
     .TLB_hit_o(TLB_hit),
     .TLB_we_i(TLB_we_o),
-    .ppn_i(TLB_ppn_o)
+    .ppn_i(TLB_ppn_o),
+    .sfence_i(sfence_i)
   );
 
   always_comb begin

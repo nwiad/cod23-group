@@ -15,7 +15,8 @@ module TLB (
 
   // Write
   input wire TLB_we_i,
-  input wire [19:0] ppn_i
+  input wire [19:0] ppn_i,
+  input wire sfence_i
 );
 
   typedef enum logic { 
@@ -50,7 +51,7 @@ module TLB (
 
   // write
   always_ff @(posedge clk_i) begin
-    if (rst_i) begin
+    if (rst_i || sfence_i) begin
       for (int i = 0; i < 64; i = i + 1) begin
         tlb_ppn[i] <= 20'h0000_0000;
         tlb_vpn[i] <= 20'h0000_0000;

@@ -142,6 +142,8 @@ module thinpad_top (
 
   logic [1:0] mode;
 
+  logic sfence;
+
   thinpad_master #(
       .ADDR_WIDTH(32),
       .DATA_WIDTH(32)
@@ -173,7 +175,9 @@ module thinpad_top (
 
       .satp_o(satp),
 
-      .mode_o(mode)
+      .mode_o(mode),
+
+      .sfence_o(sfence)
   );
 
   /* =========== Master end =========== */
@@ -266,7 +270,10 @@ module thinpad_top (
     .satp_i(satp),
 
     // mode
-    .mode_i(mode)
+    .mode_i(mode),
+
+    // sfence.vma
+    .sfence_i(sfence)
   );
   /* =========== Address Map end =========== */
 
