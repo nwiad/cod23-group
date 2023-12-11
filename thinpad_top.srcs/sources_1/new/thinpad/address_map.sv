@@ -26,9 +26,7 @@ module address_map (
 
   input wire [31:0] satp_i, // satp register
 
-  input wire [1:0] mode_i, // mode
-
-  output reg page_fault_o
+  input wire [1:0] mode_i // mode
 );
 
   typedef enum logic [1:0] {
@@ -53,25 +51,7 @@ module address_map (
   } state_t;
   state_t state;
 
-  // user code
-  `define MIN_USER_CODE_ADDR 32'h00000000
-  `define MAX_USER_CODE_ADDR 32'h002FFFFF
-  // user data
-  `define MIN_USER_DATA_ADDR 32'h7FC10000
-  `define MAX_USER_DATA_ADDR 32'h7FFFFFFF
-  // kernel code, identity mapped
-  `define MIN_KERNEL_CODE_ADDR_1 32'h80000000
-  `define MAX_KERNEL_CODE_ADDR_1 32'h80001FFF
-  `define MIN_KERNEL_CODE_ADDR_2 32'h80100000
-  `define MAX_KERNEL_CODE_ADDR_2 32'h80100FFF
-  // otherwise triggers exception
-
   logic serial;
-
-  logic page_fault;
-  logic user_code, user_data, kernel_code_1, kernel_code_2;
-
-  logic addr_valid_for_mapping;
 
   logic satp_mode;
   logic [31:0] page_table_1;
@@ -95,17 +75,6 @@ module address_map (
     pte_addr_2 = page_table_2 + (vpn_0 << 2) ;
 
     serial = (v_wb_adr_i == 32'h1000_0000 || v_wb_adr_i == 32'h1000_0005);
-
-    user_code = (v_wb_adr_i >= `MIN_USER_CODE_ADDR && v_wb_adr_i <= `MAX_USER_CODE_ADDR);
-    user_data = (v_wb_adr_i >= `MIN_USER_DATA_ADDR && v_wb_adr_i <= `MAX_USER_DATA_ADDR);
-    kernel_code_1 = (v_wb_adr_i >= `MIN_KERNEL_CODE_ADDR_1 && v_wb_adr_i <= `MAX_KERNEL_CODE_ADDR_1);
-    kernel_code_2 = (v_wb_adr_i >= `MIN_KERNEL_CODE_ADDR_2 && v_wb_adr_i <= `MAX_KERNEL_CODE_ADDR_2);
-
-    addr_valid_for_mapping = (serial || user_code || user_data || kernel_code_1 || kernel_code_2);
-
-    page_fault = (mode_i == U_MODE) && (satp_mode == SV32) && v_wb_cyc_i && v_wb_stb_i && !addr_valid_for_mapping;
-
-    page_fault_o = page_fault;
 
     if (mode_i == M_MODE || satp_mode == BARE || serial) begin // no translation
       wb_cyc_o = v_wb_cyc_i;
@@ -204,7 +173,7 @@ module address_map (
     end else begin
       case (state)
         STAND_BY: begin // transit to MAP_1 only when necessary
-          if (mode_i == U_MODE && satp_mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !page_fault && !serial) begin
+          if (mode_i == U_MODE && satp_mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !serial) begin // no page fault
             state <= MAP_1;
           end
         end

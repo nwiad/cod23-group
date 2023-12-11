@@ -24,6 +24,8 @@ module if_controller #(
     output reg [DATA_WIDTH/8-1:0] wb_sel_o,
     output reg wb_we_o,
 
+    output reg inst_page_fault_o,
+
     // EXE -> IF
     input wire pc_src_i,
     input wire [31:0] pc_result_i,
@@ -49,6 +51,8 @@ module if_controller #(
   // outputs are bounded to these regs
   reg [31:0] inst_reg;
   reg [31:0] pc_now_reg;
+
+  reg inst_page_fault_reg;
 
   // states of wishbone request
   typedef enum logic [2:0] { 
