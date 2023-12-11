@@ -73,14 +73,14 @@ module tb;
     #10000;
     $display("send G");
 
-    // send 0x80400000
+    // send 0x7fc10000
     uart.pc_send_byte(8'h00);
     #10000;
     uart.pc_send_byte(8'h00);
     #10000;
-    uart.pc_send_byte(8'h40);
+    uart.pc_send_byte(8'hc1);
     #10000;
-    uart.pc_send_byte(8'h80);
+    uart.pc_send_byte(8'h7f);
     #10000;
     $display("send 0x80400000");
 

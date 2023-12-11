@@ -123,7 +123,10 @@ module exe_controller #(
     input wire [31:0] rf_rdata_csr,
     output reg [11:0] rf_waddr_csr,
     output reg [31:0] rf_wdata_csr,
-    output reg rf_we_csr
+    output reg rf_we_csr,
+
+    //new
+    output reg exception_branch_o
 );
   logic mem_page_fault;
   logic [31:0] mem_mcause; // 0xd when load page fault, 0xf when store page fault
@@ -492,10 +495,12 @@ module exe_controller #(
   always_ff @(posedge clk_i or posedge rst_i) begin
     if (rst_i) begin
       mtime_int_lock <= 0;
+      exception_branch_o <= 0;
     end else begin
       if (mtime_int && exp_done) begin
         mtime_int_lock <= 1;
       end
+      exception_branch_o <= exception_done && (branch_eq_csr || (branch_eq_no_csr && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq_no_csr && ID_take_predict_i));
     end
   end
 

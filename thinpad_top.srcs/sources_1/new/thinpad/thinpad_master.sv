@@ -113,6 +113,8 @@ module thinpad_master #(
     .wb_sel_o(IF_wb_sel_o),
     .wb_we_o(IF_wb_we_o),
 
+    .exception_branch_i(EXE_IF_exception_branch),
+
     .mode_i(mode),
     .satp_i(satp_o),
 
@@ -301,6 +303,8 @@ module thinpad_master #(
   logic [11:0] EXE_MEM_rd_csr;
   logic EXE_handling_exception;
 
+  logic EXE_IF_exception_branch;
+
   exe_controller u_exe_controller (
     .clk_i(clk_i),
     .rst_i(rst_i),
@@ -399,7 +403,9 @@ module thinpad_master #(
     .rf_rdata_csr(EXE_rf_rdata_csr),
     .rf_waddr_csr(EXE_rf_waddr_csr),
     .rf_wdata_csr(EXE_rf_wdata_csr),
-    .rf_we_csr(EXE_rf_we_csr)
+    .rf_we_csr(EXE_rf_we_csr),
+
+    .exception_branch_o(EXE_IF_exception_branch)
   );
 
   // MEM logic & MEM/WB regs

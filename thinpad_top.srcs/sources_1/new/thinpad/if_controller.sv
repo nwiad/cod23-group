@@ -24,6 +24,8 @@ module if_controller #(
     output reg [DATA_WIDTH/8-1:0] wb_sel_o,
     output reg wb_we_o,
 
+    input wire exception_branch_i,
+
     input wire [1:0] mode_i,
     input wire [31:0] satp_i,
 
@@ -187,7 +189,7 @@ module if_controller #(
       write <= 1'b0;
     end
     if (pc_src_i == 1'b1) begin
-      refetch <= 2'b01;
+      refetch <= exception_branch_i ? 2'b10 : 2'b01;
       refetch_pc <= pc_result_i;
     end
     if (clear_icache_i == 1'b1) begin
@@ -207,7 +209,7 @@ module if_controller #(
       mcause_reg <= 32'h0000_0000;
     end else if (stall_i) begin
       // do nothing
-    end else if ( (bubble_i || (pc_src_i && refetch == 2'b0)) && !wb_inst_page_fault && !icache_inst_page_fault ) begin // insert bubble while waiting for bus response
+    end else if ( (bubble_i || (pc_src_i && refetch == 2'b0)) && !wb_inst_page_fault && !icache_inst_page_fault && !exception_branch_i ) begin // insert bubble while waiting for bus response
       inst_reg <= 32'h0000_0013;
       IF_take_predict_o <= IF_take_predict_i;
       IF_is_bubble_o <= 1'b1;
