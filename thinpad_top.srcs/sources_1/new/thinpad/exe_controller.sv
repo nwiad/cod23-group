@@ -315,6 +315,8 @@ module exe_controller #(
       exception_cause_reg = inst_mcause_i;
     end else if (mem_page_fault) begin
       exception_cause_reg = mem_mcause;
+    end else begin
+      exception_cause_reg = 32'b0;
     end
     // exception_cause_reg = mtime_int_comb ? 32'b1000_0000_0000_0000_0000_0000_0000_0111 : exception_cause_i;
     // exception_cause_reg = is_exception_i ? exception_cause_i : 32'b1000_0000_0000_0000_0000_0000_0000_0111;
