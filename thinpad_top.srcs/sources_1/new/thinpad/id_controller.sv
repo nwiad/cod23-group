@@ -494,6 +494,8 @@ module id_controller #(
       imm_to_reg_reg <= 1'b0;
 
       clear_icache_reg <= 1'b0;
+      inst_page_fault_reg <= inst_page_fault_i;
+      mcause_reg <= mcause_i;
     end else begin
       inst_page_fault_reg <= inst_page_fault_i;
       mcause_reg <= mcause_i;

@@ -207,7 +207,7 @@ module if_controller #(
       mcause_reg <= 32'h0000_0000;
     end else if (stall_i) begin
       // do nothing
-    end else if (bubble_i || (pc_src_i && refetch == 2'b0)) begin // insert bubble while waiting for bus response
+    end else if ( (bubble_i || (pc_src_i && refetch == 2'b0)) && !wb_inst_page_fault && !icache_inst_page_fault ) begin // insert bubble while waiting for bus response
       inst_reg <= 32'h0000_0013;
       IF_take_predict_o <= IF_take_predict_i;
       IF_is_bubble_o <= 1'b1;
@@ -227,7 +227,7 @@ module if_controller #(
             IF_take_predict_o <= IF_take_predict_i;
             IF_is_bubble_o <= 1'b0;
             if (hit_reg == 1'b1) begin
-              if (icache_inst_page_fault_reg == 1'b1) begin
+              if (icache_inst_page_fault == 1'b1) begin
                 inst_reg <= 32'h0000_0013;
                 inst_page_fault_reg <= 1'b1;
                 mcause_reg <= 32'h0000_000C;
@@ -237,7 +237,7 @@ module if_controller #(
                 mcause_reg <= 32'h0000_0000;
               end
             end else begin
-              if (wb_inst_page_fault_reg == 1'b1) begin
+              if (wb_inst_page_fault == 1'b1) begin
                 inst_reg <= 32'h0000_0013;
                 inst_page_fault_reg <= 1'b1;
                 mcause_reg <= 32'h0000_000C;
@@ -257,7 +257,7 @@ module if_controller #(
             IF_take_predict_o <= IF_take_predict_i;
             IF_is_bubble_o <= 1'b0;
             if (hit_reg == 1'b1) begin
-              if (icache_inst_page_fault_reg == 1'b1) begin
+              if (icache_inst_page_fault == 1'b1) begin
                 inst_reg <= 32'h0000_0013;
                 inst_page_fault_reg <= 1'b1;
                 mcause_reg <= 32'h0000_000C;
@@ -267,7 +267,7 @@ module if_controller #(
                 mcause_reg <= 32'h0000_0000;
               end
             end else begin
-              if (wb_inst_page_fault_reg == 1'b1) begin
+              if (wb_inst_page_fault == 1'b1) begin
                 inst_reg <= 32'h0000_0013;
                 inst_page_fault_reg <= 1'b1;
                 mcause_reg <= 32'h0000_000C;

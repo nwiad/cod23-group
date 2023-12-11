@@ -61,11 +61,6 @@ module tb;
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
 
   initial begin
-    // 在这里可以自定义测试输入序列，例如：
-    // dip_sw = 32'h2;
-    // touch_btn = 0;
-    // reset_btn = 0;
-    // push_btn = 0;
 
     #100;
     reset_btn = 1;
@@ -88,66 +83,312 @@ module tb;
     uart.pc_send_byte(8'h80);
     #10000;
     $display("send 0x80400000");
-    // $display("test G");
-    // uart.pc_send_byte(8'h47); // ASCII 'G'
-    // #10000;
-    // // 0x7fc1_0000
-    // uart.pc_send_byte(8'ha8);
-    // #10000;
-    // uart.pc_send_byte(8'h10);
-    // #10000;
-    // uart.pc_send_byte(8'h00);
-    // #10000;
-    // uart.pc_send_byte(8'h80);
-    // $display("send 0x800010a8");
 
-    // $display("test D");
-    // // send 'D' to uart
-    // uart.pc_send_byte(8'h44); // ASCII 'D'
-    // // send 0x80100000 to uart
+    // uart.pc_send_byte(8'h41); // A
     // #10000;
-    // $display("send 0x00");
-    // uart.pc_send_byte(8'h00);
-    // #10000;
-    // $display("send 0x00");
-    // uart.pc_send_byte(8'h00);
-    // #10000;
-    // $display("send 0x10");
-    // uart.pc_send_byte(8'h10);
-    // #10000;
-    // $display("send 0x80");
-    // uart.pc_send_byte(8'h80);
+    // $display("send A");
 
-    // // send 0x0000_0090 to uart
-    // #10000;
-    // $display("send 0x90");
-    // uart.pc_send_byte(8'h90);
-    // #10000;
-    // $display("send 0x00");
+    // // addr: 0x80100000
     // uart.pc_send_byte(8'h00);
     // #10000;
-    // $display("send 0x00");
     // uart.pc_send_byte(8'h00);
-    // #10000;
-    // $display("send 0x00");
-    // uart.pc_send_byte(8'h00);
-  
-    // // // 模拟 PC 通过直连串口，向 FPGA 发�?�字�?
-    // // uart.pc_send_byte(8'h32); // ASCII '2'
-    // #3500000;
-    // // uart.pc_send_byte(8'h33); // ASCII '3'
-    // uart.pc_send_byte(8'h47); // ASCII 'G'
-    // #10000;
-    // //800010a8
-    // uart.pc_send_byte(8'hc0);
-    // // uart.pc_send_byte(8'ha8);
     // #10000;
     // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80100000");
+
+    // // code: 0x00000293
+    // uart.pc_send_byte(8'h93);
+    // #10000;
+    // uart.pc_send_byte(8'h02);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("li t0,0");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");
+
+    // // addr: 0x80100004
+    // uart.pc_send_byte(8'h04);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80100004");
+
+    // // 0x06400313
+    // uart.pc_send_byte(8'h13);
+    // #10000;
+    // uart.pc_send_byte(8'h03);
+    // #10000;
+    // uart.pc_send_byte(8'h40);
+    // #10000;
+    // uart.pc_send_byte(8'h06);
+    // #10000;
+    // $display("li t1,100");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");   
+
+    // // addr: 0x80100008
+    // uart.pc_send_byte(8'h08);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80100008");
+
+    // // 0x00000393
+    // uart.pc_send_byte(8'h93);
+    // #10000;
+    // uart.pc_send_byte(8'h03);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("li t2,0");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");
+
+    // // addr: 0x8010000c
+    // uart.pc_send_byte(8'h0c);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x8010000c");
+
+    // // 0x00128293
+    // uart.pc_send_byte(8'h93);
+    // #10000;
+    // uart.pc_send_byte(8'h82);
+    // #10000;
+    // uart.pc_send_byte(8'h12);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("addi t0,t0,1");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");
+
+    // // addr: 0x80100010
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80100010");
+
+    // // 0x007283b3
+    // uart.pc_send_byte(8'hb3);
+    // #10000;
+    // uart.pc_send_byte(8'h83);
+    // #10000;
+    // uart.pc_send_byte(8'h72);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("add t2,t0,t2");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");
+
+    // // addr: 0x80100014
+    // uart.pc_send_byte(8'h14);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10); 
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80100014");
+
+    // // 0x00628463
+    // uart.pc_send_byte(8'h63);
+    // #10000;
+    // uart.pc_send_byte(8'h84);
+    // #10000;
+    // uart.pc_send_byte(8'h62);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("beq t0,t1,1c <__global_pointer$+0x7fffe7f4>");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");
+
+    // // addr: 0x80100018
+    // uart.pc_send_byte(8'h18);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80100018");
+
+    // // 0xfe000ae3
+    // uart.pc_send_byte(8'he3);
+    // #10000;
+    // uart.pc_send_byte(8'h0a);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'hfe);
+    // #10000;
+    // $display("beqz zero,c <__global_pointer$+0x7fffe7e4>");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");
+
+    // // addr: 0x8010001c
+    // uart.pc_send_byte(8'h1c);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x8010001c");
+
+    // // 0x800002b7
+    // uart.pc_send_byte(8'hb7);
+    // #10000;
+    // uart.pc_send_byte(8'h02);
     // #10000;
     // uart.pc_send_byte(8'h00);
     // #10000;
     // uart.pc_send_byte(8'h80);
     // #10000;
+    // $display("lui t0,0x80000");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");
+
+    // // addr: 0x80100020
+    // uart.pc_send_byte(8'h20);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80100020");
+
+    // // 0x1072a023
+    // uart.pc_send_byte(8'h23);
+    // #10000;
+    // uart.pc_send_byte(8'ha0);
+    // #10000;
+    // uart.pc_send_byte(8'h72);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // $display("sw t2,256(t0) # 80000100 <__global_pointer$+0xffffe8d8>");
+
+    // uart.pc_send_byte(8'h41); // A
+    // #10000;
+    // $display("send A");
+
+    // // addr: 0x80100024
+    // uart.pc_send_byte(8'h24);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h10);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80100024");
+
+    // // 0x00008067
+    // uart.pc_send_byte(8'h67);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("ret");
+
+    // // send G
+    // uart.pc_send_byte(8'h47); // G
+    // #10000;
+    // $display("send G");
+
+    // // send 0x0
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("send 0x0");
+
+    // #2000000;
+
+    // // send D
+    // uart.pc_send_byte(8'h44); // D
+    // #10000;
+    // $display("send D");
+
+    // // send 0x80000100
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h01);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80000100");
+
+    // // send 0x2
+    // uart.pc_send_byte(8'h02);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("send 0x2");
+
     #8000000 $finish;
     // #400000 $finish; // lab6
   end
