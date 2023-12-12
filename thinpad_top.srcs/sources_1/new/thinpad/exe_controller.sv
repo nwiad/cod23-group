@@ -185,13 +185,6 @@ module exe_controller #(
     .alu_y(alu_result),
     .alu_op(alu_op)
   );
-  
-  //csr_file
-  logic [11:0] rf_raddr_csr;
-  logic [31:0] rf_rdata_csr;
-  logic [11:0] rf_waddr_csr;
-  logic [31:0] rf_wdata_csr;
-  logic rf_we_csr;
 
   // csr 
   logic [31:0] alu_csr_operand1, alu_csr_operand2;
@@ -283,7 +276,7 @@ module exe_controller #(
 
     EXE_is_branch_o = (branch_i == 3'b100) || (branch_i == 3'b011) || (branch_i == 3'b001) || (branch_i == 3'b010);
     branch_eq_no_csr = (branch_i == 3'b100) || (branch_i == 3'b011) || ((branch_i == 3'b001) && (rf_rdata_a_real == rf_rdata_b_real)) || ((branch_i == 3'b010) && (rf_rdata_a_real != rf_rdata_b_real));
-    branch_eq_csr = (is_exception_comb == 1 && exp_done) || (branch_i == 3'b101);
+    branch_eq_csr = (exp_done) || (branch_i == 3'b101);
     branch_eq = branch_eq_csr || branch_eq_no_csr;
     branch_eq_o = branch_eq_no_csr;
     if (branch_i == 3'b100) begin
@@ -386,7 +379,7 @@ module exe_controller #(
     sync_refetch_pc_o = sync_refetch_pc_reg;
     EXE_csr_o = rf_raddr_csr_i;
     handling_exception_o = (is_exception_comb) && (!exp_done);
-    exception_done = is_exception_comb && exp_done;
+    exception_done = exp_done;
   end
 
   always_ff @(posedge clk_i) begin
@@ -432,7 +425,7 @@ module exe_controller #(
       reg_write_reg <= 1'b0;
       imm_to_reg_reg <= 1'b0;
       reg_to_csr_reg <= 1'b0;
-      if (is_exception_comb == 1) begin
+      if (is_exception_comb == 1 || exp_done) begin
         pc_result_for_IF_o <= rf_rdata_csr;
       end else if (EXE_is_branch_o && !branch_eq) begin
         pc_result_for_IF_o <= pc_now_i + 4;
@@ -516,46 +509,49 @@ module exe_controller #(
       rf_we_csr <= 1'b0;
       exp_done <= 0;
       mode_reg <= 2'b11;
-    end else if (is_exception_comb) begin
-      if (!exp_done) begin
-        case (state_exp)
-        `STATE_INIT: begin
-          state_exp <= `STATE_W_mepc;
-          rf_we_csr <= 1;
-          rf_waddr_csr <= 12'h341;
-          rf_wdata_csr <= pc_now_i;
+    end else begin
+      if (is_exception_comb) begin
+        if (!exp_done) begin
+          case (state_exp)
+          `STATE_INIT: begin
+            state_exp <= `STATE_W_mepc;
+            rf_we_csr <= 1;
+            rf_waddr_csr <= 12'h341;
+            rf_wdata_csr <= pc_now_i;
+          end
+          `STATE_W_mepc: begin
+            state_exp <= `STATE_W_mcause;
+            rf_we_csr <= 1;
+            rf_waddr_csr <= 12'h342;
+            rf_wdata_csr <= exception_cause_reg;
+          end
+          `STATE_W_mcause: begin
+            state_exp <= `STATE_W_mstatus;
+            rf_we_csr <= 1;
+            rf_waddr_csr <= 12'h300;
+            rf_wdata_csr <= {19'b0, mode_reg, 11'b0};
+          end
+          `STATE_W_mstatus: begin
+            state_exp <= `STATE_INIT;
+            rf_we_csr <= 0;
+            rf_waddr_csr <= 12'b0;
+            mode_reg <= 2'b11;
+            exp_done <= 1;
+          end
+          endcase
         end
-        `STATE_W_mepc: begin
-          state_exp <= `STATE_W_mcause;
-          rf_we_csr <= 1;
-          rf_waddr_csr <= 12'h342;
-          rf_wdata_csr <= exception_cause_reg;
-        end
-        `STATE_W_mcause: begin
-          state_exp <= `STATE_W_mstatus;
-          rf_we_csr <= 1;
-          rf_waddr_csr <= 12'h300;
-          rf_wdata_csr <= {19'b0, mode_reg, 11'b0};
-        end
-        `STATE_W_mstatus: begin
-          state_exp <= `STATE_INIT;
-          rf_we_csr <= 0;
-          rf_waddr_csr <= 12'b0;
-          mode_reg <= 2'b11;
-          exp_done <= 1;
-        end
-        endcase
-      end else begin
+      end else if (branch_i == 3'b101) begin //mret
+        mode_reg <= rf_rdata_csr_i[12:11];   //mpp
+      end
+      if ( exp_done == 1 ) begin
         exp_done <= 0;
       end
-    end else if (branch_i == 3'b101) begin //mret
-      mode_reg <= rf_rdata_csr_i[12:11];   //mpp
     end
   end
 
   always_comb begin
     rf_raddr_csr = 12'b0;
-    if (is_exception_comb) begin
+    if (is_exception_comb || exp_done) begin
       rf_raddr_csr = 12'h305;
     end else if (branch_i == 3'b101) begin
       rf_raddr_csr = 12'h341;
