@@ -485,10 +485,12 @@ module exe_controller #(
     end
   end
 
+  logic exception_branch_reg;
   always_ff @(posedge clk_i or posedge rst_i) begin
     if (rst_i) begin
       mtime_int_lock <= 0;
       exception_branch_o <= 0;
+      exception_branch_reg <= 0;
     end else begin
       if (!mtime_int) begin
         mtime_int_lock <= 0;
@@ -496,7 +498,17 @@ module exe_controller #(
       if (mtime_int && exp_done) begin
         mtime_int_lock <= 1;
       end
-      exception_branch_o <= exception_done && (inst_page_fault_i || mem_page_fault);
+      if (inst_page_fault_i || mem_page_fault) begin
+        exception_branch_reg <= 1;
+      end
+      if (branch_o == 1) begin
+        exception_branch_reg <= 0;
+      end
+      if (exp_done == 1) begin
+        exception_branch_o <= exception_branch_reg;
+      end else begin
+        exception_branch_o <= 0;
+      end
       // exception_branch_o <= 0;
     end
   end

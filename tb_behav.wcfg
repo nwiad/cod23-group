@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1400000fs"></ZoomStartTime>
-      <ZoomEndTime time="2928001fs"></ZoomEndTime>
-      <Cursor1Time time="6559910000fs"></Cursor1Time>
+      <ZoomStartTime time="8595133334fs"></ZoomStartTime>
+      <ZoomEndTime time="8618393335fs"></ZoomEndTime>
+      <Cursor1Time time="8598610000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="242"></NameColumnWidth>
-      <ValueColumnWidth column_width="108"></ValueColumnWidth>
+      <ValueColumnWidth column_width="103"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="282" />
+   <WVObjectSize size="303" />
    <wvobject fp_name="/tb/dut/u_thinpad_master/u_if_controller/clk_i" type="logic">
       <obj_property name="ElementShortName">clk_i</obj_property>
       <obj_property name="ObjectShortName">clk_i</obj_property>
@@ -1075,134 +1075,6 @@
    <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf" type="array">
       <obj_property name="ElementShortName">rf[31:0][31:0]</obj_property>
       <obj_property name="ObjectShortName">rf[31:0][31:0]</obj_property>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[31]" type="array">
-         <obj_property name="ElementShortName">[31][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[31][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[30]" type="array">
-         <obj_property name="ElementShortName">[30][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[30][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[29]" type="array">
-         <obj_property name="ElementShortName">[29][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[29][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[28]" type="array">
-         <obj_property name="ElementShortName">[28][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[28][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[27]" type="array">
-         <obj_property name="ElementShortName">[27][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[27][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[26]" type="array">
-         <obj_property name="ElementShortName">[26][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[26][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[25]" type="array">
-         <obj_property name="ElementShortName">[25][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[25][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[24]" type="array">
-         <obj_property name="ElementShortName">[24][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[24][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[23]" type="array">
-         <obj_property name="ElementShortName">[23][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[23][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[22]" type="array">
-         <obj_property name="ElementShortName">[22][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[22][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[21]" type="array">
-         <obj_property name="ElementShortName">[21][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[21][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[20]" type="array">
-         <obj_property name="ElementShortName">[20][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[20][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[19]" type="array">
-         <obj_property name="ElementShortName">[19][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[19][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[18]" type="array">
-         <obj_property name="ElementShortName">[18][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[18][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[17]" type="array">
-         <obj_property name="ElementShortName">[17][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[17][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[16]" type="array">
-         <obj_property name="ElementShortName">[16][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[16][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[15]" type="array">
-         <obj_property name="ElementShortName">[15][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[15][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[14]" type="array">
-         <obj_property name="ElementShortName">[14][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[14][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[13]" type="array">
-         <obj_property name="ElementShortName">[13][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[13][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[12]" type="array">
-         <obj_property name="ElementShortName">[12][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[12][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[11]" type="array">
-         <obj_property name="ElementShortName">[11][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[11][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[10]" type="array">
-         <obj_property name="ElementShortName">[10][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[10][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[9]" type="array">
-         <obj_property name="ElementShortName">[9][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[9][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[8]" type="array">
-         <obj_property name="ElementShortName">[8][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[8][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[7]" type="array">
-         <obj_property name="ElementShortName">[7][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[7][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[6]" type="array">
-         <obj_property name="ElementShortName">[6][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[6][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[5]" type="array">
-         <obj_property name="ElementShortName">[5][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[5][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[4]" type="array">
-         <obj_property name="ElementShortName">[4][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[4][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[3]" type="array">
-         <obj_property name="ElementShortName">[3][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[3][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[2]" type="array">
-         <obj_property name="ElementShortName">[2][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[2][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[1]" type="array">
-         <obj_property name="ElementShortName">[1][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[1][31:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb/dut/u_thinpad_master/u_id_controller/id_regfile32/rf[0]" type="array">
-         <obj_property name="ElementShortName">[0][31:0]</obj_property>
-         <obj_property name="ObjectShortName">[0][31:0]</obj_property>
-      </wvobject>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/is_exception_i" type="logic">
       <obj_property name="ElementShortName">is_exception_i</obj_property>
@@ -1275,5 +1147,89 @@
    <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/rf_rdata_csr" type="array">
       <obj_property name="ElementShortName">rf_rdata_csr[31:0]</obj_property>
       <obj_property name="ObjectShortName">rf_rdata_csr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/enable_i" type="logic">
+      <obj_property name="ElementShortName">enable_i</obj_property>
+      <obj_property name="ObjectShortName">enable_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/mode_i" type="array">
+      <obj_property name="ElementShortName">mode_i[1:0]</obj_property>
+      <obj_property name="ObjectShortName">mode_i[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/satp_i" type="array">
+      <obj_property name="ElementShortName">satp_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">satp_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/is_inst_fetch_i" type="logic">
+      <obj_property name="ElementShortName">is_inst_fetch_i</obj_property>
+      <obj_property name="ObjectShortName">is_inst_fetch_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/is_load_i" type="logic">
+      <obj_property name="ElementShortName">is_load_i</obj_property>
+      <obj_property name="ObjectShortName">is_load_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/is_store_i" type="logic">
+      <obj_property name="ElementShortName">is_store_i</obj_property>
+      <obj_property name="ObjectShortName">is_store_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/v_addr_i" type="array">
+      <obj_property name="ElementShortName">v_addr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">v_addr_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/page_fault_o" type="logic">
+      <obj_property name="ElementShortName">page_fault_o</obj_property>
+      <obj_property name="ObjectShortName">page_fault_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/mcause_o" type="array">
+      <obj_property name="ElementShortName">mcause_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mcause_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/satp_mode" type="logic">
+      <obj_property name="ElementShortName">satp_mode</obj_property>
+      <obj_property name="ObjectShortName">satp_mode</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/is_serial" type="logic">
+      <obj_property name="ElementShortName">is_serial</obj_property>
+      <obj_property name="ObjectShortName">is_serial</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/user_code" type="logic">
+      <obj_property name="ElementShortName">user_code</obj_property>
+      <obj_property name="ObjectShortName">user_code</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/user_data" type="logic">
+      <obj_property name="ElementShortName">user_data</obj_property>
+      <obj_property name="ObjectShortName">user_data</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/kernel_code_1" type="logic">
+      <obj_property name="ElementShortName">kernel_code_1</obj_property>
+      <obj_property name="ObjectShortName">kernel_code_1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/kernel_code_2" type="logic">
+      <obj_property name="ElementShortName">kernel_code_2</obj_property>
+      <obj_property name="ObjectShortName">kernel_code_2</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/addr_valid_for_mapping" type="logic">
+      <obj_property name="ElementShortName">addr_valid_for_mapping</obj_property>
+      <obj_property name="ObjectShortName">addr_valid_for_mapping</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/addr_executable" type="logic">
+      <obj_property name="ElementShortName">addr_executable</obj_property>
+      <obj_property name="ObjectShortName">addr_executable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/addr_writable" type="logic">
+      <obj_property name="ElementShortName">addr_writable</obj_property>
+      <obj_property name="ObjectShortName">addr_writable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/inst_page_fault" type="logic">
+      <obj_property name="ElementShortName">inst_page_fault</obj_property>
+      <obj_property name="ObjectShortName">inst_page_fault</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/load_page_fault" type="logic">
+      <obj_property name="ElementShortName">load_page_fault</obj_property>
+      <obj_property name="ObjectShortName">load_page_fault</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/store_page_fault" type="logic">
+      <obj_property name="ElementShortName">store_page_fault</obj_property>
+      <obj_property name="ObjectShortName">store_page_fault</obj_property>
    </wvobject>
 </wave_config>
