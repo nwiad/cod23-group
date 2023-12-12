@@ -69,6 +69,24 @@ module tb;
 
     #6000000 // 启用页表后打印欢迎信息至少要等待的时间
 
+    // send G
+    uart.pc_send_byte(8'h47); // G
+    #10000;
+    $display("send G");
+
+    // send 0x80400000
+    uart.pc_send_byte(8'h00);
+    #10000;
+    uart.pc_send_byte(8'h40);
+    #10000;
+    uart.pc_send_byte(8'h40);
+    #10000;
+    uart.pc_send_byte(8'h80);
+    #10000;
+    $display("send 0x80400000");
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
     // // send G
     // uart.pc_send_byte(8'h47); // G
     // #10000;
@@ -100,52 +118,14 @@ module tb;
     // #10000;
     // $display("send 0x800010c0");
 
-    // send A
-    uart.pc_send_byte(8'h41); // A
-    #10000;
-    $display("send A");
-
-    // send 0x80100000
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h10);
-    #10000;
-    uart.pc_send_byte(8'h80);
-    #10000;
-    $display("send addr: 0x80100000");
-
-    // send 0xc
-    uart.pc_send_byte(8'h0c);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    $display("send num: 0x0c");
-
-    // send 0x800002b7
-    uart.pc_send_byte(8'hb7);
-    #10000;
-    uart.pc_send_byte(8'h02);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h80);
-    #10000;
-    $display("lui t0,0x80000");
-
+    ////////////////////////////////////////////////////////////// 
     // // send A
     // uart.pc_send_byte(8'h41); // A
     // #10000;
     // $display("send A");
 
-    // // send 0x80100004
-
-    // uart.pc_send_byte(8'h04);
+    // // send 0x80100000
+    // uart.pc_send_byte(8'h00);
     // #10000;
     // uart.pc_send_byte(8'h00);
     // #10000;
@@ -153,60 +133,68 @@ module tb;
     // #10000;
     // uart.pc_send_byte(8'h80);
     // #10000;
-    // $display("send 0x80100004");
+    // $display("send addr: 0x80100000");
 
-    // send 0x0002a023
-    uart.pc_send_byte(8'h23);
-    #10000;
-    uart.pc_send_byte(8'ha0);
-    #10000;
-    uart.pc_send_byte(8'h02);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    $display("sw zero,4(t0)");
-
-    // // send A
-    // uart.pc_send_byte(8'h41); // A
-    // #10000;
-    // $display("send A");
-    
-    // // send 0x80100008
-    // uart.pc_send_byte(8'h08);
+    // // send 0xc
+    // uart.pc_send_byte(8'h0c);
     // #10000;
     // uart.pc_send_byte(8'h00);
     // #10000;
-    // uart.pc_send_byte(8'h10);
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("send num: 0x0c");
+
+    // // send 0x800002b7
+    // uart.pc_send_byte(8'hb7);
+    // #10000;
+    // uart.pc_send_byte(8'h02);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
     // #10000;
     // uart.pc_send_byte(8'h80);
     // #10000;
-    // $display("send 0x80100008");
+    // $display("lui t0,0x80000");
 
-    // send 0x00008067
-    uart.pc_send_byte(8'h67);
-    #10000;
-    uart.pc_send_byte(8'h80);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    $display("ret");
+    // // send 0x0002a023
+    // uart.pc_send_byte(8'h23);
+    // #10000;
+    // uart.pc_send_byte(8'ha0);
+    // #10000;
+    // uart.pc_send_byte(8'h02);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("sw zero,4(t0)");
 
-    // send G
-    uart.pc_send_byte(8'h47); // G
-    #10000;
-    $display("send G");
+    // // send 0x00008067
+    // uart.pc_send_byte(8'h67);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("ret");
 
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h00);
-    #10000;
-    $display("send 0x0");
+    // // send G
+    // uart.pc_send_byte(8'h47); // G
+    // #10000;
+    // $display("send G");
+
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // $display("send 0x0");
+
+    /////////////////////////////////////////////////////////////////////////////
 
     // uart.pc_send_byte(8'h41); // A
     // #10000;

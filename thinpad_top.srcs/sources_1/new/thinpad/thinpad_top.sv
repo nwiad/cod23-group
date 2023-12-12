@@ -174,6 +174,8 @@ module thinpad_top (
       .satp_o(satp),
 
       .mode_o(mode)
+
+    //   .page_fault_i(page_fault)
   );
 
   /* =========== Master end =========== */
@@ -237,6 +239,8 @@ module thinpad_top (
   logic [31:0] mapped_dat_i;
   logic [ 3:0] mapped_sel_o;
   logic mapped_we_o;
+
+//   logic page_fault;
 
   address_map u_address_map (
     .clk_i(sys_clk),

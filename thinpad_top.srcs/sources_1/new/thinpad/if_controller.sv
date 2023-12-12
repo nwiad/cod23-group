@@ -171,6 +171,18 @@ module if_controller #(
     endcase
   end
 
+  logic wbs0_match, wbs1_match, wbs2_match, wbs3_match;
+  logic match;
+  logic break_wb;
+  always_comb begin
+    wbs0_match = ~|((pc_next_comb ^ 32'h8000_0000) & 32'hFFC0_0000);
+    wbs1_match = ~|((pc_next_comb ^ 32'h8040_0000) & 32'hFFC0_0000);
+    wbs2_match = ~|((pc_next_comb ^ 32'h1000_0000) & 32'hFFFF_0000);
+    wbs3_match = ~|((pc_next_comb ^ 32'h0200_0000) & 32'hFFFF_0000);
+    match = wbs0_match || wbs1_match || wbs2_match || wbs3_match;
+    break_wb = match ? 1'b0 : exception_branch_i;
+  end
+
   always_comb begin
     cache_hit_o = hit;
     inst_o = inst_reg;
@@ -189,7 +201,7 @@ module if_controller #(
       write <= 1'b0;
     end
     if (pc_src_i == 1'b1) begin
-      refetch <= exception_branch_i ? 2'b10 : 2'b01;
+      refetch <= break_wb ? 2'b10 : 2'b01;
       refetch_pc <= pc_result_i;
     end
     if (clear_icache_i == 1'b1) begin
@@ -209,7 +221,7 @@ module if_controller #(
       mcause_reg <= 32'h0000_0000;
     end else if (stall_i) begin
       // do nothing
-    end else if ( (bubble_i || (pc_src_i && refetch == 2'b0)) && !wb_inst_page_fault && !icache_inst_page_fault && !exception_branch_i ) begin // insert bubble while waiting for bus response
+    end else if ( (bubble_i || (pc_src_i && refetch == 2'b0)) && !wb_inst_page_fault && !icache_inst_page_fault && !break_wb ) begin // insert bubble while waiting for bus response
       inst_reg <= 32'h0000_0013;
       IF_take_predict_o <= IF_take_predict_i;
       IF_is_bubble_o <= 1'b1;
