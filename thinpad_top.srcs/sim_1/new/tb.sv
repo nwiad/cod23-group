@@ -86,7 +86,7 @@ module tb;
     $display("send addr: 0x80100000");
 
     // send 0x18
-    uart.pc_send_byte(8'h18);
+    uart.pc_send_byte(8'h0c);
     #10000;
     uart.pc_send_byte(8'h00);
     #10000;
@@ -94,7 +94,7 @@ module tb;
     #10000;
     uart.pc_send_byte(8'h00);
     #10000;
-    $display("send num: 0x18");
+    $display("send num: 0x0c");
 
     // send 0x800002b7
     uart.pc_send_byte(8'hb7);

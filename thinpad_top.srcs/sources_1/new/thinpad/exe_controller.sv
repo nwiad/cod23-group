@@ -13,7 +13,7 @@ module exe_controller #(
     output reg stall_o,
     output reg flush_o,
 
-    input wire mode_i,
+    input wire [1:0] mode_i,
     input wire [31:0] satp_i,
 
     //exception
