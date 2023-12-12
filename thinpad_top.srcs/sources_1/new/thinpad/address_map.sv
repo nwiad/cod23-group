@@ -26,7 +26,9 @@ module address_map (
 
   input wire [31:0] satp_i, // satp register
 
-  input wire [1:0] mode_i // mode
+  input wire [1:0] mode_i, // mode
+
+  input wire sfence_i // sfence.vma
 );
 
   typedef enum logic [1:0] {
@@ -64,6 +66,24 @@ module address_map (
   reg [31:0] ppn;
   reg [31:0] sram_data;
 
+  logic [19:0] TLB_vpn_o;
+  logic [19:0] TLB_ppn_i;
+  logic [19:0] TLB_ppn_o;
+  logic TLB_hit;
+  logic TLB_we_o;
+
+  TLB u_TLB (
+    .clk_i(clk_i),
+    .rst_i(rst_i),
+    .satp_i(satp_i),
+    .vpn_i(TLB_vpn_o),
+    .ppn_o(TLB_ppn_i),
+    .TLB_hit_o(TLB_hit),
+    .TLB_we_i(TLB_we_o),
+    .ppn_i(TLB_ppn_o),
+    .sfence_i(sfence_i)
+  );
+
   always_comb begin
     satp_mode = satp_i[31];
     page_table_1 = satp_i[19:0] << 12;
@@ -75,11 +95,22 @@ module address_map (
     pte_addr_2 = page_table_2 + (vpn_0 << 2) ;
 
     is_serial = (v_wb_adr_i == 32'h1000_0000 || v_wb_adr_i == 32'h1000_0005);
+    TLB_we_o = 1'b0;
+    TLB_vpn_o = v_wb_adr_i[31:12];
 
     if (mode_i == M_MODE || satp_mode == BARE || is_serial) begin // no translation
       wb_cyc_o = v_wb_cyc_i;
       wb_stb_o = v_wb_stb_i;
       wb_adr_o = v_wb_adr_i;
+      wb_dat_o = v_wb_dat_i;
+      wb_sel_o = v_wb_sel_i;
+      wb_we_o = v_wb_we_i;
+      v_wb_ack_o = wb_ack_i;
+      v_wb_dat_o = wb_dat_i;
+    end else if (TLB_hit) begin 
+      wb_cyc_o = v_wb_cyc_i;
+      wb_stb_o = v_wb_stb_i;
+      wb_adr_o = {TLB_ppn_i, v_wb_adr_i[11:0]};
       wb_dat_o = v_wb_dat_i;
       wb_sel_o = v_wb_sel_i;
       wb_we_o = v_wb_we_i;
@@ -130,6 +161,7 @@ module address_map (
         MAP_2_DONE: begin
           wb_cyc_o = 1'b0;
           wb_stb_o = 1'b0;
+          TLB_we_o = 1'b1;
         end
 
         REQUEST: begin
@@ -170,6 +202,7 @@ module address_map (
       sram_data <= 32'h0000_0000;
       // state <= STAND_BY;
       state <= BARE_WB;
+      TLB_ppn_o <= 20'h0000_0000;
     end else begin
       case (state)
         STAND_BY: begin // transit to MAP_1 only when necessary
@@ -202,6 +235,7 @@ module address_map (
             state <= STAND_BY;
           end else begin
             if (wb_ack_i == 1'b1) begin
+              TLB_ppn_o <= wb_dat_i[31:10];
               ppn <= wb_dat_i[31:10];
               state <= MAP_2_DONE;
             end

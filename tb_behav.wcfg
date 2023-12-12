@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="8595133334fs"></ZoomStartTime>
-      <ZoomEndTime time="8618393335fs"></ZoomEndTime>
-      <Cursor1Time time="8598610000fs"></Cursor1Time>
+      <ZoomStartTime time="6559036667fs"></ZoomStartTime>
+      <ZoomEndTime time="6564876668fs"></ZoomEndTime>
+      <Cursor1Time time="6560010000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="242"></NameColumnWidth>
-      <ValueColumnWidth column_width="103"></ValueColumnWidth>
+      <ValueColumnWidth column_width="98"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="303" />
+   <WVObjectSize size="304" />
    <wvobject fp_name="/tb/dut/u_thinpad_master/u_if_controller/clk_i" type="logic">
       <obj_property name="ElementShortName">clk_i</obj_property>
       <obj_property name="ObjectShortName">clk_i</obj_property>
@@ -1231,5 +1231,9 @@
    <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/mem_page_fault_detector/store_page_fault" type="logic">
       <obj_property name="ElementShortName">store_page_fault</obj_property>
       <obj_property name="ObjectShortName">store_page_fault</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_thinpad_master/u_exe_controller/exception_branch_o" type="logic">
+      <obj_property name="ElementShortName">exception_branch_o</obj_property>
+      <obj_property name="ObjectShortName">exception_branch_o</obj_property>
    </wvobject>
 </wave_config>

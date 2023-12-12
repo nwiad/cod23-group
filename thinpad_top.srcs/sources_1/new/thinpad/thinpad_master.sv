@@ -32,7 +32,10 @@ module thinpad_master #(
 
     output reg [31:0] satp_o,
 
-    output reg [1:0] mode_o
+    output reg [1:0] mode_o,
+
+    // sfence
+    output reg sfence_o
 );
   // exception handler
   logic [1:0] mode;
@@ -270,7 +273,9 @@ module thinpad_master #(
     .rf_rdata_csr(ID_rf_rdata_csr),
     .rf_waddr_csr(ID_rf_waddr_csr),
     .rf_wdata_csr(ID_rf_wdata_csr),
-    .rf_we_csr(ID_rf_we_csr)
+    .rf_we_csr(ID_rf_we_csr),
+
+    .sfence_o(sfence_o)
   );
 
   // EXE logic & EXE/MEM regs

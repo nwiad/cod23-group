@@ -110,7 +110,10 @@ module id_controller #(
     input wire [31:0] rf_rdata_csr,
     output reg [11:0] rf_waddr_csr,
     output reg [31:0] rf_wdata_csr,
-    output reg rf_we_csr
+    output reg rf_we_csr,
+    
+    // sfence
+    output reg sfence_o
 );
   // outputs are bounded to these regs
   reg inst_page_fault_reg;
@@ -211,6 +214,9 @@ module id_controller #(
   logic is_ebreak_comb, is_ecall_comb;
   logic is_mret_comb;
 
+  // sfence.vma
+  logic is_sfence_comb;
+
   logic [4:0] rd_comb, rs1_comb, rs2_comb;
   logic [3:0] alu_op_comb;
   logic alu_src_comb_1, alu_src_comb_2;
@@ -285,6 +291,8 @@ module id_controller #(
     is_sw_comb   = (is_stype_comb && (inst_i[14:12] == 3'b010));
     //XOR   0000000SSSSSsssss100ddddd0110011
     is_xor_comb  = (is_rtype_comb && (inst_i[14:12] == 3'b100));
+    // sfence.vma 0001001SSSSSsssss000000001110011
+    is_sfence_comb = (inst_i[31:25] == 7'b000_1001) && (inst_i[14:12] == 3'b000) && (inst_i[11:7] == 5'b00000) && (inst_i[6:0] == 7'b1110011);
     rd_comb  = inst_i[11:7];
     rs1_comb = inst_i[19:15];
     rs2_comb = inst_i[24:20];
@@ -370,6 +378,14 @@ module id_controller #(
       inst_type = 3'b101;
     end else begin
       inst_type = 3'b000;
+    end
+
+    if (is_sfence_comb) begin
+      rf_raddr_a = 0;
+      rf_raddr_b = 0;
+      rf_waddr = 0;
+      rf_wdata = 0;
+      rf_we = 0;
     end
   end
 
@@ -580,6 +596,7 @@ module id_controller #(
       end else begin
         branch_reg <= 3'b000;
       end
+
       mem_read_reg <= is_lb_comb || is_lh_comb || is_lw_comb;
       mem_write_reg <= (is_sb_comb || is_sh_comb || is_sw_comb);
       mem_sel_reg <= mem_sel_comb;
@@ -604,6 +621,9 @@ module id_controller #(
       exe_csr_hazard_o <= exe_csr_hazard_i;
       mem_csr_hazard_o <= mem_csr_hazard_i;
       wb_csr_hazard_o <= wb_csr_hazard_i;
+
+      // sfence
+      sfence_o <= is_sfence_comb;
     end
   end
 
