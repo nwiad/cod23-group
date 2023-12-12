@@ -490,10 +490,14 @@ module exe_controller #(
       mtime_int_lock <= 0;
       exception_branch_o <= 0;
     end else begin
+      if (!mtime_int) begin
+        mtime_int_lock <= 0;
+      end
       if (mtime_int && exp_done) begin
         mtime_int_lock <= 1;
       end
-      exception_branch_o <= exception_done && (branch_eq_csr || (branch_eq_no_csr && !ID_take_predict_i) || (EXE_is_branch_o && !branch_eq_no_csr && ID_take_predict_i));
+      exception_branch_o <= exception_done && (inst_page_fault_i || mem_page_fault);
+      // exception_branch_o <= 0;
     end
   end
 

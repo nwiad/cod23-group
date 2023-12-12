@@ -75,7 +75,7 @@ module mtime_controller(
             end else begin
               mtime_int_o <= 0;
             end
-            mtime_reg <= mtime_reg + 64'd100;
+            mtime_reg <= mtime_reg + 64'd1;
             // mtime_reg <= mtime_reg + 64'd10000;
             // mtime_reg <= mtime_reg + 64'd500;
           end
