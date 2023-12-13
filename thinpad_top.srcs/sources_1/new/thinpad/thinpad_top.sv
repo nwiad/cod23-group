@@ -83,13 +83,13 @@ module thinpad_top (
   /* =========== Demo code begin =========== */
 
   // PLL 分频示例
-  logic locked, clk_10M, clk_20M;
+  logic locked, clk_10M, clk_100M;
   pll_example clock_gen (
       // Clock in ports
       .clk_in1(clk_50M),  // 外部时钟输入
       // Clock out ports
       .clk_out1(clk_10M),  // 时钟输出 1，频率在 IP 配置界面中设置
-      .clk_out2(clk_20M),  // 时钟输出 2，频率在 IP 配置界面中设置
+      .clk_out2(clk_100M),  // 时钟输出 2，频率在 IP 配置界面中设置
       // Status and control signals
       .reset(reset_btn),  // PLL 复位输入
       .locked(locked)  // PLL 锁定指示输出，"1"表示时钟稳定，
@@ -98,6 +98,7 @@ module thinpad_top (
 
   logic reset_of_clk10M;
   logic reset_of_clk50M;
+  logic reset_of_clk100M;
   // 异步复位，同步释放，将 locked 信号转为后级电路的复位 reset_of_clk10M
   always_ff @(posedge clk_10M or negedge locked) begin
     if (~locked) reset_of_clk10M <= 1'b1;
@@ -110,6 +111,12 @@ module thinpad_top (
     else reset_of_clk50M <= 1'b0;
   end
 
+  // 异步复位，同步释放，将 locked 信号转为后级电路的复位 reset_of_clk10M
+  always_ff @(posedge clk_100M or negedge locked) begin
+    if (~locked) reset_of_clk100M <= 1'b1;
+    else reset_of_clk100M <= 1'b0;
+  end
+
   /* =========== Demo code end =========== */
 
   logic sys_clk;
@@ -118,8 +125,8 @@ module thinpad_top (
   // 是否超时信号
   logic mtime_int;
 
-  assign sys_clk = clk_10M;
-  assign sys_rst = reset_of_clk10M;
+  assign sys_clk = clk_100M;
+  assign sys_rst = reset_of_clk100M;
 
   // 本实验不使用 CPLD 串口，禁用防止总线冲突
   assign uart_rdn = 1'b1;
