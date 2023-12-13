@@ -54,6 +54,7 @@ module address_map (
   state_t state;
 
   logic is_serial;
+  logic is_vga;
 
   logic satp_mode;
   logic [31:0] page_table_1;
@@ -95,10 +96,11 @@ module address_map (
     pte_addr_2 = page_table_2 + (vpn_0 << 2) ;
 
     is_serial = (v_wb_adr_i == 32'h1000_0000 || v_wb_adr_i == 32'h1000_0005);
+    is_vga    = (v_wb_adr_i >= 32'h0100_0000 && v_wb_adr_i <= 32'h0107_52FF);
     TLB_we_o = 1'b0;
     TLB_vpn_o = v_wb_adr_i[31:12];
 
-    if (mode_i == M_MODE || satp_mode == BARE || is_serial) begin // no translation
+    if (mode_i == M_MODE || satp_mode == BARE || is_serial || is_vga) begin // no translation
       wb_cyc_o = v_wb_cyc_i;
       wb_stb_o = v_wb_stb_i;
       wb_adr_o = v_wb_adr_i;
@@ -206,7 +208,7 @@ module address_map (
     end else begin
       case (state)
         STAND_BY: begin // transit to MAP_1 only when necessary
-          if (mode_i == U_MODE && satp_mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !is_serial) begin // no page fault
+          if (mode_i == U_MODE && satp_mode == SV32 && v_wb_cyc_i == 1'b1 && v_wb_stb_i == 1'b1 && !is_serial && !is_vga) begin // no page fault
             state <= MAP_1;
           end
         end

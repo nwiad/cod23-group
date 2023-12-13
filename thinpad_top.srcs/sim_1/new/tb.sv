@@ -55,9 +55,10 @@ module tb;
   `define YJX_KERNEL "D:\\rv-2023\\supervisor-rv\\kernel\\kernel.bin"
   // parameter BASE_RAM_INIT_FILE = "D:\\code\\cod23-grp53\\rvtests_simple\\test19.bin";
   // parameter BASE_RAM_INIT_FILE = `WJL_KERNEL_PAGING; // wjl
-  parameter BASE_RAM_INIT_FILE = `WJL_KERNEL_PAGING; // dwn
+  parameter BASE_RAM_INIT_FILE = "D:\\Downloads\\ComputerOrganization2022InstructionPipeline-master\\ComputerOrganization2022InstructionPipeline-master\\vga_video_utils\\video_reader.bin"; // dwn
   // parameter BASE_RAM_INIT_FILE = `YJX_KERNEL; // yjx
-  parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
+  // parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
+  parameter EXT_RAM_INIT_FILE = "D:\\Downloads\\ComputerOrganization2022InstructionPipeline-master\\ComputerOrganization2022InstructionPipeline-master\\vga_video_utils\\kun.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�?
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�?
 
   initial begin
@@ -69,21 +70,21 @@ module tb;
 
     #6000000 // 启用页表后打印欢迎信息至少要等待的时间
 
-    // send G
-    uart.pc_send_byte(8'h47); // G
-    #10000;
-    $display("send G");
+    // // send G
+    // uart.pc_send_byte(8'h47); // G
+    // #10000;
+    // $display("send G");
 
-    // send 0x80400000
-    uart.pc_send_byte(8'h00);
-    #10000;
-    uart.pc_send_byte(8'h40);
-    #10000;
-    uart.pc_send_byte(8'h40);
-    #10000;
-    uart.pc_send_byte(8'h80);
-    #10000;
-    $display("send 0x80400000");
+    // // send 0x80400000
+    // uart.pc_send_byte(8'h00);
+    // #10000;
+    // uart.pc_send_byte(8'h40);
+    // #10000;
+    // uart.pc_send_byte(8'h40);
+    // #10000;
+    // uart.pc_send_byte(8'h80);
+    // #10000;
+    // $display("send 0x80400000");
 
     ///////////////////////////////////////////////////////////////////////////////////////////
 

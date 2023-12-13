@@ -31,7 +31,9 @@ module page_fault_detector (
   // serial registers
   `define SERIAL_STATUS 32'h1000_0005
   `define SERIAL_DATA   32'h1000_0000
-
+  // vga memories
+  `define MIN_VGA_ADDR 32'h0100_0000
+  `define MAX_VGA_ADDR 32'h0107_52FF
   // user code
   `define MIN_USER_CODE_ADDR 32'h00000000
   `define MAX_USER_CODE_ADDR 32'h002FFFFF
@@ -46,7 +48,7 @@ module page_fault_detector (
   // otherwise triggers exception
   
   logic satp_mode;
-  logic is_serial;
+  logic is_serial, is_vga;
   logic user_code, user_data, kernel_code_1, kernel_code_2;
   logic addr_valid_for_mapping, addr_executable, addr_writable;
   logic inst_page_fault, load_page_fault, store_page_fault;
@@ -55,14 +57,15 @@ module page_fault_detector (
     satp_mode = satp_i[31];
     
     is_serial = (v_addr_i == `SERIAL_DATA || v_addr_i == `SERIAL_STATUS);
+    is_vga    = (v_addr_i >= `MIN_VGA_ADDR && v_addr_i <= `MAX_VGA_ADDR);
     user_code = (v_addr_i >= `MIN_USER_CODE_ADDR && v_addr_i <= `MAX_USER_CODE_ADDR);
     user_data = (v_addr_i >= `MIN_USER_DATA_ADDR && v_addr_i <= `MAX_USER_DATA_ADDR);
     kernel_code_1 = (v_addr_i >= `MIN_KERNEL_CODE_ADDR_1 && v_addr_i <= `MAX_KERNEL_CODE_ADDR_1);
     kernel_code_2 = (v_addr_i >= `MIN_KERNEL_CODE_ADDR_2 && v_addr_i <= `MAX_KERNEL_CODE_ADDR_2);
 
-    addr_valid_for_mapping = (is_serial || user_code || user_data || kernel_code_1 || kernel_code_2);
+    addr_valid_for_mapping = (is_serial || is_vga || user_code || user_data || kernel_code_1 || kernel_code_2);
     addr_executable = (user_code || kernel_code_1 || kernel_code_2);
-    addr_writable = user_data;
+    addr_writable = user_data || is_vga;
 
     inst_page_fault  = enable_i && (mode_i == U_MODE) && (satp_mode == SV32) && is_inst_fetch_i && (!addr_valid_for_mapping || !addr_executable);
     load_page_fault  = enable_i && (mode_i == U_MODE) && (satp_mode == SV32) && is_load_i && !addr_valid_for_mapping;
