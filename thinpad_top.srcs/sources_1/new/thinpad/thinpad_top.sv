@@ -532,7 +532,7 @@ module thinpad_top (
 
   assign video_clk = clk_50M;
 
-  logic [18:0] bram_r_addr;
+  logic [15:0] bram_r_addr;
   logic [10:0] real_h, real_v;
   logic [7:0] bram_r_data;
 
@@ -548,7 +548,7 @@ module thinpad_top (
   assign bram_r_addr = real_h + 50 * real_v;
 
   logic bram_we;
-  logic [18:0] bram_w_addr;
+  logic [15:0] bram_w_addr;
   logic [7:0]  bram_w_data;
 
   bram_controller u_bram_controller (

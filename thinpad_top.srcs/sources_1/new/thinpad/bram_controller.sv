@@ -17,7 +17,7 @@ module bram_controller (
 
   // to bram
   output reg bram_we,
-  output reg [18:0] bram_addr,
+  output reg [15:0] bram_addr,
   output reg [7:0]  bram_data
 );
   logic [1:0] adr_low_2;
@@ -43,7 +43,7 @@ module bram_controller (
       end
       STATE_WRITE: begin
         bram_we = 1;
-        bram_addr = wb_adr_i[18:0];  /* 截低19位就行 */
+        bram_addr = wb_adr_i[15:0];  /* 截低19位就行 */
         adr_low_2 = bram_addr[1:0];
         if (adr_low_2 == 2'b00) begin
           bram_data = wb_dat_i[7:0];
