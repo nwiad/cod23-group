@@ -496,7 +496,7 @@ module thinpad_top (
   // 串口控制器模块
   // NOTE: 如果修改系统时钟频率，也需要修改此处的时钟频率参数
   uart_controller #(
-      .CLK_FREQ(10_000_000),
+      .CLK_FREQ(100_000_000),
       .BAUD    (115200)
   ) uart_controller (
       .clk_i(sys_clk),
